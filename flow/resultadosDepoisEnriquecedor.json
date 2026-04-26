@@ -1,0 +1,163 @@
+[
+  {
+    "nome_cliente": "Claudio Damasco",
+    "nicho": "marketing digital",
+    "handle_cliente": "saadamasco",
+    "concorrentes": [
+      "rodolfooviedo",
+      "conradoadolpho"
+    ],
+    "todos_handles": [
+      "saadamasco",
+      "rodolfooviedo",
+      "conradoadolpho"
+    ],
+    "iniciado_em": "2026-04-14T12:01:31.158Z",
+    "cliente_dados": {
+      "handle": "saadamasco",
+      "tipo": "cliente",
+      "nome_cliente": "Claudio Damasco",
+      "nicho": "marketing digital",
+      "handle_cliente": "saadamasco",
+      "concorrentes": [
+        "rodolfooviedo",
+        "conradoadolpho"
+      ],
+      "todos_handles": [
+        "saadamasco",
+        "rodolfooviedo",
+        "conradoadolpho"
+      ],
+      "bio": "",
+      "seguidores": 0,
+      "seguindo": 0,
+      "total_posts": 0,
+      "verificado": false,
+      "link_externo": "",
+      "taxa_engajamento": "0.00",
+      "media_curtidas": 0,
+      "media_comentarios": 0,
+      "mix_formatos": {
+        "reels_pct": 0,
+        "carrossel_pct": 0,
+        "foto_pct": 0
+      },
+      "posts": [],
+      "top_posts": [],
+      "posts_video": [],
+      "ultimos_15_posts": []
+    },
+    "concorrentes_dados": [
+      {
+        "handle": "rodolfooviedo",
+        "tipo": "concorrente",
+        "nome_cliente": "Claudio Damasco",
+        "nicho": "marketing digital",
+        "handle_cliente": "saadamasco",
+        "concorrentes": [
+          "rodolfooviedo",
+          "conradoadolpho"
+        ],
+        "todos_handles": [
+          "saadamasco",
+          "rodolfooviedo",
+          "conradoadolpho"
+        ],
+        "bio": "",
+        "seguidores": 0,
+        "seguindo": 0,
+        "total_posts": 0,
+        "verificado": false,
+        "link_externo": "",
+        "taxa_engajamento": "0.00",
+        "media_curtidas": 0,
+        "media_comentarios": 0,
+        "mix_formatos": {
+          "reels_pct": 0,
+          "carrossel_pct": 0,
+          "foto_pct": 0
+        },
+        "posts": [],
+        "top_posts": [],
+        "posts_video": [],
+        "ultimos_15_posts": []
+      },
+      {
+        "handle": "conradoadolpho",
+        "tipo": "concorrente",
+        "nome_cliente": "Claudio Damasco",
+        "nicho": "marketing digital",
+        "handle_cliente": "saadamasco",
+        "concorrentes": [
+          "rodolfooviedo",
+          "conradoadolpho"
+        ],
+        "todos_handles": [
+          "saadamasco",
+          "rodolfooviedo",
+          "conradoadolpho"
+        ],
+        "bio": "",
+        "seguidores": 0,
+        "seguindo": 0,
+        "total_posts": 0,
+        "verificado": false,
+        "link_externo": "",
+        "taxa_engajamento": "0.00",
+        "media_curtidas": 0,
+        "media_comentarios": 0,
+        "mix_formatos": {
+          "reels_pct": 0,
+          "carrossel_pct": 0,
+          "foto_pct": 0
+        },
+        "posts": [],
+        "top_posts": [],
+        "posts_video": [],
+        "ultimos_15_posts": []
+      }
+    ],
+    "total_perfis": 3,
+    "melhor_concorrente_handle": null,
+    "gap_engajamento_pct": "0.00",
+    "tendencias_google": [],
+    "keywords_google": [
+      {
+        "titulo": "Como crescer no Instagram? 10 estratégias para sua marca",
+        "snippet": "Salvamentos: indicam que seu conteúdo foi útil; ; Compartilhamentos: mostram que as pessoas confiam na sua marca a ponto de indicá-la; ; Mensagens ..."
+      },
+      {
+        "titulo": "Como crescer no Instagram em 2024: 11 estratégias comprovadas",
+        "snippet": "A dúvida do momento: como crescer no instagram? Trouxemos 11 estratégias comprovadas que fazem um perfil crescer em seguidores. Acesse!"
+      },
+      {
+        "titulo": "Estratégia de Divulgação para o Instagram - Sebrae",
+        "snippet": "Principais estratégias para o Instagram · Tenha um perfil comercial · Analise os resultados · Produza bons conteúdos · Varie o formato de postagens · Use Hashtags."
+      },
+      {
+        "titulo": "Marketing Digital no Instagram: Dicas e Estratégias para Crescer",
+        "snippet": "1. Primeiro de tudo: não compre seguidores. · 2. Ótimo conteúdo traz seguidores · 3. Promova seu Perfil · 4. Humanize sua marca · 5. Fique atento a oportunidades de ..."
+      },
+      {
+        "titulo": "Estratégias para Criar Conteúdo e CRESCER no Instagram ...",
+        "snippet": "https://hyeser.com.br/... Inscreva-se no Canal: Para mais dicas valiosas sobre como criar conteúdo, marketing digital, e estratégias de sucesso ..."
+      },
+      {
+        "titulo": "Como dominar o marketing no Instagram: estratégias, ideias e dicas",
+        "snippet": "1. Conteúdo de qualidade · 2. Uso estratégico de hashtags · 3. Colaborações e parcerias · 4. Instagram Ads · 5. Interação com seguidores."
+      },
+      {
+        "titulo": "Especialista revela 12 estratégias para fazer seu negócio crescer no ...",
+        "snippet": "Especialista revela 12 estratégias para fazer seu negócio crescer no Instagram · 1. Use a aba Explorar como ferramenta de pesquisa · 2. Aposte em ..."
+      },
+      {
+        "titulo": "Marketing Digital no Instagram em 2025: 13 dicas essenciais",
+        "snippet": "Dicas de Marketing Digital no Instagram · 1. Defina seus objetivos · 2. Conheça seu público · 3. Aproveite o poder da humanização · 4. Configure seu ..."
+      }
+    ],
+    "anuncios_facebook": [],
+    "video_atual": null,
+    "sem_videos": true,
+    "top_virais": []
+  }
+]

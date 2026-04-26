@@ -1,0 +1,925 @@
+import { useState, useEffect, useCallback } from 'react';
+import { marketingData as demoData } from './data';
+
+declare global {
+  interface Window {
+    __MARKETING_DATA__?: typeof demoData;
+    __SECTION__?: string;
+  }
+}
+
+const marketingData = (window.__MARKETING_DATA__ as typeof demoData) ?? demoData;
+
+const C = {
+  primary:   '#FF6600',
+  secondary: '#222222',
+  green:     '#00B37E',
+  yellow:    '#FFD600',
+  neutral:   '#F4F4F4',
+  white:     '#FFFFFF',
+};
+
+type Section     = 'all' | 'overview_cliente' | 'diretrizes_tecnicas';
+type Orientation = 'landscape' | 'portrait';
+type Fscale      = (n: number) => number;
+
+// ─── DonutChart ──────────────────────────────────────────────────────────────
+function DonutChart({ data, f }: { data: { label: string; value: number; color: string }[]; f: Fscale }) {
+  const size = 200;
+  const r    = 72;
+  const cx   = size / 2;
+  const cy   = size / 2;
+  const circ = 2 * Math.PI * r;
+  let offset = 0;
+  const slices = data.map((d) => {
+    const dash = (d.value / 100) * circ;
+    const sl   = { ...d, dash, gap: circ - dash, offset };
+    offset    += dash;
+    return sl;
+  });
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: f(24) }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+        {slices.map((s, i) => (
+          <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={32}
+            strokeDasharray={`${s.dash} ${s.gap}`} strokeDashoffset={-s.offset} />
+        ))}
+        <circle cx={cx} cy={cy} r={56} fill="#1a1a1a" />
+      </svg>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: f(8) }}>
+        {data.map((d, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: f(8) }}>
+            <div style={{ width: f(12), height: f(12), borderRadius: 3, background: d.color, flexShrink: 0 }} />
+            <span style={{ fontFamily: 'Roboto, sans-serif', fontSize: f(13), color: 'rgba(255,255,255,0.8)' }}>
+              <strong style={{ color: d.color }}>{d.value}%</strong> — {d.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── BarChart ─────────────────────────────────────────────────────────────────
+function BarChart({ bars, f }: { bars: { label: string; value: number; max: number; color: string }[]; f: Fscale }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: f(12), width: '100%' }}>
+      {bars.map((b, i) => (
+        <div key={i}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(4) }}>
+            <span style={{ fontFamily: 'Roboto, sans-serif', fontSize: f(12), color: 'rgba(255,255,255,0.6)' }}>{b.label}</span>
+            <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(12), color: b.color }}>{b.value.toLocaleString('pt-BR')}</span>
+          </div>
+          <div style={{ width: '100%', height: f(8), borderRadius: 99, background: 'rgba(255,255,255,0.08)' }}>
+            <div style={{ width: `${(b.value / b.max) * 100}%`, height: f(8), borderRadius: 99, background: b.color }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── KpiCard ──────────────────────────────────────────────────────────────────
+function KpiCard({ kpi, meta30, meta60, meta90, f }: { kpi: string; meta30: string; meta60: string; meta90: string; f: Fscale }) {
+  return (
+    <div style={{ borderRadius: 12, padding: `${f(14)}px ${f(16)}px`, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,102,0,0.25)' }}>
+      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(13), color: C.primary, marginBottom: f(10) }}>{kpi}</div>
+      <div style={{ display: 'flex', gap: f(8) }}>
+        {[{ label: '30d', val: meta30, color: C.yellow }, { label: '60d', val: meta60, color: C.primary }, { label: '90d', val: meta90, color: C.green }].map((m) => (
+          <div key={m.label} style={{ flex: 1, borderRadius: 8, padding: `${f(8)}px ${f(6)}px`, textAlign: 'center', background: 'rgba(255,255,255,0.04)' }}>
+            <div style={{ fontSize: f(10), color: 'rgba(255,255,255,0.4)', fontFamily: 'Roboto' }}>{m.label}</div>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(15), color: m.color }}>{m.val}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Tag ──────────────────────────────────────────────────────────────────────
+function Tag({ text, color = C.primary, f }: { text: string; color?: string; f: Fscale }) {
+  return (
+    <span style={{ padding: `${f(3)}px ${f(8)}px`, borderRadius: 4, fontSize: f(11), fontWeight: 700, background: color + '22', color, border: `1px solid ${color}44`, fontFamily: 'Roboto', whiteSpace: 'nowrap' }}>
+      {text}
+    </span>
+  );
+}
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const { overview_cliente: ov, diretrizes_tecnicas: dt } = marketingData;
+
+// ─── Slides ───────────────────────────────────────────────────────────────────
+function buildSlides(section: Section, f: Fscale, isP: boolean) {
+  const lh = 1;
+  const all: { id: string; section: 'overview_cliente' | 'diretrizes_tecnicas'; render: () => JSX.Element }[] = [];
+
+  // ── OVERVIEW ────────────────────────────────────────────────────────────────
+  if (section === 'all' || section === 'overview_cliente') {
+
+    all.push({ id: 'ov-cover', section: 'overview_cliente', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.primary, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 80px' }}>
+          <div style={{ fontFamily: 'Roboto', fontSize: f(15), color: 'rgba(255,255,255,0.7)', letterSpacing: 5, textTransform: 'uppercase' }}>Análise de Perfil Instagram</div>
+          <div style={{ marginTop: f(16), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 76, color: C.white, lineHeight: 1, textTransform: 'uppercase', letterSpacing: 2 }}>
+            OVERVIEW<br />DO CLIENTE
+          </div>
+          <div style={{ marginTop: f(24), fontFamily: 'Roboto', fontSize: f(20), color: 'rgba(255,255,255,0.85)', maxWidth: 580, lineHeight: lh }}>
+            Diagnóstico completo, posicionamento competitivo e caminhos de crescimento para <strong>@saadamasco</strong>
+          </div>
+        </div>
+        <div style={{ padding: `0 80px ${f(40)}px`, display: 'flex', alignItems: 'center', gap: f(16) }}>
+          <div style={{ width: f(48), height: f(4), borderRadius: 99, background: C.yellow }} />
+          <div style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.5)' }}>Radar de Marketing Digital</div>
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'ov-diagnostico', section: 'overview_cliente', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row' }}>
+        <div style={{ width: isP ? '100%' : '33%', background: C.primary, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: isP ? `${f(20)}px 40px` : 48 }}>
+          <div>
+            <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)', letterSpacing: 3, textTransform: 'uppercase' }}>Slide 01</div>
+            <div style={{ marginTop: f(8), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 38, color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>DIAGNÓSTICO DE IDENTIDADE</div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(12), marginTop: isP ? f(12) : 0 }}>
+            {[{ label: 'Engajamento', val: '343,45', color: C.yellow }, { label: 'Seguidores', val: '733', color: C.white }, { label: 'Top Post', val: '29.037', color: C.green }].map((m) => (
+              <div key={m.label} style={{ borderRadius: 12, padding: f(12), background: 'rgba(0,0,0,0.2)', flex: isP ? 1 : undefined }}>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)' }}>{m.label}</div>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(28), color: m.color }}>{m.val}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: `${f(40)}px ${f(48)}px` }}>
+          <div style={{ display: 'flex', gap: f(8), marginBottom: f(16), flexWrap: 'wrap' }}>
+            <Tag text="Perfil Pessoal" color={C.primary} f={f} />
+            <Tag text="Fitness Lifestyle" color={C.green} f={f} />
+            <Tag text="Autenticidade" color={C.yellow} f={f} />
+          </div>
+          <p style={{ fontFamily: 'Roboto, sans-serif', fontSize: f(15), color: 'rgba(255,255,255,0.8)', lineHeight: lh, margin: 0, marginBottom: f(16) }}>
+            {ov.diagnostico_identidade.split('\n\n')[0]}
+          </p>
+          <div style={{ padding: f(16), borderRadius: 12, background: 'rgba(255,102,0,0.1)', border: '1px solid rgba(255,102,0,0.3)' }}>
+            <div style={{ fontFamily: 'Roboto', fontSize: f(14), color: C.primary, lineHeight: lh }}>
+              ⚠️ {ov.diagnostico_identidade.split('\n\n')[1]}
+            </div>
+          </div>
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'ov-posicionamento', section: 'overview_cliente', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: f(16), marginBottom: f(32) }}>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Posicionamento Competitivo</div>
+          <div style={{ width: f(32), height: f(4), borderRadius: 99, background: C.primary, flexShrink: 0 }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr 1fr' : '1fr 1fr 1fr', gap: f(20), flex: 1 }}>
+          {[
+            { handle: '@saadamasco',    eng: 343.45, seg: 733,    curtidas: 2489, color: C.primary, star: true },
+            { handle: '@conradoadolpho',eng: 0.04,   seg: 733000, curtidas: 251,  color: C.green,   star: false },
+            { handle: '@rodolfooviedo', eng: 0,      seg: 500,    curtidas: 0,    color: 'rgba(255,255,255,0.15)', star: false },
+          ].map((prof) => (
+            <div key={prof.handle} style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(12), position: 'relative', background: prof.star ? C.primary : 'rgba(255,255,255,0.04)', border: prof.star ? 'none' : '1px solid rgba(255,255,255,0.08)' }}>
+              {prof.star && <div style={{ position: 'absolute', top: f(16), right: f(16), fontSize: f(20) }}>⭐</div>}
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.white }}>{prof.handle}</div>
+              {[{ label: 'Taxa Engajamento', val: prof.eng.toLocaleString('pt-BR') }, { label: 'Seguidores', val: prof.seg.toLocaleString('pt-BR') }, { label: 'Curtidas médias', val: prof.curtidas.toLocaleString('pt-BR') }].map((m) => (
+                <div key={m.label}>
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: prof.star ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)' }}>{m.label}</div>
+                  <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(26), color: prof.star ? C.yellow : C.white }}>{m.val}</div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: f(20), padding: f(14), borderRadius: 12, background: 'rgba(0,179,126,0.08)', border: '1px solid rgba(0,179,126,0.25)' }}>
+          <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: C.green, margin: 0 }}>📊 {ov.posicionamento_atual}</p>
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'ov-swot', section: 'overview_cliente', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Pontos Fortes & Fracos</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(20), flex: 1 }}>
+          {[
+            { label: 'Forças',    items: ov.pontos_fortes, color: C.green,   icon: '💪', bg: 'rgba(0,179,126,0.06)',   border: 'rgba(0,179,126,0.3)'   },
+            { label: 'Fraquezas', items: ov.pontos_fracos, color: C.primary, icon: '⚠️', bg: 'rgba(255,102,0,0.06)',   border: 'rgba(255,102,0,0.3)'   },
+          ].map((col) => (
+            <div key={col.label} style={{ borderRadius: 20, padding: f(28), display: 'flex', flexDirection: 'column', gap: f(12), background: col.bg, border: `1px solid ${col.border}`, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: f(10), marginBottom: f(4) }}>
+                <span style={{ fontSize: f(24) }}>{col.icon}</span>
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(20), color: col.color, textTransform: 'uppercase' }}>{col.label}</span>
+              </div>
+              {col.items.map((item, i) => (
+                <div key={i} style={{ display: 'flex', gap: f(10), alignItems: 'flex-start' }}>
+                  <div style={{ width: f(22), height: f(22), borderRadius: '50%', background: col.color, color: C.white, fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(11), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>{i + 1}</div>
+                  <span style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'ov-concorrentes', section: 'overview_cliente', render: () => {
+      const c = ov.comparativo_concorrentes[0];
+      return (
+        <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row' }}>
+          <div style={{ width: isP ? '100%' : '42%', display: 'flex', flexDirection: 'column', padding: isP ? '32px 40px 24px' : 48, background: '#111' }}>
+            <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', letterSpacing: 3, textTransform: 'uppercase' }}>Análise Competitiva</div>
+            <div style={{ marginTop: f(8), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 34, color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>O QUE SEU<br />CONCORRENTE<br />FAZ BEM</div>
+            <div style={{ marginTop: f(20), borderRadius: 20, padding: f(20), background: C.primary }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white }}>{c.handle}</div>
+              <div style={{ marginTop: f(6), fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh }}>{c.estrategia_que_funciona}</div>
+            </div>
+            {!isP && (
+              <div style={{ marginTop: 'auto', padding: f(16), borderRadius: 12, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.35)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(22), color: C.green }}>{c.ganho_esperado_vendas}</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.4)' }}>Ganho esperado em vendas</div>
+              </div>
+            )}
+          </div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: isP ? '24px 40px' : 48, gap: f(24) }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: f(8), marginBottom: f(10) }}>
+                <span style={{ fontSize: f(22) }}>🎯</span>
+                <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(16), color: C.yellow, textTransform: 'uppercase' }}>Como você aplica</span>
+              </div>
+              <div style={{ padding: f(18), borderRadius: 12, background: 'rgba(255,214,0,0.06)', border: '1px solid rgba(255,214,0,0.2)' }}>
+                <p style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{c.como_voce_aplica}</p>
+              </div>
+            </div>
+            <BarChart f={f} bars={[
+              { label: '@saadamasco — Engajamento',    value: 343,  max: 344,  color: C.primary },
+              { label: '@conradoadolpho — Engajamento', value: 1,    max: 344,  color: C.green },
+              { label: '@saadamasco — Curtidas médias', value: 2489, max: 2500, color: C.yellow },
+              { label: '@conradoadolpho — Curtidas',    value: 251,  max: 2500, color: 'rgba(255,255,255,0.25)' },
+            ]} />
+            {isP && (
+              <div style={{ padding: f(14), borderRadius: 12, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.35)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(20), color: C.green }}>{c.ganho_esperado_vendas}</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.4)' }}>Ganho esperado em vendas</div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }});
+
+    all.push({ id: 'ov-crescimento', section: 'overview_cliente', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Caminhos de Crescimento</div>
+        <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr' : '1fr 1fr 1fr', gap: f(20), flex: 1 }}>
+          {ov.caminhos_de_crescimento.map((cam, i) => {
+            const colors  = [C.yellow, C.primary, C.green];
+            const icons   = ['📣', '📹', '🔍'];
+            const efCols: Record<string, string> = { baixo: C.green, médio: C.yellow };
+            const col     = colors[i];
+            return (
+              <div key={i} style={{ borderRadius: 20, padding: f(22), display: 'flex', flexDirection: 'column', gap: f(12), position: 'relative', overflow: 'hidden', background: 'rgba(255,255,255,0.03)', border: `1px solid ${col}33` }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: col, borderRadius: '20px 0 0 20px' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: f(10) }}>
+                  <span style={{ fontSize: f(28) }}>{icons[i]}</span>
+                  <div>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase' }}>Caminho {i + 1}</div>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(16), color: col }}>{cam.titulo}</div>
+                  </div>
+                </div>
+                <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.75)', lineHeight: lh, margin: 0 }}>{cam.movimento}</p>
+                <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: f(6) }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)' }}>⏱ {cam.tempo_para_resultado}</span>
+                    <Tag text={cam.esforco} color={efCols[cam.esforco] || C.primary} f={f} />
+                  </div>
+                  <div style={{ padding: f(10), borderRadius: 10, background: `${col}14` }}>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: col }}>📈 {cam.impacto_em_vendas}</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'ov-previsao', section: 'overview_cliente', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ marginBottom: f(28), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Previsão de Resultados</div>
+        <div style={{ display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(20), flex: 1 }}>
+          {[
+            { period: '30 dias', text: ov.previsao_resultados['30_dias'], color: C.yellow,  icon: '🚀', pct: 33 },
+            { period: '60 dias', text: ov.previsao_resultados['60_dias'], color: C.primary, icon: '📈', pct: 66 },
+            { period: '90 dias', text: ov.previsao_resultados['90_dias'], color: C.green,   icon: '🏆', pct: 100 },
+          ].map((item, i) => (
+            <div key={i} style={{ flex: 1, borderRadius: 20, padding: f(28), display: 'flex', flexDirection: 'column', background: `${item.color}0e`, border: `1px solid ${item.color}44` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: f(12), marginBottom: f(12) }}>
+                <span style={{ fontSize: f(36) }}>{item.icon}</span>
+                <div>
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2 }}>Meta</div>
+                  <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(32), color: item.color }}>{item.period}</div>
+                </div>
+              </div>
+              <p style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.8)', lineHeight: lh, flex: 1, margin: 0 }}>{item.text}</p>
+              <div style={{ marginTop: f(16) }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(5) }}>
+                  <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)' }}>Progresso</span>
+                  <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(11), color: item.color }}>{item.pct}%</span>
+                </div>
+                <div style={{ width: '100%', height: f(6), borderRadius: 99, background: 'rgba(255,255,255,0.08)' }}>
+                  <div style={{ width: `${item.pct}%`, height: f(6), borderRadius: 99, background: item.color }} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'ov-carta', section: 'overview_cliente', render: () => {
+      const paras = ov.carta_para_cliente_markdown.split('\n\n');
+      return (
+        <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row' }}>
+          <div style={{ width: isP ? '100%' : '26%', background: C.primary, display: 'flex', flexDirection: isP ? 'row' : 'column', alignItems: 'center', justifyContent: 'center', padding: isP ? `${f(24)}px 40px` : f(40), gap: f(16) }}>
+            <span style={{ fontSize: f(48) }}>✉️</span>
+            <div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(18), color: C.white, textTransform: 'uppercase', letterSpacing: 2 }}>Carta para o Cliente</div>
+              <div style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', lineHeight: lh, marginTop: f(6) }}>Uma análise direta, sem rodeios.</div>
+            </div>
+          </div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: `${f(40)}px ${f(48)}px`, gap: f(14), overflow: 'hidden' }}>
+            {paras.map((para, i) => (
+              <p key={i} style={{ fontFamily: 'Roboto', fontSize: i === 0 ? f(15) : f(13), color: i === 0 ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.7)', lineHeight: lh, borderLeft: i === 0 ? `3px solid ${C.yellow}` : 'none', paddingLeft: i === 0 ? f(16) : 0, margin: 0 }}>
+                {para}
+              </p>
+            ))}
+          </div>
+        </div>
+      );
+    }});
+  }
+
+  // ── DIRETRIZES ───────────────────────────────────────────────────────────────
+  if (section === 'all' || section === 'diretrizes_tecnicas') {
+
+    all.push({ id: 'dt-cover', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 80px' }}>
+          <div style={{ fontFamily: 'Roboto', fontSize: f(15), color: 'rgba(255,255,255,0.35)', letterSpacing: 5, textTransform: 'uppercase' }}>Manual Estratégico</div>
+          <div style={{ marginTop: f(16), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 76, color: C.white, lineHeight: 1, textTransform: 'uppercase', letterSpacing: 2 }}>
+            DIRETRIZES<br /><span style={{ color: C.green }}>TÉCNICAS</span>
+          </div>
+          <div style={{ marginTop: f(24), fontFamily: 'Roboto', fontSize: f(20), color: 'rgba(255,255,255,0.6)', maxWidth: 580, lineHeight: lh }}>
+            Tom de voz, SEO, frequência, pilares, hashtags, identidade visual e KPIs para execução.
+          </div>
+        </div>
+        <div style={{ display: 'flex', height: 8 }}>
+          <div style={{ flex: 3, background: C.green }} />
+          <div style={{ flex: 2, background: C.primary }} />
+          <div style={{ flex: 1, background: C.yellow }} />
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'dt-tom', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row' }}>
+        <div style={{ width: isP ? '100%' : '40%', display: 'flex', flexDirection: 'column', padding: isP ? '28px 40px 20px' : 48, background: '#111' }}>
+          <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', letterSpacing: 3, textTransform: 'uppercase' }}>Comunicação</div>
+          <div style={{ marginTop: f(8), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>TOM DE VOZ</div>
+          <div style={{ marginTop: f(12), display: 'inline-block', padding: `${f(5)}px ${f(14)}px`, borderRadius: 8, background: C.primary, width: 'fit-content' }}>
+            <span style={{ fontFamily: 'Roboto', fontSize: f(14), color: C.white }}>{dt.tom_de_voz.personalidade}</span>
+          </div>
+          <div style={{ marginTop: f(20), display: 'flex', flexDirection: isP ? 'row' : 'column', gap: isP ? f(24) : 0 }}>
+            <div style={{ flex: isP ? 1 : undefined }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.green, textTransform: 'uppercase', letterSpacing: 1, marginBottom: f(8) }}>✅ Como Falar</div>
+              {dt.tom_de_voz.como_falar.map((t, i) => (
+                <div key={i} style={{ display: 'flex', gap: f(8), marginBottom: f(6), alignItems: 'flex-start' }}>
+                  <div style={{ color: C.green, fontSize: f(12), marginTop: 2 }}>▸</div>
+                  <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.8)', lineHeight: lh }}>{t}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ flex: isP ? 1 : undefined, marginTop: isP ? 0 : f(16) }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.primary, textTransform: 'uppercase', letterSpacing: 1, marginBottom: f(8) }}>❌ Como NÃO Falar</div>
+              {dt.tom_de_voz.como_nao_falar.map((t, i) => (
+                <div key={i} style={{ display: 'flex', gap: f(8), marginBottom: f(6), alignItems: 'flex-start' }}>
+                  <div style={{ color: C.primary, fontSize: f(12), marginTop: 2 }}>▸</div>
+                  <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.5)', lineHeight: lh }}>{t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: isP ? '20px 40px 32px' : 48, gap: f(20) }}>
+          <div>
+            <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: C.green, textTransform: 'uppercase', marginBottom: f(10) }}>Frases que funcionam</div>
+            {dt.tom_de_voz.exemplos_frase_ok.map((ex, i) => (
+              <div key={i} style={{ marginBottom: f(10), padding: f(14), borderRadius: 12, background: 'rgba(0,179,126,0.08)', border: '1px solid rgba(0,179,126,0.22)' }}>
+                <span style={{ fontFamily: 'Roboto', fontSize: f(14), color: C.white }}>"{ex}"</span>
+              </div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: C.primary, textTransform: 'uppercase', marginBottom: f(10) }}>Frases a evitar</div>
+            {dt.tom_de_voz.exemplos_frase_evitar.map((ex, i) => (
+              <div key={i} style={{ marginBottom: f(10), padding: f(14), borderRadius: 12, background: 'rgba(255,102,0,0.06)', border: '1px solid rgba(255,102,0,0.18)' }}>
+                <span style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.4)', textDecoration: 'line-through' }}>"{ex}"</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'dt-frequencia', section: 'diretrizes_tecnicas', render: () => {
+      const dist = dt.frequencia_publicacao.distribuicao_formatos;
+      return (
+        <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+          <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Frequência & Formatos</div>
+          <div style={{ display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(32), flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(14), width: isP ? '100%' : 400, flexShrink: 0 }}>
+              {[
+                { label: 'Posts / dia',    val: dt.frequencia_publicacao.posts_por_dia,     icon: '📅' },
+                { label: 'Posts / semana', val: String(dt.frequencia_publicacao.posts_por_semana), icon: '📆' },
+                { label: 'Stories / dia',  val: String(dist.stories_por_dia),               icon: '📸' },
+              ].map((m) => (
+                <div key={m.label} style={{ borderRadius: 16, padding: f(16), background: 'rgba(255,102,0,0.1)', border: '1px solid rgba(255,102,0,0.28)', flex: isP ? 1 : undefined }}>
+                  <div style={{ fontSize: f(24) }}>{m.icon}</div>
+                  <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(26), color: C.primary, marginTop: f(4) }}>{m.val}</div>
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)' }}>{m.label}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(24) }}>
+              <div style={{ flex: 1 }}>
+                <DonutChart f={f} data={[
+                  { label: 'Reels',     value: dist.reels_pct,     color: C.primary },
+                  { label: 'Carrossel', value: dist.carrossel_pct, color: C.green   },
+                  { label: 'Foto',      value: dist.foto_pct,      color: C.yellow  },
+                ]} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.yellow, textTransform: 'uppercase', marginBottom: f(10) }}>⏰ Melhores Horários</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(8) }}>
+                  {dt.frequencia_publicacao.melhores_horarios.map((h, i) => (
+                    <div key={i} style={{ padding: f(10), borderRadius: 10, background: 'rgba(255,214,0,0.07)', border: '1px solid rgba(255,214,0,0.18)' }}>
+                      <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.8)' }}>{h}</span>
+                    </div>
+                  ))}
+                </div>
+                {!isP && (
+                  <div style={{ marginTop: f(16) }}>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.white, textTransform: 'uppercase', marginBottom: f(8) }}>🔥 Dias de Pico</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+                      {['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'].map((d) => {
+                        const isPico = dt.frequencia_publicacao.dias_de_pico.includes(d);
+                        return (
+                          <div key={d} style={{ borderRadius: 8, padding: `${f(5)}px ${f(10)}px`, background: isPico ? C.primary : 'rgba(255,255,255,0.04)', border: isPico ? 'none' : '1px solid rgba(255,255,255,0.08)' }}>
+                            <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: C.white }}>{d}{isPico ? ' 🔥' : ''}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }});
+
+    all.push({ id: 'dt-pilares', section: 'diretrizes_tecnicas', render: () => {
+      const pillarColors = [C.primary, C.green, C.yellow, 'rgba(200,200,255,0.8)'];
+      return (
+        <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+          <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Pilares de Conteúdo</div>
+          <div style={{ display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(40), flex: 1, alignItems: 'flex-start' }}>
+            <DonutChart f={f} data={dt.pilares_conteudo.map((p2, i) => ({ label: p2.pilar, value: p2.porcentagem, color: pillarColors[i] }))} />
+            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(14), width: isP ? '100%' : undefined }}>
+              {dt.pilares_conteudo.map((p2, i) => (
+                <div key={i} style={{ borderRadius: 16, padding: f(20), background: `${pillarColors[i]}0e`, border: `1px solid ${pillarColors[i]}44` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: f(10) }}>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(16), color: pillarColors[i] }}>{p2.pilar}</div>
+                    <div style={{ borderRadius: '50%', width: f(36), height: f(36), background: pillarColors[i], display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(13), color: i === 2 ? C.secondary : C.white, flexShrink: 0 }}>{p2.porcentagem}%</div>
+                  </div>
+                  <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: lh, marginBottom: f(8), marginTop: 0 }}>{p2.descricao}</p>
+                  <div style={{ padding: f(8), borderRadius: 8, background: 'rgba(255,255,255,0.04)' }}>
+                    <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.4)' }}>💡 {p2.por_que_funciona}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }});
+
+    all.push({ id: 'dt-ganchos', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row', overflow: 'hidden' }}>
+        <div style={{ flex: isP ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column', padding: isP ? '28px 40px 16px' : 48, borderRight: isP ? 'none' : '1px solid rgba(255,255,255,0.06)', borderBottom: isP ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+          <div style={{ marginBottom: f(18), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>🪝 Ganchos Modelo</div>
+          <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(12), flex: isP ? undefined : 1 }}>
+            {dt.ganchos_modelo.map((g, i) => (
+              <div key={i} style={{ flex: isP ? 1 : undefined, marginBottom: isP ? 0 : f(4), borderRadius: 14, padding: f(16), position: 'relative', overflow: 'hidden', background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.25)' }}>
+                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: C.primary }} />
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: C.white, marginBottom: f(6), lineHeight: lh }}>"{g.gancho}"</div>
+                <Tag text={`Inspirado em ${g.inspirado_em}`} color={C.primary} f={f} />
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: f(16) }}>
+            <div style={{ marginBottom: f(12), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(18), color: C.white, textTransform: 'uppercase' }}>💬 CTAs Recomendados</div>
+            <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(10) }}>
+              {dt.ctas_recomendados.map((c, i) => {
+                const icons = ['💬', '📩', '🔗'];
+                const cols  = [C.green, C.primary, C.yellow];
+                return (
+                  <div key={i} style={{ flex: isP ? 1 : undefined, borderRadius: 12, padding: f(14), background: `${cols[i]}0e`, border: `1px solid ${cols[i]}2a` }}>
+                    <div style={{ display: 'flex', gap: f(8), alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: f(18), flexShrink: 0 }}>{icons[i]}</span>
+                      <div>
+                        <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: cols[i], marginBottom: f(4), lineHeight: lh }}>"{c.cta}"</div>
+                        <Tag text={c.quando_usar} color={cols[i]} f={f} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+        <div style={{ flex: isP ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column', padding: isP ? '16px 40px 28px' : 48 }}>
+          <div style={{ marginBottom: f(18), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>💬 Ideias de Títulos</div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(10) }}>
+            {dt.ideias_de_titulos.map((t, i) => {
+              const pCols: Record<string, string> = { 'Transformação': C.primary, 'Storytelling Pessoal': C.green, 'Dicas Práticas': C.yellow, 'Oferta e CTA': 'rgba(200,200,255,0.8)' };
+              const col = pCols[t.pilar] || C.white;
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: f(10) }}>
+                  <div style={{ width: f(24), height: f(24), borderRadius: '50%', background: C.yellow, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(11), color: C.secondary, flexShrink: 0, marginTop: 2 }}>{i + 1}</div>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.9)' }}>{t.titulo} </span>
+                    <Tag text={t.formato_sugerido} color={C.yellow} f={f} />
+                    {' '}<Tag text={t.pilar} color={col} f={f} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: f(16) }}>
+            <div style={{ marginBottom: f(10), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(18), color: C.white, textTransform: 'uppercase' }}>📱 Stories Recorrentes</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: f(8) }}>
+              {dt.stories_recorrentes.map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: f(10) }}>
+                  <span style={{ fontSize: f(18) }}>{'📊📹📬✅'[i]}</span>
+                  <div>
+                    <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.85)' }}>{s.ideia} </span>
+                    <Tag text={s.objetivo} color={C.green} f={f} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'dt-hashtags', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}># Hashtags Estratégicas</div>
+        <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr 1fr' : '1fr 1fr 1fr', gap: f(20), flex: 1 }}>
+          <div style={{ borderRadius: 20, padding: f(22), background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.28)' }}>
+            <div style={{ marginBottom: f(14), display: 'flex', alignItems: 'center', gap: f(8) }}>
+              <span style={{ fontSize: f(18) }}>📌</span>
+              <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.primary, textTransform: 'uppercase' }}>Core (sempre usar)</span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+              {dt.hashtags_estrategicas.core.map((h) => <Tag key={h} text={h} color={C.primary} f={f} />)}
+            </div>
+          </div>
+          <div style={{ borderRadius: 20, padding: f(22), background: 'rgba(0,179,126,0.08)', border: '1px solid rgba(0,179,126,0.28)' }}>
+            <div style={{ marginBottom: f(14), display: 'flex', alignItems: 'center', gap: f(8) }}>
+              <span style={{ fontSize: f(18) }}>🔄</span>
+              <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.green, textTransform: 'uppercase' }}>Rotativas — Nicho</span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+              {dt.hashtags_estrategicas.rotativas_nicho.map((h) => <Tag key={h} text={h} color={C.green} f={f} />)}
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: f(14), gridColumn: isP ? '1 / -1' : undefined }}>
+            <div style={{ borderRadius: 20, padding: f(18), flex: 1, background: 'rgba(255,214,0,0.06)', border: '1px solid rgba(255,214,0,0.22)' }}>
+              <div style={{ marginBottom: f(10), display: 'flex', alignItems: 'center', gap: f(8) }}>
+                <span style={{ fontSize: f(16) }}>📈</span>
+                <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.yellow, textTransform: 'uppercase' }}>Alto Volume</span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+                {dt.hashtags_estrategicas.rotativas_alto_volume.map((h) => <Tag key={h} text={h} color={C.yellow} f={f} />)}
+              </div>
+            </div>
+            <div style={{ borderRadius: 20, padding: f(18), background: 'rgba(255,60,60,0.07)', border: '1px solid rgba(255,60,60,0.22)' }}>
+              <div style={{ marginBottom: f(10), display: 'flex', alignItems: 'center', gap: f(8) }}>
+                <span style={{ fontSize: f(16) }}>🚫</span>
+                <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: '#ff5555', textTransform: 'uppercase' }}>Evite</span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+                {dt.hashtags_estrategicas.evite.map((h) => (
+                  <span key={h} style={{ padding: `${f(3)}px ${f(8)}px`, borderRadius: 4, fontSize: f(11), background: 'rgba(255,60,60,0.1)', color: '#ff5555', border: '1px solid rgba(255,60,60,0.2)', textDecoration: 'line-through', fontFamily: 'Roboto' }}>{h}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: f(16), padding: f(14), borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+            📍 <strong style={{ color: C.white }}>Categoria:</strong> {dt.seo_instagram.categoria_perfil_recomendada}&nbsp;&nbsp;|&nbsp;&nbsp;
+            📝 <strong style={{ color: C.white }}>Bio:</strong> {dt.seo_instagram.uso_em_bio}
+          </p>
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'dt-identidade', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Identidade Visual</div>
+        <div style={{ display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(32), flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(10), width: isP ? '100%' : 260, flexShrink: 0 }}>
+            {dt.identidade_visual.paleta_cores.map((cor) => (
+              <div key={cor.nome} style={{ display: 'flex', flex: isP ? 1 : undefined, alignItems: 'center', gap: f(12), borderRadius: 12, padding: f(10), background: 'rgba(255,255,255,0.03)' }}>
+                <div style={{ width: isP ? f(32) : f(48), height: isP ? f(32) : f(48), borderRadius: 8, background: cor.hex, flexShrink: 0 }} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.white, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cor.nome}</div>
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.35)' }}>{cor.hex}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(18) }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(12) }}>
+              <div style={{ borderRadius: 12, padding: f(14), background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.22)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(20), color: C.white }}>MONTSERRAT</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)' }}>Títulos / Display</div>
+              </div>
+              <div style={{ borderRadius: 12, padding: f(14), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(20), color: C.white }}>Roboto Regular</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)' }}>Corpo de texto</div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(12) }}>
+              <div style={{ borderRadius: 12, padding: f(14), background: 'rgba(0,179,126,0.06)', border: '1px solid rgba(0,179,126,0.18)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.green, marginBottom: f(6) }}>📷 Estilo Fotográfico</div>
+                <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: lh, margin: 0 }}>{dt.identidade_visual.estilo_fotografico}</p>
+              </div>
+              <div style={{ borderRadius: 12, padding: f(14), background: 'rgba(255,214,0,0.06)', border: '1px solid rgba(255,214,0,0.18)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, marginBottom: f(6) }}>🎨 Estilo Gráfico</div>
+                <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: lh, margin: 0 }}>{dt.identidade_visual.estilo_grafico}</p>
+              </div>
+            </div>
+            <div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: f(8) }}>Mood Visual</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6), marginBottom: f(10) }}>
+                {dt.identidade_visual.vestimenta_aparicoes.mood_referencias.map((m) => <Tag key={m} text={m} color={C.green} f={f} />)}
+              </div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: f(8) }}>Evitar</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+                {dt.identidade_visual.vestimenta_aparicoes.evitar.map((e) => (
+                  <span key={e} style={{ padding: `${f(3)}px ${f(8)}px`, borderRadius: 4, fontSize: f(11), background: 'rgba(255,60,60,0.08)', color: '#ff5555', border: '1px solid rgba(255,60,60,0.18)', textDecoration: 'line-through', fontFamily: 'Roboto' }}>{e}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'dt-kpis', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ marginBottom: f(20), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>KPIs & Metas</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: f(10), marginBottom: f(20) }}>
+          {[{ label: '30 dias', color: C.yellow, icon: '🚀' }, { label: '60 dias', color: C.primary, icon: '📈' }, { label: '90 dias', color: C.green, icon: '🏆' }].map((m) => (
+            <div key={m.label} style={{ borderRadius: 12, padding: `${f(10)}px ${f(14)}px`, display: 'flex', alignItems: 'center', gap: f(8), background: `${m.color}12`, border: `1px solid ${m.color}44` }}>
+              <span style={{ fontSize: f(20) }}>{m.icon}</span>
+              <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: m.color }}>Meta {m.label}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr' : '1fr 1fr', gap: f(12), flex: 1 }}>
+          {dt.kpis_acompanhar.map((k, i) => <KpiCard key={i} kpi={k.kpi} meta30={k.meta_30d} meta60={k.meta_60d} meta90={k.meta_90d} f={f} />)}
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'dt-briefings', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row' }}>
+        <div style={{ flex: isP ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column', padding: isP ? '32px 40px 20px' : 48, borderRight: isP ? 'none' : '1px solid rgba(255,255,255,0.06)', borderBottom: isP ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: f(14), marginBottom: f(20) }}>
+            <span style={{ fontSize: f(32) }}>✍️</span>
+            <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(24), color: C.white, textTransform: 'uppercase' }}>Briefing Redatores</div>
+          </div>
+          <div style={{ padding: f(20), borderRadius: 16, flex: 1, background: 'rgba(255,102,0,0.07)', border: '1px solid rgba(255,102,0,0.22)' }}>
+            <p style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{dt.briefing_redatores}</p>
+          </div>
+          <div style={{ marginTop: f(16), display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(8) }}>
+            {[{ icon: '⚡', label: 'Gancho nos 3 primeiros segundos' }, { icon: '📝', label: '300-400 chars por legenda' }, { icon: '❓', label: 'Perguntas para comentários' }, { icon: '🎯', label: 'CTA claro em todo post' }].map((r) => (
+              <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: f(8), padding: f(10), borderRadius: 10, background: 'rgba(255,255,255,0.03)' }}>
+                <span style={{ fontSize: f(16) }}>{r.icon}</span>
+                <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.7)', lineHeight: lh }}>{r.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ flex: isP ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column', padding: isP ? '20px 40px 32px' : 48 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: f(14), marginBottom: f(20) }}>
+            <span style={{ fontSize: f(32) }}>🎨</span>
+            <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(24), color: C.white, textTransform: 'uppercase' }}>Briefing Designers</div>
+          </div>
+          <div style={{ padding: f(20), borderRadius: 16, flex: 1, background: 'rgba(0,179,126,0.07)', border: '1px solid rgba(0,179,126,0.22)' }}>
+            <p style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{dt.briefing_designers}</p>
+          </div>
+          <div style={{ marginTop: f(16) }}>
+            <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(8) }}>Mood Visual</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+              {dt.identidade_visual.vestimenta_aparicoes.mood_referencias.map((m) => <Tag key={m} text={m} color={C.green} f={f} />)}
+            </div>
+          </div>
+        </div>
+      </div>
+    )});
+
+    all.push({ id: 'dt-assuntos', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>🔥 Assuntos Quentes</div>
+        <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr 1fr' : '1fr 1fr 1fr', gap: f(10), flex: 1 }}>
+          {dt.assuntos_quentes.map((a, i) => {
+            const cols = [C.primary, C.green, C.yellow];
+            const col  = cols[i % 3];
+            return (
+              <div key={i} style={{ borderRadius: 12, padding: f(14), display: 'flex', alignItems: 'center', gap: f(10), background: `${col}0c`, border: `1px solid ${col}2a` }}>
+                <div style={{ width: f(28), height: f(28), borderRadius: '50%', background: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(11), color: i % 3 === 2 ? C.secondary : C.white, flexShrink: 0 }}>{i + 1}</div>
+                <span style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh }}>{a}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    )});
+  }
+
+  return all;
+}
+
+// ─── Scale helper ─────────────────────────────────────────────────────────────
+function ScaleManager({ isLandscape, W, H }: { isLandscape: boolean; W: number; H: number }) {
+  useEffect(() => {
+    function update() {
+      const el = document.getElementById('slide-inner');
+      if (!el) return;
+      const parent = el.parentElement;
+      if (!parent) return;
+      const scale = Math.min(parent.clientWidth / W, parent.clientHeight / H);
+      el.style.transform      = `scale(${scale})`;
+      el.style.transformOrigin = 'top left';
+    }
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [isLandscape, W, H]);
+  return null;
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+export default function App() {
+  const validSections: Section[] = ['all', 'overview_cliente', 'diretrizes_tecnicas'];
+  const injectedSection = window.__SECTION__ as Section;
+  const initialSection: Section = validSections.includes(injectedSection) ? injectedSection : 'all';
+
+  const [section,     setSection]     = useState<Section>(initialSection);
+  const [orientation, setOrientation] = useState<Orientation>('landscape');
+  const [current,     setCurrent]     = useState(0);
+
+  const isLandscape = orientation === 'landscape';
+  const isPortrait  = !isLandscape;
+  // both orientations double body fonts; titles stay raw (never go through f)
+  const f: Fscale   = (n) => Math.round(n * 2);
+
+  const W = isLandscape ? 1920 : 1080;
+  const H = isLandscape ? 1080 : 1920;
+
+  const slides = buildSlides(section, f, isPortrait);
+  const total  = slides.length;
+  const slide  = slides[current];
+
+  const prev = useCallback(() => setCurrent((c) => Math.max(0, c - 1)),          []);
+  const next = useCallback(() => setCurrent((c) => Math.min(total - 1, c + 1)), [total]);
+
+  useEffect(() => { setCurrent(0); }, [section]);
+  useEffect(() => { setCurrent(0); }, [orientation]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next();
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prev();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [next, prev]);
+
+  // Inject/update print CSS whenever orientation changes
+  useEffect(() => {
+    let el = document.getElementById('__pdf_css__') as HTMLStyleElement | null;
+    if (!el) {
+      el = document.createElement('style');
+      el.id = '__pdf_css__';
+      document.head.appendChild(el);
+    }
+    const scale = 0.585;
+    const pageW = isLandscape ? '297mm' : '210mm';
+    const pageH = isLandscape ? '210mm' : '297mm';
+    const orient = isLandscape ? 'landscape' : 'portrait';
+    el.textContent = `
+      @media print {
+        @page { size: A4 ${orient}; margin: 0; }
+        #__screen_ui__ { display: none !important; }
+        #__print_pages__ { display: block !important; }
+        .pp { width: ${pageW}; height: ${pageH}; overflow: hidden; break-after: page; page-break-after: always; background: #000; position: relative; }
+        .ppi { width: ${W}px; height: ${H}px; transform: scale(${scale}); transform-origin: top left; }
+      }
+      #__print_pages__ { display: none; }
+    `;
+  }, [isLandscape, W, H]);
+
+  const sectionColor = slide?.section === 'overview_cliente' ? C.primary : C.green;
+  const sectionLabel = slide?.section === 'overview_cliente' ? 'OVERVIEW CLIENTE' : 'DIRETRIZES TÉCNICAS';
+
+  const navBtn = (label: string, onClick: () => void, active: boolean, activeColor: string, disabled?: boolean) => (
+    <button onClick={onClick} disabled={disabled}
+      style={{ padding: '5px 14px', borderRadius: 6, border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12, background: active ? activeColor : 'rgba(255,255,255,0.06)', color: active ? C.white : disabled ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.55)', transition: 'all 0.2s' }}>
+      {label}
+    </button>
+  );
+
+  return (
+    <>
+    <div id="__screen_ui__" style={{ minHeight: '100vh', background: '#0d0d0d', display: 'flex', flexDirection: 'column' }}>
+      {/* NAV */}
+      <div style={{ background: '#0a0a0a', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 14, color: C.primary, letterSpacing: 2 }}>RADAR</div>
+        <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.08)' }} />
+        <div style={{ display: 'flex', gap: 4 }}>
+          {([['all','Tudo'], ['overview_cliente','Cliente'], ['diretrizes_tecnicas','Técnicas']] as [Section, string][]).map(([val, label]) =>
+            navBtn(label, () => setSection(val), section === val, C.primary)
+          )}
+        </div>
+        <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.08)' }} />
+        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+          <span style={{ color: C.white }}>{current + 1}</span> / {total}
+        </div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {navBtn('◀', prev, false, C.primary, current === 0)}
+          {navBtn('▶', next, false, C.primary, current === total - 1)}
+        </div>
+        <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.08)' }} />
+        <div style={{ display: 'flex', gap: 4 }}>
+          {navBtn('16:9', () => setOrientation('landscape'), !isPortrait, C.green)}
+          {navBtn('9:16', () => setOrientation('portrait'),   isPortrait,  C.green)}
+        </div>
+        <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.08)' }} />
+        {navBtn('📄 PDF', () => window.print(), false, C.yellow)}
+        <div style={{ marginLeft: 'auto', fontFamily: 'Roboto', fontSize: 12, color: sectionColor, fontWeight: 700 }}>{sectionLabel}</div>
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', maxWidth: 280 }}>
+          {slides.map((s, i) => (
+            <button key={s.id} onClick={() => setCurrent(i)} title={s.id}
+              style={{ width: 8, height: 8, borderRadius: '50%', border: 'none', cursor: 'pointer', padding: 0, background: i === current ? (s.section === 'overview_cliente' ? C.primary : C.green) : 'rgba(255,255,255,0.12)', transition: 'all 0.2s' }} />
+          ))}
+        </div>
+      </div>
+
+      {/* VIEWPORT */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, overflow: 'hidden' }}>
+        <div style={{ position: 'relative', width: isLandscape ? 'min(90vw, calc(85vh * 16 / 9))' : 'min(50vw, calc(85vh * 9 / 16))' }}>
+          <div style={{ paddingTop: `${(H / W) * 100}%`, position: 'relative' }}>
+            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12, boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
+              <div id="slide-inner" style={{ width: W, height: H }}>
+                {slide?.render()}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ScaleManager isLandscape={isLandscape} W={W} H={H} />
+
+      <div style={{ padding: '8px 24px', textAlign: 'center', fontFamily: 'Roboto', fontSize: 11, color: 'rgba(255,255,255,0.18)' }}>
+        ← → Navegar por teclado · Clique nos pontos para ir ao slide
+      </div>
+    </div>
+    <div id="__print_pages__">
+      {slides.map((s) => (
+        <div key={s.id} className="pp">
+          <div className="ppi">{s.render()}</div>
+        </div>
+      ))}
+    </div>
+    </>
+  );
+}

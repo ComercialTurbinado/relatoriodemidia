@@ -1,0 +1,484 @@
+{
+  "name": "🔍 Auditor de Negócios IA — v2",
+  "nodes": [
+
+    {
+      "id": "n01",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "auditor-ia-trigger-v1",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auditor-ia",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n02",
+      "name": "Validar e Preparar Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [280, 0],
+      "parameters": {
+        "jsCode": "// Payload: { nome_cliente, nicho, handle_cliente, concorrentes: ['@c1','@c2'] }\nconst raw  = $input.first().json;\nconst body = raw.body ?? raw;\n\nconst nome_cliente   = (body.nome_cliente   || '').trim();\nconst nicho          = (body.nicho          || '').trim();\nconst handle_cliente = (body.handle_cliente || '').replace('@','').trim();\nconst concorrentes   = (body.concorrentes   || [])\n  .map(h => String(h).replace('@','').trim())\n  .filter(Boolean);\n\nif (!nome_cliente || !nicho || !handle_cliente || concorrentes.length === 0) {\n  throw new Error('Payload incompleto. Envie: nome_cliente, nicho, handle_cliente, concorrentes[].');\n}\n\nconst todos_handles = [handle_cliente, ...concorrentes];\n\nreturn [{ json: {\n  nome_cliente,\n  nicho,\n  handle_cliente,\n  concorrentes,\n  todos_handles,\n  iniciado_em: new Date().toISOString(),\n}}];\n"
+      }
+    },
+
+    {
+      "id": "n03",
+      "name": "Expandir Handles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [560, 0],
+      "parameters": {
+        "jsCode": "// Transforma 1 item com array todos_handles em N itens (1 por handle)\n// Cada item carrega o contexto completo + handle atual + tipo (cliente/concorrente)\nconst data = $input.first().json;\n\nif (!Array.isArray(data.todos_handles) || data.todos_handles.length === 0) {\n  throw new Error('todos_handles ausente ou vazio.');\n}\n\nreturn data.todos_handles.map(handle => ({\n  json: {\n    // Contexto da auditoria\n    nome_cliente:   data.nome_cliente,\n    nicho:          data.nicho,\n    handle_cliente: data.handle_cliente,\n    concorrentes:   data.concorrentes,\n    todos_handles:  data.todos_handles,\n    iniciado_em:    data.iniciado_em,\n    // Handle atual e seu papel\n    handle: handle,\n    tipo:   handle === data.handle_cliente ? 'cliente' : 'concorrente',\n  }\n}));\n"
+      }
+    },
+
+    {
+      "id": "n04",
+      "name": "RapidAPI — Buscar Perfil Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [840, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "https://instagram120.p.rapidapi.com/api/instagram/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Rapidapi-Key",  "value": "={{ $env.RAPIDAPI_KEY }}" },
+            { "name": "X-Rapidapi-Host", "value": "instagram120.p.rapidapi.com" },
+            { "name": "Content-Type",    "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ username: $json.handle, maxId: '' }) }}",
+        "options": { "timeout": 30000 }
+      }
+    },
+
+    {
+      "id": "n05",
+      "name": "Normalizar Perfil",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 0],
+      "parameters": {
+        "jsCode": "// Combina resposta RapidAPI (índice i) com o handle/tipo original (Expandir Handles índice i)\nconst rapItems  = $input.all();\nconst origItems = $('Expandir Handles').all();\n\nfunction normalizarPosts(rawItems) {\n  return (rawItems || []).slice(0, 20).map(node => {\n    const legenda     = (node.edge_media_to_caption?.edges?.[0]?.node?.text ?? node.caption ?? '').slice(0, 600);\n    const curtidas    = node.edge_liked_by?.count         ?? node.like_count     ?? 0;\n    const comentarios = node.edge_media_to_comment?.count ?? node.comment_count  ?? 0;\n    const is_video    = node.is_video ?? (node.media_type === 2);\n    const engajamento = curtidas + comentarios;\n    return {\n      shortCode:     node.shortcode ?? node.code ?? '',\n      url:           `https://www.instagram.com/p/${node.shortcode ?? node.code ?? ''}/`,\n      legenda,\n      curtidas,\n      comentarios,\n      visualizacoes: node.video_view_count ?? 0,\n      tipo:          is_video ? 'video' : (node.edge_sidecar_to_children ? 'carrossel' : 'foto'),\n      videoUrl:      node.video_url    ?? null,\n      thumbnailUrl:  node.display_url  ?? node.thumbnail_url ?? null,\n      data:          node.taken_at_timestamp\n                       ? new Date(node.taken_at_timestamp * 1000).toISOString()\n                       : null,\n      engajamento,\n    };\n  });\n}\n\nreturn rapItems.map((rapItem, idx) => {\n  const orig = origItems[idx]?.json || {};\n  const resp = rapItem.json;\n\n  // Suporta múltiplas estruturas de resposta do Instagram120\n  const u = resp.user ?? resp.data?.user ?? {};\n  const rawItems =\n    resp.items ??\n    resp.data?.items ??\n    (u.edge_owner_to_timeline_media?.edges || []).map(e => e.node) ??\n    [];\n\n  const posts          = normalizarPosts(rawItems);\n  const seguidores     = u.edge_followed_by?.count ?? u.follower_count  ?? 0;\n  const seguindo       = u.edge_follow?.count       ?? u.following_count ?? 0;\n  const total_posts    = u.edge_owner_to_timeline_media?.count ?? u.media_count ?? 0;\n  const totalEng       = posts.reduce((s, x) => s + x.engajamento, 0);\n  const taxa_engajamento = posts.length\n    ? ((totalEng / posts.length / (seguidores || 1)) * 100).toFixed(2)\n    : '0.00';\n  const media_curtidas    = posts.length ? Math.round(posts.reduce((s, x) => s + x.curtidas,    0) / posts.length) : 0;\n  const media_comentarios = posts.length ? Math.round(posts.reduce((s, x) => s + x.comentarios, 0) / posts.length) : 0;\n\n  // Mix de formatos\n  const total = posts.length || 1;\n  const qtdVideo    = posts.filter(p => p.tipo === 'video').length;\n  const qtdCarrossel= posts.filter(p => p.tipo === 'carrossel').length;\n  const qtdFoto     = posts.filter(p => p.tipo === 'foto').length;\n\n  return { json: {\n    // Contexto\n    handle:         orig.handle,\n    tipo:           orig.tipo,\n    nome_cliente:   orig.nome_cliente,\n    nicho:          orig.nicho,\n    handle_cliente: orig.handle_cliente,\n    concorrentes:   orig.concorrentes,\n    todos_handles:  orig.todos_handles,\n    // Dados do perfil\n    bio:              u.biography ?? u.bio ?? '',\n    seguidores,\n    seguindo,\n    total_posts,\n    verificado:       u.is_verified ?? false,\n    link_externo:     u.external_url ?? '',\n    taxa_engajamento,\n    media_curtidas,\n    media_comentarios,\n    mix_formatos: {\n      reels_pct:     Math.round((qtdVideo    / total) * 100),\n      carrossel_pct: Math.round((qtdCarrossel/ total) * 100),\n      foto_pct:      Math.round((qtdFoto     / total) * 100),\n    },\n    posts,\n    top_posts:        [...posts].sort((a, b) => b.engajamento - a.engajamento).slice(0, 5),\n    posts_video:      posts.filter(x => x.tipo === 'video' && x.videoUrl),\n    ultimos_15_posts: posts.slice(0, 15),\n  }};\n});\n"
+      }
+    },
+
+    {
+      "id": "n06",
+      "name": "Agregar Perfis",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [1400, 0],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "perfis",
+        "include": "allFields",
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n07",
+      "name": "Separar Cliente e Concorrentes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1680, 0],
+      "parameters": {
+        "jsCode": "// Agrupa perfis separando o cliente dos concorrentes\nconst perfis = $input.first().json.perfis || [];\n\nconst cliente_dados      = perfis.find(p => p.tipo === 'cliente') || null;\nconst concorrentes_dados = perfis.filter(p => p.tipo === 'concorrente');\n\nif (!cliente_dados) {\n  throw new Error('Perfil do cliente não encontrado. Verifique se o handle_cliente retornou dados da RapidAPI.');\n}\n\n// Resumo comparativo rápido\nconst melhor_concorrente = concorrentes_dados.reduce((best, c) => {\n  return parseFloat(c.taxa_engajamento) > parseFloat(best?.taxa_engajamento || '0') ? c : best;\n}, null);\n\nconst gap_engajamento = melhor_concorrente\n  ? (parseFloat(melhor_concorrente.taxa_engajamento) - parseFloat(cliente_dados.taxa_engajamento)).toFixed(2)\n  : '0.00';\n\nreturn [{ json: {\n  // Metadados da auditoria\n  nome_cliente:    cliente_dados.nome_cliente,\n  nicho:           cliente_dados.nicho,\n  handle_cliente:  cliente_dados.handle_cliente,\n  concorrentes:    cliente_dados.concorrentes,\n  todos_handles:   cliente_dados.todos_handles,\n  iniciado_em:     new Date().toISOString(),\n  // Perfis separados\n  cliente_dados,\n  concorrentes_dados,\n  total_perfis: perfis.length,\n  // Diagnóstico rápido\n  melhor_concorrente_handle: melhor_concorrente?.handle || null,\n  gap_engajamento_pct: gap_engajamento,\n}}];\n"
+      }
+    },
+
+    {
+      "id": "n08",
+      "name": "Serper — Tendências do Nicho",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1960, 0],
+      "parameters": {
+        "method": "GET",
+        "url": "https://google.serper.dev/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-API-KEY", "value": "={{ $env.SERPER_API_KEY }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "q",       "value": "={{ $('Separar Cliente e Concorrentes').first().json.nicho + ' tendências 2025 instagram Brasil' }}" },
+            { "name": "gl",      "value": "br" },
+            { "name": "hl",      "value": "pt-br" },
+            { "name": "num",     "value": "10" }
+          ]
+        },
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n09",
+      "name": "Serper — Keywords do Nicho",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2240, 0],
+      "parameters": {
+        "method": "GET",
+        "url": "https://google.serper.dev/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-API-KEY", "value": "={{ $env.SERPER_API_KEY }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "q",       "value": "={{ $('Separar Cliente e Concorrentes').first().json.nicho + ' estratégia conteúdo instagram crescimento' }}" },
+            { "name": "gl",      "value": "br" },
+            { "name": "hl",      "value": "pt-br" },
+            { "name": "num",     "value": "10" }
+          ]
+        },
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n10",
+      "name": "Apify — Facebook Ads Library",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2520, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/apify~facebook-ads-library-scraper/run-sync-get-dataset-items?token={{ $env.APIFY_TOKEN }}&timeout=120&memory=1024",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ searchTerms: $('Separar Cliente e Concorrentes').first().json.concorrentes, country: 'BR', adType: 'all', maxResults: 20, activeStatus: 'active' }) }}",
+        "options": { "timeout": 150000 }
+      }
+    },
+
+    {
+      "id": "n11",
+      "name": "Enriquecer Dados + Identificar Vídeos Virais",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2800, 0],
+      "parameters": {
+        "jsCode": "// Consolida todos os dados coletados e identifica os top 3 vídeos virais dos concorrentes\nconst base   = $('Separar Cliente e Concorrentes').first().json;\nconst tendRaw= $('Serper — Tendências do Nicho').first().json;\nconst kwRaw  = $('Serper — Keywords do Nicho').first().json;\nconst adsRaw = $('Apify — Facebook Ads Library').first().json;\n\nconst tendencias_google = (tendRaw.organic || []).slice(0, 8).map(r => ({\n  titulo:  r.title,\n  snippet: r.snippet,\n  link:    r.link,\n}));\n\nconst keywords_google = (kwRaw.organic || []).slice(0, 8).map(r => ({\n  titulo:  r.title,\n  snippet: r.snippet,\n}));\n\nconst anuncios_facebook = (Array.isArray(adsRaw) ? adsRaw : []).slice(0, 15).map(ad => ({\n  page_name:   ad.pageName            || ad.page_name          || '',\n  titulo:      ad.title               || ad.ad_creative_body   || '',\n  cta:         ad.cta_text            || ad.call_to_action_type|| '',\n  status:      ad.is_active ? 'ativo' : 'inativo',\n  formato:     ad.ad_type             || '',\n  url_destino: ad.snapshot_url        || '',\n}));\n\n// Coleta todos os vídeos dos concorrentes ordenados por engajamento\nconst allVideos = [];\n(base.concorrentes_dados || []).forEach(conc => {\n  (conc.posts_video || []).forEach(post => {\n    if (post.videoUrl) {\n      allVideos.push({\n        ...post,\n        handle_concorrente: conc.handle,\n        seguidores_conc:    conc.seguidores,\n        taxa_eng_perfil:    conc.taxa_engajamento,\n      });\n    }\n  });\n});\nallVideos.sort((a, b) => b.engajamento - a.engajamento);\nconst top3 = allVideos.slice(0, 3);\n\nconst mergedBase = {\n  ...base,\n  tendencias_google,\n  keywords_google,\n  anuncios_facebook,\n};\n\n// Sem vídeos: retorna 1 item com flag — Whisper será pulado pelo IF\nif (top3.length === 0) {\n  return [{ json: { ...mergedBase, video_atual: null, sem_videos: true, top_virais: [] } }];\n}\n\n// 1 item por vídeo viral → Download + Whisper roda uma vez para cada\nreturn top3.map((video, idx) => ({\n  json: {\n    ...mergedBase,\n    video_atual:  video,\n    video_index:  idx,\n    sem_videos:   false,\n    top_virais:   top3,\n  }\n}));\n"
+      }
+    },
+
+    {
+      "id": "n11b",
+      "name": "Tem Vídeos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [3080, 0],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "check-videos",
+              "leftValue": "={{ $json.sem_videos }}",
+              "rightValue": false,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n12",
+      "name": "Download Vídeo Viral",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3360, -200],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.video_atual.videoUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "videoFile"
+            }
+          },
+          "timeout": 60000,
+          "redirect": { "redirect": { "followRedirects": true, "maxRedirects": 5 } }
+        }
+      }
+    },
+
+    {
+      "id": "n13",
+      "name": "OpenAI Whisper — Transcrição",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3640, -200],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.OPENAI_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "model",    "value": "whisper-1" },
+            { "name": "language", "value": "pt" },
+            {
+              "name": "file",
+              "value": "=videoFile",
+              "parameterType": "formBinaryData",
+              "inputDataFieldName": "videoFile"
+            }
+          ]
+        },
+        "options": { "timeout": 120000 }
+      }
+    },
+
+    {
+      "id": "n13b",
+      "name": "Enriquecer Transcrição",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3920, -200],
+      "parameters": {
+        "jsCode": "// Combina transcrição do Whisper com metadados do vídeo (via paired items)\nconst whisperItems  = $input.all();\nconst videoItems    = $('Enriquecer Dados + Identificar Vídeos Virais').all();\n\nreturn whisperItems.map((item, idx) => {\n  const video = videoItems[idx]?.json?.video_atual || {};\n  return { json: {\n    transcricao:         item.json.text || '[sem transcrição]',\n    handle_concorrente:  video.handle_concorrente || '',\n    legenda:             video.legenda            || '',\n    curtidas:            video.curtidas           || 0,\n    comentarios:         video.comentarios        || 0,\n    engajamento:         video.engajamento        || 0,\n    video_index:         idx,\n  }};\n});\n"
+      }
+    },
+
+    {
+      "id": "n14",
+      "name": "Agregar Transcrições",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [4200, -200],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "transcricoes_coletadas",
+        "include": "allFields",
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n15",
+      "name": "Montar Payload GPT-4o",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4480, -200],
+      "parameters": {
+        "jsCode": "// Recupera base de dados consolidada + transcrições\nconst aggItem    = $input.first().json;\nconst coletados  = aggItem.transcricoes_coletadas || [];\n\n// Base dos dados vem do nó de separação (disponível via referência de nó)\nconst base = $('Separar Cliente e Concorrentes').first().json;\nconst tendencias = $('Serper — Tendências do Nicho').first().json;\nconst keywords   = $('Serper — Keywords do Nicho').first().json;\nconst adsRaw     = $('Apify — Facebook Ads Library').first().json;\n\nconst tendencias_google = (tendencias.organic || []).slice(0, 8).map(r => ({ titulo: r.title, snippet: r.snippet, link: r.link }));\nconst keywords_google   = (keywords.organic   || []).slice(0, 8).map(r => ({ titulo: r.title, snippet: r.snippet }));\nconst anuncios_facebook = (Array.isArray(adsRaw) ? adsRaw : []).slice(0, 15).map(ad => ({\n  page_name:  ad.pageName || ad.page_name || '',\n  titulo:     ad.title || ad.ad_creative_body || '',\n  cta:        ad.cta_text || ad.call_to_action_type || '',\n  formato:    ad.ad_type || '',\n}));\n\nconst videos_transcritos = coletados.map(item => ({\n  handle:      item.handle_concorrente || 'desconhecido',\n  legenda:     item.legenda            || '',\n  curtidas:    item.curtidas           || 0,\n  comentarios: item.comentarios        || 0,\n  engajamento: item.engajamento        || 0,\n  transcricao: item.transcricao        || '[sem transcrição disponível]',\n}));\n\n// Monta resumo do cliente\nconst c = base.cliente_dados || {};\nconst cliente_resumo = {\n  nome:              base.nome_cliente,\n  nicho:             base.nicho,\n  handle:            `@${base.handle_cliente}`,\n  bio:               c.bio               || '',\n  seguidores:        c.seguidores         || 0,\n  seguindo:          c.seguindo           || 0,\n  total_posts:       c.total_posts        || 0,\n  taxa_engajamento:  `${c.taxa_engajamento || '0.00'}%`,\n  media_curtidas:    c.media_curtidas     || 0,\n  media_comentarios: c.media_comentarios  || 0,\n  mix_formatos:      c.mix_formatos       || {},\n  top_5_posts:       (c.top_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo, data: p.data })),\n  ultimos_15_posts:  (c.ultimos_15_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n};\n\nconst concorrentes_resumo = (base.concorrentes_dados || []).map(cc => ({\n  handle:           `@${cc.handle}`,\n  bio:              cc.bio,\n  seguidores:       cc.seguidores,\n  taxa_engajamento: `${cc.taxa_engajamento}%`,\n  media_curtidas:   cc.media_curtidas,\n  media_comentarios:cc.media_comentarios,\n  mix_formatos:     cc.mix_formatos || {},\n  top_5_posts:      (cc.top_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n  tem_videos:       (cc.posts_video || []).length,\n}));\n\nconst userContent = JSON.stringify({\n  cliente:                   cliente_resumo,\n  concorrentes:              concorrentes_resumo,\n  videos_virais_transcritos: videos_transcritos,\n  tendencias_google,\n  palavras_chave:            keywords_google,\n  anuncios_ativos:           anuncios_facebook,\n}, null, 2);\n\nconst systemPrompt = `Você é um Growth Hacker Sênior com 12 anos de experiência em marketing digital no Brasil, especializado em análise competitiva de Instagram, criação de conteúdo de alta conversão e escalonamento de negócios via redes sociais.\n\nMISSÃO: Produzir um DOSSIÊ DE AUDITORIA COMPETITIVA ULTRA-PERSONALIZADO baseado EXCLUSIVAMENTE nos dados do JSON fornecido. Nunca seja genérico. Cada insight deve ter um dado como evidência. Se um dado não estiver disponível, declare: [dado não disponível no input].\n\nESTRUTURA DO DOSSIÊ — gere todos os módulos em Markdown:\n\n## 🔬 MÓDULO 1: DIAGNÓSTICO CLÍNICO DO PERFIL\n### 1.1 Autópsia da Bio (compare bio atual vs concorrentes. Marque ✅/❌ para: keyword do nicho, CTA, prova social, link rastreável. Reescreva em 2 versões: 80 e 150 caracteres)\n### 1.2 Padrão Editorial Atual (mix de formatos %, frequência estimada, tema dominante, CTA mais usado, análise dos 3 top posts — o que os diferencia, ganchos fortes/fracos)\n### 1.3 Tabela Score de Competitividade (Handle | Seguidores | Eng% | Mix Reels% | Curtidas Médias | Comentários Médios — com dados reais. Calcule o gap % do cliente vs melhor concorrente)\n\n## 📊 MÓDULO 2: INTELIGÊNCIA COMPETITIVA\n### 2.1 Táticas que Concorrentes Usam e o Cliente NÃO (MÍNIMO 8 táticas. Para cada: nome da tática, @handle que usa, evidência literal nos dados, por que funciona, como adaptar para o cliente)\n### 2.2 Análise dos Anúncios Ativos (para cada anúncio: CTA exato, promessa central, dor ativada, formato, padrão de copy. Identifique o padrão dominante entre todos)\n### 2.3 Mapa de Ganchos Virais (tabela: Concorrente | Gancho 0-3s | Promessa | Prova/Dado | CTA Final | Engajamento. Identifique o padrão dominante)\n\n## 👥 MÓDULO 3: PERFIL PSICOGRÁFICO DO PÚBLICO\n### 3.1 Mapeamento das 5 Maiores Dores/Desejos (evidência de comentários ou anúncios, intensidade Alta/Média/Baixa, formato de conteúdo para explorar)\n### 3.2 Vocabulário Nativo do Público (20 palavras/expressões/gírias do nicho que o cliente DEVE usar nas legendas para criar identificação imediata)\n### 3.3 Tendências de Mercado para Capitalizar (5 tendências dos dados Google: Tendência | Volume/Relevância | Formato Recomendado | Exemplo de Gancho)\n\n## 🎯 MÓDULO 4: PLANO DE AÇÃO ESTRATÉGICO\n### 4.1 Quick Wins — Execute Esta Semana (5 ações de alto impacto, baixo esforço: o que fazer, como fazer em 3 passos, resultado esperado mensurável)\n### 4.2 Linha Editorial 30 Dias (mix de formatos%, frequência posts+stories, 4 pilares de conteúdo com exemplo de post cada, template de gancho das primeiras 2 linhas)\n### 4.3 Roadmap 90 Dias (Sprint 1 Dias 1-30 Fundação | Sprint 2 Dias 31-60 Aceleração | Sprint 3 Dias 61-90 Escala — cada um com objetivo e KPI mensurável)\n\n## ✍️ MÓDULO 5: ARSENAL DE CONTEÚDO PRONTO\n### 5.1 — 10 Legendas Prontas (cada uma: GANCHO linha 1 que para o scroll + CORPO 80-120 palavras com quebras curtas para mobile + CTA específico + 8-10 hashtags. Estrutura PSC ou SAS. Cada legenda aborda uma dor diferente)\n### 5.2 — 5 Roteiros de Reels (cada um: CENA 1 0-3s gancho | CENA 2 3-15s desenvolvimento | CENA 3 15-25s prova com dado | CENA 4 25-30s CTA + instrução de engajamento. Máx 90 palavras de fala. + legenda completa + props necessários + referência de gancho viral)\n\n## 📈 MÓDULO 6: MÉTRICAS E MONITORAMENTO\n### 6.1 KPIs 90 Dias (tabela: KPI | Baseline Cliente | Benchmark Melhor Concorrente | Meta 30d | Meta 60d | Meta 90d | Ferramenta de Medição)\n### 6.2 Sinais de Alerta — Revisar Estratégia Imediatamente Se (3 gatilhos específicos com números)\n### 6.3 Checklist Semanal do Criador (10 itens práticos e específicos, com checkbox markdown)\n\nREGRAS ABSOLUTAS DE OUTPUT:\n1. PROIBIDO: \"é importante\", \"é fundamental\", \"é essencial\", \"recomendo que\" — seja DIRETO e IMPERATIVO\n2. OBRIGATÓRIO: citar a fonte de cada dado (@handle teve X curtidas no post Y, anúncio conforme Ads Library)\n3. PROIBIDO: inventar dados. Se ausente: [dado não disponível no input]\n4. OBRIGATÓRIO: todo conteúdo em português brasileiro coloquial do nicho informado\n5. OBRIGATÓRIO: roteiros de Reels máximo 30s de fala (~90 palavras)\n6. OBRIGATÓRIO: mínimo 3.000 palavras no dossiê completo\n7. Comece DIRETAMENTE pelo Módulo 1. Sem saudações ou introduções.\n8. Termine com: 📋 FIM DO DOSSIÊ — Gerado em ${new Date().toLocaleDateString('pt-BR')}`;\n\nreturn [{ json: {\n  nome_cliente:      base.nome_cliente,\n  nicho:             base.nicho,\n  handle_cliente:    base.handle_cliente,\n  cliente_dados:     base.cliente_dados,\n  concorrentes_dados:base.concorrentes_dados,\n  tendencias_google,\n  keywords_google,\n  anuncios_facebook,\n  videos_transcritos,\n  gap_engajamento_pct: base.gap_engajamento_pct,\n  gpt_payload: {\n    model:       'gpt-4o',\n    messages: [\n      { role: 'system', content: systemPrompt },\n      { role: 'user',   content: userContent  },\n    ],\n    max_tokens:  8000,\n    temperature: 0.72,\n  },\n}}];\n"
+      }
+    },
+
+    {
+      "id": "n15b",
+      "name": "Montar Payload GPT-4o (sem vídeos)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4480, 200],
+      "parameters": {
+        "jsCode": "// Caminho alternativo: sem vídeos para transcrever\nconst item = $input.first().json;\n\nconst base = $('Separar Cliente e Concorrentes').first().json;\nconst tendencias = $('Serper — Tendências do Nicho').first().json;\nconst keywords   = $('Serper — Keywords do Nicho').first().json;\nconst adsRaw     = $('Apify — Facebook Ads Library').first().json;\n\nconst tendencias_google = (tendencias.organic || []).slice(0, 8).map(r => ({ titulo: r.title, snippet: r.snippet, link: r.link }));\nconst keywords_google   = (keywords.organic   || []).slice(0, 8).map(r => ({ titulo: r.title, snippet: r.snippet }));\nconst anuncios_facebook = (Array.isArray(adsRaw) ? adsRaw : []).slice(0, 15).map(ad => ({\n  page_name: ad.pageName || ad.page_name || '',\n  titulo:    ad.title || ad.ad_creative_body || '',\n  cta:       ad.cta_text || ad.call_to_action_type || '',\n  formato:   ad.ad_type || '',\n}));\n\nconst c = base.cliente_dados || {};\nconst cliente_resumo = {\n  nome:              base.nome_cliente,\n  nicho:             base.nicho,\n  handle:            `@${base.handle_cliente}`,\n  bio:               c.bio               || '',\n  seguidores:        c.seguidores         || 0,\n  taxa_engajamento:  `${c.taxa_engajamento || '0.00'}%`,\n  media_curtidas:    c.media_curtidas     || 0,\n  media_comentarios: c.media_comentarios  || 0,\n  mix_formatos:      c.mix_formatos       || {},\n  top_5_posts:       (c.top_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n  ultimos_15_posts:  (c.ultimos_15_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n};\n\nconst concorrentes_resumo = (base.concorrentes_dados || []).map(cc => ({\n  handle:            `@${cc.handle}`,\n  bio:               cc.bio,\n  seguidores:        cc.seguidores,\n  taxa_engajamento:  `${cc.taxa_engajamento}%`,\n  media_curtidas:    cc.media_curtidas,\n  mix_formatos:      cc.mix_formatos || {},\n  top_5_posts:       (cc.top_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n}));\n\nconst userContent = JSON.stringify({\n  cliente:                   cliente_resumo,\n  concorrentes:              concorrentes_resumo,\n  videos_virais_transcritos: [],\n  tendencias_google,\n  palavras_chave:            keywords_google,\n  anuncios_ativos:           anuncios_facebook,\n}, null, 2);\n\nconst systemPrompt = `Você é um Growth Hacker Sênior com 12 anos de experiência em marketing digital no Brasil. MISSÃO: Produzir um DOSSIÊ DE AUDITORIA COMPETITIVA baseado EXCLUSIVAMENTE nos dados do JSON. Nunca seja genérico. Cite dados. Se ausente: [dado não disponível]. Gere os 6 módulos completos em Markdown. Mínimo 3.000 palavras. Comece pelo Módulo 1 sem introduções. Termine com: 📋 FIM DO DOSSIÊ — Gerado em ${new Date().toLocaleDateString('pt-BR')}`;\n\nreturn [{ json: {\n  nome_cliente:       base.nome_cliente,\n  nicho:              base.nicho,\n  handle_cliente:     base.handle_cliente,\n  cliente_dados:      base.cliente_dados,\n  concorrentes_dados: base.concorrentes_dados,\n  tendencias_google,\n  keywords_google,\n  anuncios_facebook,\n  videos_transcritos: [],\n  gap_engajamento_pct: base.gap_engajamento_pct,\n  gpt_payload: {\n    model:       'gpt-4o',\n    messages: [\n      { role: 'system', content: systemPrompt },\n      { role: 'user',   content: userContent  },\n    ],\n    max_tokens:  8000,\n    temperature: 0.72,\n  },\n}}];\n"
+      }
+    },
+
+    {
+      "id": "n16",
+      "name": "Unir Caminhos GPT",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [4760, 0],
+      "parameters": {
+        "mode": "chooseBranch",
+        "chooseBranchMode": "waitForAll",
+        "output": "both"
+      }
+    },
+
+    {
+      "id": "n17",
+      "name": "OpenAI GPT-4o — Gerar Dossiê",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5040, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.OPENAI_API_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.gpt_payload) }}",
+        "options": { "timeout": 300000 }
+      }
+    },
+
+    {
+      "id": "n18",
+      "name": "Formatar Dossiê",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [5320, 0],
+      "parameters": {
+        "jsCode": "const gptResponse = $input.first().json;\nconst baseData    = $('Unir Caminhos GPT').first().json;\n\nconst dossie_markdown = gptResponse?.choices?.[0]?.message?.content || '[Erro: GPT-4o não retornou conteúdo]';\nconst tokens_usados   = gptResponse?.usage?.total_tokens || 0;\nconst titulo          = `Dossiê Auditoria IA — ${baseData.nome_cliente} | ${baseData.nicho} | ${new Date().toLocaleDateString('pt-BR')}`;\n\nreturn [{ json: {\n  ...baseData,\n  dossie_markdown,\n  titulo_documento: titulo,\n  tokens_usados,\n  gerado_em: new Date().toISOString(),\n}}];\n"
+      }
+    },
+
+    {
+      "id": "n19",
+      "name": "Google Docs — Criar Documento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5600, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "https://docs.googleapis.com/v1/documents",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $json.titulo_documento }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "oAuth2Api": { "id": "GOOGLE_OAUTH_CRED_ID", "name": "Google OAuth2" }
+      }
+    },
+
+    {
+      "id": "n20",
+      "name": "Google Docs — Inserir Conteúdo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5880, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://docs.googleapis.com/v1/documents/' + $('Google Docs — Criar Documento').first().json.documentId + ':batchUpdate' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ requests: [{ insertText: { location: { index: 1 }, text: $('Formatar Dossiê').first().json.dossie_markdown } }] }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "oAuth2Api": { "id": "GOOGLE_OAUTH_CRED_ID", "name": "Google OAuth2" }
+      }
+    },
+
+    {
+      "id": "n21",
+      "name": "Montar Resposta Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [6160, 0],
+      "parameters": {
+        "jsCode": "const base       = $('Formatar Dossiê').first().json;\nconst docCreated = $('Google Docs — Criar Documento').first().json;\nconst docId      = docCreated.documentId || '';\n\nreturn [{ json: {\n  sucesso:                 true,\n  cliente:                 base.nome_cliente,\n  nicho:                   base.nicho,\n  handle_cliente:          `@${base.handle_cliente}`,\n  concorrentes_analisados: (base.concorrentes_dados || []).map(c => `@${c.handle}`),\n  total_perfis_analisados: base.total_perfis || 0,\n  gap_engajamento_pct:     base.gap_engajamento_pct || '0.00',\n  melhor_concorrente:      base.melhor_concorrente_handle ? `@${base.melhor_concorrente_handle}` : null,\n  videos_transcritos:      (base.videos_transcritos || []).length,\n  tokens_usados:           base.tokens_usados,\n  gerado_em:               base.gerado_em,\n  documento: {\n    titulo:      base.titulo_documento,\n    id:          docId,\n    link_editar: docId ? `https://docs.google.com/document/d/${docId}/edit`      : null,\n    link_pdf:    docId ? `https://docs.google.com/document/d/${docId}/export?format=pdf` : null,\n  },\n}}];\n"
+      }
+    },
+
+    {
+      "id": "n22",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [6440, 0],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [{ "name": "Content-Type", "value": "application/json" }]
+          }
+        }
+      }
+    }
+
+  ],
+
+  "connections": {
+    "Webhook Trigger":                        { "main": [[{ "node": "Validar e Preparar Input",                  "type": "main", "index": 0 }]] },
+    "Validar e Preparar Input":               { "main": [[{ "node": "Expandir Handles",                          "type": "main", "index": 0 }]] },
+    "Expandir Handles":                       { "main": [[{ "node": "RapidAPI — Buscar Perfil Instagram",        "type": "main", "index": 0 }]] },
+    "RapidAPI — Buscar Perfil Instagram":     { "main": [[{ "node": "Normalizar Perfil",                         "type": "main", "index": 0 }]] },
+    "Normalizar Perfil":                      { "main": [[{ "node": "Agregar Perfis",                            "type": "main", "index": 0 }]] },
+    "Agregar Perfis":                         { "main": [[{ "node": "Separar Cliente e Concorrentes",            "type": "main", "index": 0 }]] },
+    "Separar Cliente e Concorrentes":         { "main": [[{ "node": "Serper — Tendências do Nicho",              "type": "main", "index": 0 }]] },
+    "Serper — Tendências do Nicho":           { "main": [[{ "node": "Serper — Keywords do Nicho",                "type": "main", "index": 0 }]] },
+    "Serper — Keywords do Nicho":             { "main": [[{ "node": "Apify — Facebook Ads Library",              "type": "main", "index": 0 }]] },
+    "Apify — Facebook Ads Library":           { "main": [[{ "node": "Enriquecer Dados + Identificar Vídeos Virais", "type": "main", "index": 0 }]] },
+    "Enriquecer Dados + Identificar Vídeos Virais": { "main": [[{ "node": "Tem Vídeos?",                        "type": "main", "index": 0 }]] },
+    "Tem Vídeos?": {
+      "main": [
+        [{ "node": "Download Vídeo Viral",              "type": "main", "index": 0 }],
+        [{ "node": "Montar Payload GPT-4o (sem vídeos)","type": "main", "index": 0 }]
+      ]
+    },
+    "Download Vídeo Viral":                   { "main": [[{ "node": "OpenAI Whisper — Transcrição",              "type": "main", "index": 0 }]] },
+    "OpenAI Whisper — Transcrição":           { "main": [[{ "node": "Enriquecer Transcrição",                    "type": "main", "index": 0 }]] },
+    "Enriquecer Transcrição":                 { "main": [[{ "node": "Agregar Transcrições",                      "type": "main", "index": 0 }]] },
+    "Agregar Transcrições":                   { "main": [[{ "node": "Montar Payload GPT-4o",                     "type": "main", "index": 0 }]] },
+    "Montar Payload GPT-4o":                  { "main": [[{ "node": "Unir Caminhos GPT",                         "type": "main", "index": 0 }]] },
+    "Montar Payload GPT-4o (sem vídeos)":     { "main": [[{ "node": "Unir Caminhos GPT",                         "type": "main", "index": 1 }]] },
+    "Unir Caminhos GPT":                      { "main": [[{ "node": "OpenAI GPT-4o — Gerar Dossiê",              "type": "main", "index": 0 }]] },
+    "OpenAI GPT-4o — Gerar Dossiê":          { "main": [[{ "node": "Formatar Dossiê",                           "type": "main", "index": 0 }]] },
+    "Formatar Dossiê":                        { "main": [[{ "node": "Google Docs — Criar Documento",             "type": "main", "index": 0 }]] },
+    "Google Docs — Criar Documento":          { "main": [[{ "node": "Google Docs — Inserir Conteúdo",            "type": "main", "index": 0 }]] },
+    "Google Docs — Inserir Conteúdo":         { "main": [[{ "node": "Montar Resposta Final",                     "type": "main", "index": 0 }]] },
+    "Montar Resposta Final":                  { "main": [[{ "node": "Respond to Webhook",                        "type": "main", "index": 0 }]] }
+  },
+
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "2.0.0",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "auditor-ia-completo"
+  },
+  "id": "auditor-ia-completo-v2",
+  "tags": ["auditoria", "instagram", "ia", "growth", "openai", "rapidapi"]
+}

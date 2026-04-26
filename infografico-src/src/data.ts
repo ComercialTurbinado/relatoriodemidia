@@ -1,0 +1,210 @@
+export const marketingData = {
+  "overview_cliente": {
+    "diagnostico_identidade": "Hoje, @saadamasco é percebido como um perfil pessoal em transformação, com forte ênfase em jornada própria de emagrecimento e lifestyle fitness. A bio destaca resultados reais (-20kg), prática de treino e nutrição e o status de estudante, transmitindo autenticidade e proximidade, mas carece de proposta comercial clara e categoria definida. O mix de formatos é quase exclusivamente Reels (92%), com carrosséis representando apenas 8% e ausência total de fotos, o que limita a diversidade de conteúdo e pontos de contato.\n\nO público percebe o perfil como motivacional, baseado em experiência pessoal, mas sem direcionamento para solução ou oferta concreta. Não há menção a produtos, serviços ou CTA explícito. O storytelling é consistente, mas falta call to action para conversão.",
+    "posicionamento_atual": "@saadamasco tem engajamento desproporcionalmente alto (taxa de 343,45) frente ao volume de seguidores (733), superando em curtidas médias (2.489) até perfis muito maiores como @conradoadolpho (251). Porém, perde em seguidores (-99,91% de gap) e em comentários médios (29 vs. 48). O perfil @rodolfooviedo é irrelevante competitivamente (sem engajamento, formatos ou hashtags significativos).",
+    "pontos_fortes": [
+      "Engajamento muito acima da média: 343,45 vs. 0,04 (@conradoadolpho)",
+      "Curtidas médias por post (2.489) superam grandes players do nicho",
+      "Histórias autênticas e pessoais geram viralização (top post: 29.037 de engajamento)",
+      "Consistência na publicação de Reels (92% do mix), aproveitando o formato de maior alcance"
+    ],
+    "pontos_fracos": [
+      "Ausência de CTA claro limita geração de leads e conversão em vendas",
+      "Bio e categoria sem foco comercial, dificultando SEO e busca intencional",
+      "Baixa diversidade de formatos: carrossel (8%), sem fotos, reduz potencial de engajamento recorrente",
+      "Sem uso estratégico de hashtags, perdendo alcance orgânico e posicionamento",
+      "Falta de oferta ou produto explícito impede monetização direta"
+    ],
+    "comparativo_concorrentes": [
+      {
+        "handle": "@conradoadolpho",
+        "estrategia_que_funciona": "Alterna Reels (50%) e Carrosséis (50%), usa ganchos virais e CTAs de comentário para estimular interação, mesmo com baixo engajamento relativo (0,04), mantém audiência ativa e direciona para diagnóstico gratuito.",
+        "como_voce_aplica": "Introduza carrosséis semanais com storytelling de transformação e CTA para comentários e directs, além de Reels com ganchos de curiosidade e perguntas.",
+        "ganho_esperado_vendas": "+15% em DMs qualificados em 60 dias"
+      }
+    ],
+    "caminhos_de_crescimento": [
+      {
+        "titulo": "CTA Direto e Oferta",
+        "movimento": "Adicionar CTA explícito em bio, legendas e vídeos, direcionando para direct, lista de espera ou produto digital",
+        "porque_funciona": "Base nos CTAs de @conradoadolpho, que converte audiência para funil de vendas via direct/diagnóstico",
+        "impacto_em_vendas": "Aumento de leads/dia e primeiras conversões em até 30 dias",
+        "tempo_para_resultado": "30 dias",
+        "esforco": "baixo"
+      },
+      {
+        "titulo": "Diversificação de Formatos",
+        "movimento": "Incluir carrosséis semanais com dicas práticas, estudos de caso e depoimentos",
+        "porque_funciona": "Carrosséis de @conradoadolpho geram engajamento e abrem espaço para CTAs de comentário ou direct",
+        "impacto_em_vendas": "+10% no engajamento e +20% em respostas via direct em 60 dias",
+        "tempo_para_resultado": "60 dias",
+        "esforco": "médio"
+      },
+      {
+        "titulo": "SEO e Hashtags Estratégicas",
+        "movimento": "Atualizar bio, categoria e legendas com palavras-chave do nicho, além de usar hashtags identificadas na análise",
+        "porque_funciona": "Melhora descobribilidade, aumenta alcance orgânico e atrai público qualificado",
+        "impacto_em_vendas": "+30% em alcance e +10% em seguidores qualificados em 90 dias",
+        "tempo_para_resultado": "90 dias",
+        "esforco": "baixo"
+      }
+    ],
+    "previsao_resultados": {
+      "30_dias": "Alcance semanal +20%, primeiros leads via direct, engajamento mantém acima de 300",
+      "60_dias": "+10% seguidores, +15% respostas em direct, primeiras conversões em oferta digital",
+      "90_dias": "+30% alcance, +20% seguidores, funil de vendas rodando com ticket médio inicial"
+    },
+    "carta_para_cliente_markdown": "Claudio, olhando friamente para sua conta, você construiu um ativo de engajamento raro: uma comunidade pequena, mas extremamente ativa. Seu conteúdo é genuíno, sua jornada inspira e a taxa de curtidas por post supera até players gigantes do mercado. Mas, ao analisar o cenário competitivo, especialmente @conradoadolpho, fica claro o que separa sua autoridade da monetização real: clareza de oferta e direcionamento para vendas.\n\nHoje, sua bio e seus posts falam de transformação e experiência pessoal, mas não entregam um próximo passo para quem quer comprar de você ou aprofundar a relação. Não existe um CTA claro, nem em bio, nem em conteúdo. E, mesmo com engajamento brutal, o funil trava: ninguém sabe o que fazer depois de se inspirar.\n\nOlhando para o que @conradoadolpho faz bem – alternância de formatos, storytelling com ganchos, carrosséis que ensinam e CTAs que puxam a audiência para o direct ou para um diagnóstico – fica evidente o caminho. Você precisa de carrosséis semanais que entreguem valor prático, perguntas nos Reels que incentivem comentário e, principalmente, um CTA direto para direct, lista de espera ou oferta digital. Seu tráfego já existe. Só falta canalizar para venda.\n\nNos próximos 90 dias, a meta é clara: manter a autenticidade, mas transformar engajamento em vendas. Isso passa por bio otimizada, formatos variados, hashtags estratégicas e, acima de tudo, clareza na oferta. O resultado? Mais leads por dia, seguidores qualificados e conversão real. Estou contigo para virar essa chave."
+  },
+  "diretrizes_tecnicas": {
+    "tom_de_voz": {
+      "personalidade": "especialista direto + parceiro próximo",
+      "como_falar": [
+        "Use frases objetivas, sem rodeios",
+        "Aproxime o público com exemplos pessoais e linguagem acessível",
+        "Inclua perguntas para estimular interação",
+        "Mostre autoridade sem arrogância",
+        "Direcione sempre para ação"
+      ],
+      "como_nao_falar": [
+        "Evite termos técnicos sem explicação",
+        "Não use frases vagas ou motivacionais genéricas",
+        "Não enrole na introdução",
+        "Evite promessas sem lastro",
+        "Não fale como guru distante"
+      ],
+      "exemplos_frase_ok": [
+        "Perdi 20kg sem fórmula mágica. Quer saber como?",
+        "Treino de hoje: simples, direto e eficaz.",
+        "Comenta aqui se já tentou essa estratégia."
+      ],
+      "exemplos_frase_evitar": [
+        "Vamos juntos nessa jornada incrível!",
+        "Acredite no seu potencial, tudo é possível.",
+        "Você só precisa querer para conseguir."
+      ]
+    },
+    "seo_instagram": {
+      "palavras_chave_principais": [
+        "emagrecimento", "treino", "nutrição", "crossfit", "perda de peso",
+        "estratégia alimentar", "marketing digital", "vendas", "transformação",
+        "obesidade", "resultado real", "estilo de vida saudável"
+      ],
+      "palavras_chave_secundarias": [
+        "dieta prática", "rotina fitness", "antes e depois", "consultoria digital",
+        "conteúdo motivacional", "mudança de hábitos", "comida de verdade",
+        "treino funcional", "marketing pessoal", "produtos digitais",
+        "lead qualificado", "oferta online"
+      ],
+      "uso_em_bio": "Transforme seu corpo e sua rotina. Consultoria digital em emagrecimento e treino. Direct para vaga.",
+      "uso_em_legenda": "Inclua palavra-chave principal nos 125 primeiros caracteres e sempre relacione ao benefício prático.",
+      "uso_em_alt_text": "Descreva o conteúdo do post focando no benefício (ex: 'Dica de treino para emagrecimento rápido e saudável').",
+      "categoria_perfil_recomendada": "Consultor(a) de saúde"
+    },
+    "frequencia_publicacao": {
+      "posts_por_dia": "1 (com 3 stories/dia)",
+      "posts_por_semana": 7,
+      "distribuicao_formatos": { "reels_pct": 60, "carrossel_pct": 35, "foto_pct": 5, "stories_por_dia": 3 },
+      "melhores_horarios": [
+        "07:00-08:00 (público fitness ativo cedo)",
+        "12:00-13:00 (almoço, maior tempo livre)",
+        "18:00-19:00 (pré-treino, alta atenção)",
+        "21:00-22:00 (fim do dia, scroll relaxante)"
+      ],
+      "dias_de_pico": ["Segunda", "Quarta", "Domingo"]
+    },
+    "pilares_conteudo": [
+      { "pilar": "Transformação", "porcentagem": 35, "descricao": "Antes e depois, depoimentos, evolução pessoal", "por_que_funciona": "Posts de transformação têm engajamento recorde (ex: 29.037 no top post)", "exemplo_concorrente": "@conradoadolpho" },
+      { "pilar": "Dicas Práticas", "porcentagem": 30, "descricao": "Estratégias de treino, nutrição, hacks do dia a dia", "por_que_funciona": "Conteúdo educativo gera comentários e perguntas", "exemplo_concorrente": "@conradoadolpho" },
+      { "pilar": "Storytelling Pessoal", "porcentagem": 20, "descricao": "Relatos de rotina, bastidores, desafios reais", "por_que_funciona": "Aproxima e humaniza, sustentando engajamento alto", "exemplo_concorrente": "@conradoadolpho" },
+      { "pilar": "Oferta e CTA", "porcentagem": 15, "descricao": "Posts com chamada para direct, lista de espera, produtos digitais", "por_que_funciona": "Direciona tráfego para conversão e monetização", "exemplo_concorrente": "@conradoadolpho" }
+    ],
+    "assuntos_quentes": [
+      "Como saí do sedentarismo e perdi 20kg",
+      "Erros comuns que travam seu emagrecimento",
+      "Como montar um treino funcional em casa",
+      "O que como em um dia (versão realista)",
+      "Crossfit: mitos e verdades para quem quer emagrecer",
+      "Como lidar com recaídas na dieta",
+      "Estratégias para não desistir na primeira semana",
+      "A diferença entre emagrecer e perder peso",
+      "Como evitar efeito sanfona",
+      "Marketing digital para profissionais fitness",
+      "Como criar produto digital de emagrecimento",
+      "Transformação de alunos/clientes (depoimentos)",
+      "Bastidores de gravação e rotina",
+      "Como usar o Instagram para vender consultoria",
+      "Checklist da semana saudável"
+    ],
+    "ideias_de_titulos": [
+      { "titulo": "Antes e depois: o que ninguém te conta", "pilar": "Transformação", "formato_sugerido": "Carrossel" },
+      { "titulo": "Meu treino real de hoje", "pilar": "Storytelling Pessoal", "formato_sugerido": "Reel" },
+      { "titulo": "3 dicas para emagrecer sem dieta maluca", "pilar": "Dicas Práticas", "formato_sugerido": "Reel" },
+      { "titulo": "Oferta exclusiva: consultoria digital para emagrecimento", "pilar": "Oferta e CTA", "formato_sugerido": "Carrossel" },
+      { "titulo": "Como voltei ao foco depois de uma recaída", "pilar": "Storytelling Pessoal", "formato_sugerido": "Reel" },
+      { "titulo": "Checklist: alimentação fácil para semana corrida", "pilar": "Dicas Práticas", "formato_sugerido": "Carrossel" }
+    ],
+    "ganchos_modelo": [
+      { "gancho": "Você sabia que perder peso não é só fechar a boca?", "inspirado_em": "@conradoadolpho" },
+      { "gancho": "O erro que quase me fez desistir da dieta.", "inspirado_em": "@conradoadolpho" },
+      { "gancho": "Por que seu treino não está funcionando?", "inspirado_em": "@conradoadolpho" }
+    ],
+    "ctas_recomendados": [
+      { "cta": "Comente 'quero' para receber a estratégia no direct.", "quando_usar": "Posts educativos / geração de leads" },
+      { "cta": "Me manda um direct com sua dúvida.", "quando_usar": "Posts de transformação / aproximação" },
+      { "cta": "Clique no link da bio para garantir sua vaga.", "quando_usar": "Oferta de produto digital / consultoria" }
+    ],
+    "hashtags_estrategicas": {
+      "core": ["#emagrecimento","#treino","#nutrição","#crossfit","#transformacao","#consultoriadigital","#marketingdigital","#vendas"],
+      "rotativas_alto_volume": ["#vendas","#marketing","#empreendedorismo","#negócios","#negocios","#marketingdigital"],
+      "rotativas_nicho": ["#emagrecercomsaude","#dietafacil","#treinofuncional","#rotinafitness","#alimentacaosaudavel","#resultadoreal","#mudancadehabito","#vidasaudavel","#antesedepois","#consultoriadigital","#produtodigital","#leadqualificado"],
+      "evite": ["#foco","#fitness","#instagood","#likeforlike","#motivation"]
+    },
+    "identidade_visual": {
+      "paleta_cores": [
+        { "nome": "Primária", "hex": "#FF6600", "uso": "fundo / títulos" },
+        { "nome": "Secundária", "hex": "#222222", "uso": "destaques" },
+        { "nome": "Apoio 1", "hex": "#00B37E", "uso": "elementos gráficos" },
+        { "nome": "Apoio 2", "hex": "#FFD600", "uso": "call to action / detalhes" },
+        { "nome": "Neutro",  "hex": "#F4F4F4", "uso": "fundos neutros / áreas de respiro" }
+      ],
+      "tipografia": {
+        "display": "Montserrat Bold + Google Fonts: Montserrat",
+        "texto": "Roboto Regular + Google Fonts: Roboto",
+        "regras_uso": [
+          "Títulos sempre em caixa alta, peso bold",
+          "Subtítulos em semi-bold, caixa baixa",
+          "Corpo de texto regular, entre 16-20px",
+          "Tracking levemente aberto para títulos",
+          "Hierarquia visual clara: título > subtítulo > texto"
+        ]
+      },
+      "estilo_fotografico": "Enquadramento reto, luz natural ou branca, foco no rosto/corpo, fundo limpo, props de treino e nutrição (halteres, pratos, cadernos).",
+      "estilo_grafico": "Capas de carrossel com fundo colorido (primária), textos grandes, elementos de destaque em amarelo, frames de Reel com cortes rápidos e motion clean, animações sóbrias nos CTAs.",
+      "vestimenta_aparicoes": {
+        "diretrizes": "Roupas fitness em tons neutros ou preto, pontos de cor da paleta (laranja, verde), relógio esportivo, acessórios discretos",
+        "evitar": ["Roupas estampadas demais","Cores fora da paleta","Acessórios grandes","Bonés com logo","Cenários poluídos"],
+        "mood_referencias": ["minimalista","autêntico","moderno","fitness real","prático"]
+      },
+      "logos_e_marca_dagua": "Aplicar logo no canto inferior direito, opacidade 70%, tamanho discreto (máx 7% da largura da imagem)"
+    },
+    "calendario_30_dias": [
+      { "dia": 1, "dia_semana": "Segunda", "formato": "Reel", "pilar": "Transformação", "tema": "Antes e depois: minha maior virada", "gancho_3s": "Ninguém viu o que rolou nos bastidores...", "estrutura_resumida": "abertura forte -> relato real -> CTA para direct", "cta": "Me manda um direct com sua dúvida.", "hashtags": ["#emagrecimento","#transformacao","#antesedepois","#resultadoreal"], "objetivo": "Conversão" }
+    ],
+    "stories_recorrentes": [
+      { "ideia": "Enquete: Qual maior dificuldade para emagrecer?", "formato": "enquete", "objetivo": "Engajamento e pesquisa" },
+      { "ideia": "Bastidores do treino do dia", "formato": "bastidor", "objetivo": "Aproximação" },
+      { "ideia": "Caixa de perguntas: dúvidas sobre dieta", "formato": "caixa", "objetivo": "Geração de leads" },
+      { "ideia": "Checklist semanal: metas atingidas", "formato": "checklist", "objetivo": "Autoridade e rotina" }
+    ],
+    "kpis_acompanhar": [
+      { "kpi": "Leads via direct", "meta_30d": "10/dia", "meta_60d": "15/dia", "meta_90d": "20/dia" },
+      { "kpi": "Alcance semanal", "meta_30d": "10.000", "meta_60d": "15.000", "meta_90d": "20.000" },
+      { "kpi": "Novos seguidores", "meta_30d": "100", "meta_60d": "200", "meta_90d": "300" },
+      { "kpi": "Taxa de engajamento", "meta_30d": "300", "meta_60d": "290", "meta_90d": "280" },
+      { "kpi": "Conversões em produto/consultoria", "meta_30d": "5", "meta_60d": "15", "meta_90d": "30" }
+    ],
+    "briefing_redatores": "Copy sempre com gancho forte nos 3 primeiros segundos. Legendas entre 300-400 caracteres, direto ao ponto, usando perguntas para estimular comentário. Inclua sempre CTA claro (comentar, enviar direct, clicar na bio). Evite frases motivacionais genéricas. Use linguagem acessível, exemplos reais e dados próprios. Não prometa milagres.",
+    "briefing_designers": "Capas de carrossel e thumb de Reel sempre com fundo laranja ou preto, textos grandes em branco/amarelo, hierarquia clara (título > subtítulo > apoio). Use Montserrat e Roboto, mantenha respiro e contraste. Imagens tratadas com luz neutra, props fitness/nutrição. Animações sóbrias nos CTAs, logo sempre discreto no canto inferior direito."
+  }
+};

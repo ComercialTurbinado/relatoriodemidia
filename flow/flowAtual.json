@@ -1,0 +1,978 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// 1 item → N itens (1 por handle). Normaliza @ e ordem: cliente primeiro.\nconst data = $input.first().json;\nif (!Array.isArray(data.todos_handles) || data.todos_handles.length === 0) {\n  throw new Error('todos_handles ausente ou vazio.');\n}\nconst hc = String(data.handle_cliente || '').replace(/^@/, '').trim().toLowerCase();\nconst conc = (data.concorrentes || []).map(h => String(h).replace(/^@/, '').trim().toLowerCase()).filter(Boolean);\nconst todos = [hc, ...conc.filter(h => h !== hc)];\n\nreturn todos.map(handle => ({\n  json: {\n    nome_cliente: data.nome_cliente,\n    nicho: data.nicho,\n    handle_cliente: hc,\n    concorrentes: conc,\n    todos_handles: todos,\n    iniciado_em: data.iniciado_em,\n    handle,\n    tipo: handle === hc ? 'cliente' : 'concorrente',\n  }\n}));\n"
+      },
+      "id": "a3c59b97-5a01-4739-ad37-695ea1d8a7a2",
+      "name": "Expandir Handles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2528,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://instagram120.p.rapidapi.com/api/instagram/userInfo",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Rapidapi-Key",
+              "value": "={{ $env.RAPIDAPI_KEY || '0127634a29msh4a303edef58f6dbp1430c6jsnd00af7a6bc1e' }}"
+            },
+            {
+              "name": "X-Rapidapi-Host",
+              "value": "instagram120.p.rapidapi.com"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ username: String($json.handle || '').replace(/^@/, '').trim() }) }}",
+        "options": {
+          "timeout": 45000,
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 750
+            }
+          }
+        }
+      },
+      "id": "232fbca5-e300-4e24-9360-e9259e96b615",
+      "name": "RapidAPI — UserInfo Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2392,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://instagram120.p.rapidapi.com/api/instagram/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Rapidapi-Key",
+              "value": "={{ $env.RAPIDAPI_KEY || '0127634a29msh4a303edef58f6dbp1430c6jsnd00af7a6bc1e' }}"
+            },
+            {
+              "name": "X-Rapidapi-Host",
+              "value": "instagram120.p.rapidapi.com"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ username: String($json.handle || '').replace(/^@/, '').trim(), maxId: '' }) }}",
+        "options": {
+          "timeout": 45000,
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 750
+            }
+          }
+        }
+      },
+      "id": "dc202269-f7cc-4488-9f83-8d27d10491bd",
+      "name": "RapidAPI — Buscar Perfil Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2256,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combina resposta RapidAPI com o item original (1 execução por handle)\n// instagram120 e scrapers similares mudam o formato: desembrulha + busca profunda de user/posts.\nconst rapItems  = $input.all();\nconst origItems = $('Expandir Handles').all();\n\nfunction flattenEdgeNodes(arr) {\n  if (!Array.isArray(arr) || !arr.length) return [];\n  if (arr[0]?.node != null) return arr.map(e => e.node).filter(Boolean);\n  return arr;\n}\n\nfunction looksLikeIgUser(o) {\n  if (!o || typeof o !== 'object' || Array.isArray(o)) return false;\n  const hasFollowers = o.edge_followed_by != null || o.follower_count != null || o.followers != null;\n  const hasUsername = o.username != null || o.user_name != null;\n  const hasTimeline = o.edge_owner_to_timeline_media != null;\n  const hasBio = o.biography != null || o.bio != null;\n  return hasFollowers && (hasUsername || hasTimeline || hasBio);\n}\n\nfunction looksLikeIgPost(o) {\n  if (!o || typeof o !== 'object' || Array.isArray(o)) return false;\n  if (o.shortcode || o.code) return true;\n  if (o.pk != null && (o.media_type != null || o.product_type || o.__typename)) return true;\n  if (o.id && (o.like_count != null || o.comment_count != null || o.display_url)) return true;\n  return false;\n}\n\nfunction deepFindUser(obj, depth, seen) {\n  if (!obj || depth > 10) return null;\n  if (typeof obj !== 'object') return null;\n  if (seen.has(obj)) return null;\n  seen.add(obj);\n  if (Array.isArray(obj)) {\n    for (const el of obj) {\n      const f = deepFindUser(el, depth + 1, seen);\n      if (f) return f;\n    }\n  } else {\n    if (looksLikeIgUser(obj)) return obj;\n    for (const k of Object.keys(obj)) {\n      const f = deepFindUser(obj[k], depth + 1, seen);\n      if (f) return f;\n    }\n  }\n  return null;\n}\n\nfunction deepFindPostsArray(obj, depth, seen) {\n  if (!obj || depth > 10) return null;\n  if (typeof obj !== 'object') return null;\n  if (seen.has(obj)) return null;\n  seen.add(obj);\n  if (Array.isArray(obj)) {\n    if (obj.length && (looksLikeIgPost(obj[0]) || (obj[0]?.node && looksLikeIgPost(obj[0].node))))\n      return flattenEdgeNodes(obj);\n    for (const el of obj) {\n      const f = deepFindPostsArray(el, depth + 1, new Set(seen));\n      if (f?.length) return f;\n    }\n  } else {\n    for (const k of Object.keys(obj)) {\n      const f = deepFindPostsArray(obj[k], depth + 1, seen);\n      if (f?.length) return f;\n    }\n  }\n  return null;\n}\n\nfunction prepararResposta(raw) {\n  let r = raw;\n  if (Array.isArray(r) && r.length === 1 && typeof r[0] === 'object') r = r[0];\n  if (r?.data != null && typeof r.data === 'string') {\n    try { r = JSON.parse(r.data); } catch (e) { /* mantém */ }\n  }\n  const wrapKeys = ['result', 'body', 'payload', 'response', 'content', 'info', 'graphql'];\n  for (let pass = 0; pass < 4 && r && typeof r === 'object' && !Array.isArray(r); pass++) {\n    let next = null;\n    for (const w of wrapKeys) {\n      const inner = r[w];\n      if (inner && typeof inner === 'object' && !Array.isArray(inner)) {\n        if (inner.user || inner.items || inner.posts || inner.data || inner.edges || inner.medias || inner.feed) {\n          next = inner;\n          break;\n        }\n      }\n    }\n    if (!next) break;\n    r = next;\n  }\n  return r;\n}\n\nfunction extrairErroApi(r) {\n  if (!r) return null;\n  if (r.success === false && (r.message || r.msg)) return String(r.message || r.msg);\n  if (typeof r.message === 'string' && r.message.length) return r.message;\n  if (typeof r.msg === 'string') return r.msg;\n  if (typeof r.error === 'string') return r.error;\n  if (r.error?.message) return String(r.error.message);\n  if (r.detail) return String(r.detail);\n  if (Array.isArray(r.errors) && r.errors[0]) return String(r.errors[0].message || r.errors[0]);\n  if (r.status === 'fail') return r.message || r.msg || 'fail';\n  return null;\n}\n\nfunction normalizarPosts(rawItems) {\n  return (rawItems || []).slice(0, 20).map(node => {\n    const cap = node.caption;\n    const capText = typeof cap === 'string' ? cap : (cap?.text ?? '');\n    const legenda = (node.edge_media_to_caption?.edges?.[0]?.node?.text ?? capText ?? node.accessibility_caption ?? '').slice(0, 600);\n    const curtidas    = node.edge_liked_by?.count ?? node.like_count ?? node.likes_count ?? 0;\n    const comentarios = node.edge_media_to_comment?.count ?? node.comment_count ?? 0;\n    const is_video    = !!(node.is_video || Number(node.media_type) === 2 || node.type === 'video' || node.product_type === 'clips');\n    const engajamento = Number(curtidas) + Number(comentarios);\n    return {\n      shortCode:     node.shortcode ?? node.code ?? '',\n      url:           `https://www.instagram.com/p/${node.shortcode ?? node.code ?? ''}/`,\n      legenda,\n      curtidas:      Number(curtidas),\n      comentarios:   Number(comentarios),\n      visualizacoes: node.video_view_count ?? node.play_count ?? 0,\n      tipo:          is_video ? 'video' : ((node.edge_sidecar_to_children?.edges?.length || node.carousel_media) ? 'carrossel' : 'foto'),\n      videoUrl:      node.video_url ?? node.video_versions?.[0]?.url ?? null,\n      thumbnailUrl:  node.display_url ?? node.thumbnail_url ?? node.thumbnail_src ?? node.image_versions2?.candidates?.[0]?.url ?? null,\n      data:          node.taken_at_timestamp\n                       ? new Date(node.taken_at_timestamp * 1000).toISOString()\n                       : null,\n      engajamento,\n    };\n  });\n}\n\nfunction extrairUserERawItems(resp, origHandle) {\n  const r0 = prepararResposta(resp);\n  let u = r0.user ?? r0.data?.user ?? r0.data?.graphql?.user ?? r0.graphql?.user ?? {};\n  if (!u || !Object.keys(u).length) u = r0.result?.user ?? r0.profile ?? {};\n  if (!u || !Object.keys(u).length) {\n    if (looksLikeIgUser(r0)) u = r0;\n  }\n  let rawItems =\n    r0.items ??\n    r0.data?.items ??\n    r0.posts ??\n    r0.data?.posts ??\n    r0.medias ??\n    r0.feed ??\n    r0.collector ??\n    r0.data?.collector ??\n    r0.timeline ??\n    [];\n  rawItems = flattenEdgeNodes(rawItems);\n  if (!rawItems.length && Array.isArray(r0.data) && r0.data.length) {\n    const cand = flattenEdgeNodes(r0.data);\n    if (cand.length && looksLikeIgPost(cand[0])) rawItems = cand;\n  }\n  if (!rawItems.length && u.edge_owner_to_timeline_media?.edges) {\n    rawItems = flattenEdgeNodes(u.edge_owner_to_timeline_media.edges);\n  }\n  if (!rawItems.length && Array.isArray(u.edge_felix_video_timeline?.edges)) {\n    rawItems = flattenEdgeNodes(u.edge_felix_video_timeline.edges);\n  }\n  if (!u || !Object.keys(u).length) {\n    const found = deepFindUser(r0, 0, new Set());\n    if (found) u = found;\n  }\n  if (!rawItems.length) {\n    const foundP = deepFindPostsArray(r0, 0, new Set());\n    if (foundP?.length) rawItems = foundP;\n  }\n  rawItems = flattenEdgeNodes(rawItems);\n\n  if (rawItems.length && (!u.username || !Object.keys(u).length)) {\n    const owner = rawItems[0].owner || rawItems[0].user;\n    if (owner && typeof owner === 'object') u = { ...owner, ...u };\n  }\n\n  const h = String(origHandle || '').replace(/^@/, '').trim().toLowerCase();\n  const uname = String(u.username || u.user_name || '').replace(/^@/, '').trim().toLowerCase();\n  let aviso = null;\n  if (h && uname && h !== uname) aviso = rawItems.length ? 'username_difere_mas_ha_posts' : 'username_resposta_diferente';\n\n  return { u, rawItems, aviso };\n}\n\nreturn rapItems.map((rapItem, idx) => {\n  const orig = origItems[idx]?.json || {};\n  const resp = rapItem.json;\n  const handleAlvo = orig.handle || '';\n\n  const { u, rawItems, aviso } = extrairUserERawItems(resp, handleAlvo);\n  const posts = normalizarPosts(rawItems);\n  const seguidores  = Number(u.edge_followed_by?.count ?? u.follower_count ?? u.followers ?? 0);\n  const seguindo    = Number(u.edge_follow?.count ?? u.following_count ?? u.following ?? 0);\n  const total_posts = Number(u.edge_owner_to_timeline_media?.count ?? u.media_count ?? u.edge_media_collections?.count ?? 0);\n  const totalEng = posts.reduce((s, x) => s + x.engajamento, 0);\n  const taxa_engajamento = posts.length && seguidores\n    ? ((totalEng / posts.length / seguidores) * 100).toFixed(2)\n    : '0.00';\n  const media_curtidas = posts.length ? Math.round(posts.reduce((s, x) => s + x.curtidas, 0) / posts.length) : 0;\n  const media_comentarios = posts.length ? Math.round(posts.reduce((s, x) => s + x.comentarios, 0) / posts.length) : 0;\n  const total = posts.length || 1;\n  const qtdVideo = posts.filter(p => p.tipo === 'video').length;\n  const qtdCarrossel = posts.filter(p => p.tipo === 'carrossel').length;\n  const qtdFoto = posts.filter(p => p.tipo === 'foto').length;\n\n  const apiErro = extrairErroApi(resp);\n  const semDados = !seguidores && !posts.length && !total_posts;\n  const debugVazio = semDados && !apiErro ? {\n    chaves_raiz: Object.keys(resp || {}).slice(0, 20),\n    chaves_data: (resp?.data && typeof resp.data === 'object' && !Array.isArray(resp.data)) ? Object.keys(resp.data).slice(0, 20) : null,\n  } : null;\n\n  return { json: {\n    handle:         orig.handle,\n    tipo:           orig.tipo,\n    nome_cliente:   orig.nome_cliente,\n    nicho:          orig.nicho,\n    handle_cliente: orig.handle_cliente,\n    concorrentes:   orig.concorrentes,\n    todos_handles:  orig.todos_handles,\n    bio:            u.biography ?? u.biography_with_entities?.raw_text ?? u.bio ?? '',\n    seguidores,\n    seguindo,\n    total_posts,\n    verificado:     !!(u.is_verified ?? u.is_verified_user),\n    link_externo:   u.external_url ?? u.external_url_linkshimmed ?? '',\n    taxa_engajamento,\n    media_curtidas,\n    media_comentarios,\n    mix_formatos: {\n      reels_pct:     Math.round((qtdVideo / total) * 100),\n      carrossel_pct: Math.round((qtdCarrossel / total) * 100),\n      foto_pct:      Math.round((qtdFoto / total) * 100),\n    },\n    posts,\n    top_posts: [...posts].sort((a, b) => b.engajamento - a.engajamento).slice(0, 5),\n    posts_video: posts.filter(x => x.tipo === 'video' && x.videoUrl),\n    ultimos_15_posts: posts.slice(0, 15),\n    meta_coleta: {\n      indice_batch: idx,\n      aviso_username: aviso,\n      erro_api: apiErro || null,\n      perfil_sem_dados_publicos: semDados,\n      debug_resposta_vazia: debugVazio,\n    },\n  }};\n});\n"
+      },
+      "id": "4750a4ea-f7e9-4c31-9fc3-160c3ddcb487",
+      "name": "Normalizar Perfil",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1968,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "perfis",
+        "options": {}
+      },
+      "id": "cb4117c8-f83f-4ea2-8263-0cb00ea174e7",
+      "name": "Agregar Perfis",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Agrupa perfis + matriz comparativa para o GPT\nconst perfis = $input.first().json.perfis || [];\n\nconst cliente_dados = perfis.find(p => p.tipo === 'cliente') || null;\nconst concorrentes_dados = perfis.filter(p => p.tipo === 'concorrente');\n\nif (!cliente_dados) {\n  throw new Error('Perfil do cliente não encontrado após agregar. Verifique handle_cliente e todos_handles.');\n}\n\nconst melhor_concorrente = concorrentes_dados.reduce((best, c) => {\n  return parseFloat(c.taxa_engajamento) > parseFloat(best?.taxa_engajamento || '0') ? c : best;\n}, null);\n\nconst gap_engajamento = melhor_concorrente\n  ? (parseFloat(melhor_concorrente.taxa_engajamento) - parseFloat(cliente_dados.taxa_engajamento)).toFixed(2)\n  : '0.00';\n\nconst matriz_comparativa = perfis.map(p => ({\n  handle: `@${p.handle}`,\n  papel: p.tipo,\n  page_name: p.page_name || p.full_name || '',\n  is_private: !!p.is_private,\n  links_no_perfil: (p.bio_links || []).length,\n  seguidores: p.seguidores,\n  seguindo: p.seguindo,\n  total_posts_api: p.total_posts,\n  taxa_engajamento_pct: p.taxa_engajamento,\n  media_curtidas: p.media_curtidas,\n  media_comentarios: p.media_comentarios,\n  mix_formatos: p.mix_formatos,\n  posts_amostra: (p.posts || []).length,\n  erro_ou_vazio: !!(p.meta_coleta?.erro_api || p.meta_coleta?.perfil_sem_dados_publicos),\n}));\n\nconst maior_seg = perfis.reduce((m, p) => (p.seguidores > m ? p.seguidores : m), 0);\nconst insights_rapidos = {\n  cliente_vs_maior_seguidores: maior_seg\n    ? `${((cliente_dados.seguidores / maior_seg) * 100).toFixed(1)}% do maior alcance entre os perfis coletados`\n    : '[sem base]',\n  concorrentes_com_mais_engajamento_medio: (concorrentes_dados || [])\n    .filter(c => parseFloat(c.taxa_engajamento) > parseFloat(cliente_dados.taxa_engajamento))\n    .map(c => c.handle),\n};\n\nreturn [{ json: {\n  nome_cliente: cliente_dados.nome_cliente,\n  nicho: cliente_dados.nicho,\n  handle_cliente: cliente_dados.handle_cliente,\n  concorrentes: cliente_dados.concorrentes,\n  todos_handles: cliente_dados.todos_handles,\n  iniciado_em: new Date().toISOString(),\n  cliente_dados,\n  concorrentes_dados,\n  total_perfis: perfis.length,\n  melhor_concorrente_handle: melhor_concorrente?.handle || null,\n  gap_engajamento_pct: gap_engajamento,\n  matriz_comparativa,\n  insights_rapidos,\n}}];\n"
+      },
+      "id": "3092e61b-4314-495d-87d8-cdef7cf46d4f",
+      "name": "Separar Cliente e Concorrentes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1408,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function extrairOrganic(raw) {\n  if (!raw || typeof raw !== 'object') return [];\n  if (Array.isArray(raw.organic)) return raw.organic;\n  if (Array.isArray(raw.organic_results)) {\n    return raw.organic_results.map(r => ({\n      title: r.title,\n      snippet: r.snippet,\n      link: r.link || r.redirect_link,\n    }));\n  }\n  return [];\n}\n\nfunction achatarAdsFacebook(raw) {\n  if (!raw) return [];\n  if (Array.isArray(raw) && raw.length && raw[0]?.snapshot) return raw.slice(0, 40);\n  const grupos = raw?.data?.ads || raw?.ads;\n  if (!Array.isArray(grupos)) return [];\n  const out = [];\n  for (const g of grupos) {\n    const arr = Array.isArray(g) ? g : [g];\n    for (const ad of arr) {\n      if (!ad) continue;\n      const snap = ad.snapshot || ad;\n      out.push({\n        pageName: ad.page_name || snap.page_name || '',\n        page_id: ad.page_id || snap.page_id,\n        title: snap.title || snap.body?.text || ad.title || '',\n        ad_creative_body: snap.body?.text || '',\n        cta_text: snap.cta_text || ad.cta_text || '',\n        call_to_action_type: snap.cta_type || '',\n        ad_type: snap.display_format || '',\n        snapshot_url: snap.link_url || snap.page_profile_uri || '',\n        is_active: ad.is_active !== false,\n      });\n    }\n  }\n  return out.slice(0, 25);\n}\n\nconst base = $('Separar Cliente e Concorrentes').first().json;\nconst tendRaw = $('Serper — Tendências do Nicho3').first().json;\nconst kwRaw = $('Serper — Keywords do Nicho').first().json;\nconst adsRaw = $('Facebook Ads Library').first().json;\n\nconst tendencias_google = extrairOrganic(tendRaw).slice(0, 8).map(r => ({\n  titulo: r.title,\n  snippet: r.snippet,\n  link: r.link,\n}));\n\nconst keywords_google = extrairOrganic(kwRaw).slice(0, 8).map(r => ({\n  titulo: r.title,\n  snippet: r.snippet,\n}));\n\nconst adsList = achatarAdsFacebook(adsRaw);\nconst anuncios_facebook = adsList.map(ad => ({\n  page_name: ad.pageName || ad.page_name || '',\n  titulo: ad.title || ad.ad_creative_body || '',\n  cta: ad.cta_text || ad.call_to_action_type || '',\n  status: ad.is_active ? 'ativo' : 'inativo',\n  formato: ad.ad_type || '',\n  url_destino: ad.snapshot_url || '',\n}));\n\nconst allVideos = [];\n(base.concorrentes_dados || []).forEach(conc => {\n  (conc.posts_video || []).forEach(post => {\n    if (post.videoUrl) {\n      allVideos.push({\n        ...post,\n        handle_concorrente: conc.handle,\n        seguidores_conc: conc.seguidores,\n        taxa_eng_perfil: conc.taxa_engajamento,\n      });\n    }\n  });\n});\nallVideos.sort((a, b) => b.engajamento - a.engajamento);\nconst top3 = allVideos.slice(0, 3);\n\nconst mergedBase = {\n  ...base,\n  tendencias_google,\n  keywords_google,\n  anuncios_facebook,\n};\n\nif (top3.length === 0) {\n  return [{ json: { ...mergedBase, video_atual: null, sem_videos: true, top_virais: [] } }];\n}\n\nreturn top3.map((video, idx) => ({\n  json: {\n    ...mergedBase,\n    video_atual: video,\n    video_index: idx,\n    sem_videos: false,\n    top_virais: top3,\n  }\n}));\n"
+      },
+      "id": "300a3261-0127-4335-9bbf-219e0f0f0975",
+      "name": "Enriquecer Dados + Identificar Vídeos Virais",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-videos",
+              "leftValue": "={{ $json.sem_videos }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "da12560d-f955-460c-a7ca-47abc44f547e",
+      "name": "Tem Vídeos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.OPENAI_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "whisper-1"
+            },
+            {
+              "name": "language",
+              "value": "pt"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "videoFile"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "bf790624-56bd-4c93-a1a2-db10cb17dec3",
+      "name": "OpenAI Whisper — Transcrição",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        768
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combina transcrição (nó HTTP ou OpenAI oficial) com metadados do vídeo\nconst whisperItems  = $input.all();\nconst videoItems    = $('Enriquecer Dados + Identificar Vídeos Virais').all();\n\nfunction textoWhisper(j) {\n  if (!j || typeof j !== 'object') return '[sem transcrição]';\n  return j.text || j.data || j.result?.text || j.output || '[sem transcrição]';\n}\n\nreturn whisperItems.map((item, idx) => {\n  const video = videoItems[idx]?.json?.video_atual || {};\n  return { json: {\n    transcricao:         textoWhisper(item.json),\n    handle_concorrente:  video.handle_concorrente || '',\n    legenda:             video.legenda            || '',\n    curtidas:            video.curtidas           || 0,\n    comentarios:         video.comentarios        || 0,\n    engajamento:         video.engajamento        || 0,\n    video_index:         idx,\n  }};\n});\n"
+      },
+      "id": "9c878420-a7c0-4b9c-9365-9c8c54f93ad6",
+      "name": "Enriquecer Transcrição",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "transcricoes_coletadas",
+        "options": {}
+      },
+      "id": "f44ff18a-1d38-427d-a2aa-5e66d1f550dd",
+      "name": "Agregar Transcrições",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recupera base de dados consolidada + transcrições\nconst aggItem    = $input.first().json;\nconst coletados  = aggItem.transcricoes_coletadas || [];\n\n// Base dos dados vem do nó de separação (disponível via referência de nó)\nconst base = $('Separar Cliente e Concorrentes').first().json;\nconst tendencias = $('Serper — Tendências do Nicho3').first().json;\nconst keywords   = $('Serper — Keywords do Nicho').first().json;\nconst adsRaw     = $('Facebook Ads Library').first().json;\n\nconst _orgT = (tendencias.organic || tendencias.organic_results || []).slice(0, 8).map(r => ({ title: r.title, snippet: r.snippet, link: r.link || r.redirect_link }));\nconst tendencias_google = _orgT.map(r => ({ titulo: r.title, snippet: r.snippet, link: r.link }));\nconst keywords_google = (keywords.organic || keywords.organic_results || []).slice(0, 8).map(r => ({ titulo: r.title, snippet: r.snippet }));\nfunction _flatAds(raw) { if (!raw) return []; const g = raw?.data?.ads || raw?.ads; if (!Array.isArray(g)) return Array.isArray(raw) ? raw.slice(0, 20) : []; const o = []; for (const x of g) { const a = Array.isArray(x) ? x : [x]; for (const ad of a) { const s = ad?.snapshot; if (s) o.push({ pageName: ad.page_name || s.page_name, title: s.title || s.body?.text, ad_creative_body: s.body?.text, cta_text: s.cta_text, call_to_action_type: s.cta_type, ad_type: s.display_format, snapshot_url: s.link_url, is_active: ad.is_active }); } } return o; }\nconst anuncios_facebook = _flatAds(adsRaw).slice(0, 15).map(ad => ({\n  page_name:  ad.pageName || ad.page_name || '',\n  titulo:     ad.title || ad.ad_creative_body || '',\n  cta:        ad.cta_text || ad.call_to_action_type || '',\n  formato:    ad.ad_type || '',\n}));\n\nconst videos_transcritos = coletados.map(item => ({\n  handle:      item.handle_concorrente || 'desconhecido',\n  legenda:     item.legenda            || '',\n  curtidas:    item.curtidas           || 0,\n  comentarios: item.comentarios        || 0,\n  engajamento: item.engajamento        || 0,\n  transcricao: item.transcricao        || '[sem transcrição disponível]',\n}));\n\n// Monta resumo do cliente\nconst c = base.cliente_dados || {};\nconst cliente_resumo = {\n  nome:              base.nome_cliente,\n  nicho:             base.nicho,\n  handle:            `@${base.handle_cliente}`,\n  nome_exibicao:     c.full_name || c.page_name || '',\n  page_name:         c.page_name || '',\n  bio:               c.bio               || '',\n  link_bio:          c.link_externo || '',\n  bio_links:         c.bio_links || [],\n  is_private:        !!c.is_private,\n  is_business_perfil: !!c.is_business,\n  profile_pic_url:   c.profile_pic_url || '',\n  contatos_publicos: c.contatos_publicos || {},\n  seguidores:        c.seguidores         || 0,\n  seguindo:          c.seguindo           || 0,\n  total_posts:       c.total_posts        || 0,\n  taxa_engajamento:  `${c.taxa_engajamento || '0.00'}%`,\n  media_curtidas:    c.media_curtidas     || 0,\n  media_comentarios: c.media_comentarios  || 0,\n  mix_formatos:      c.mix_formatos       || {},\n  top_5_posts:       (c.top_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo, data: p.data })),\n  ultimos_15_posts:  (c.ultimos_15_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n};\n\nconst concorrentes_resumo = (base.concorrentes_dados || []).map(cc => ({\n  handle:           `@${cc.handle}`,\n  nome_exibicao:    cc.full_name || cc.page_name || '',\n  page_name:        cc.page_name || '',\n  bio:              cc.bio,\n  link_bio:         cc.link_externo || '',\n  bio_links:        cc.bio_links || [],\n  is_private:       !!cc.is_private,\n  is_business_perfil: !!cc.is_business,\n  seguidores:       cc.seguidores,\n  taxa_engajamento: `${cc.taxa_engajamento}%`,\n  media_curtidas:   cc.media_curtidas,\n  media_comentarios:cc.media_comentarios,\n  mix_formatos:     cc.mix_formatos || {},\n  top_5_posts:      (cc.top_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n  tem_videos:       (cc.posts_video || []).length,\n}));\n\nconst userContent = JSON.stringify({\n  matriz_comparativa:        base.matriz_comparativa || [],\n  insights_rapidos:          base.insights_rapidos || {},\n  cliente:                   cliente_resumo,\n  concorrentes:              concorrentes_resumo,\n  videos_virais_transcritos: videos_transcritos,\n  tendencias_google,\n  palavras_chave:            keywords_google,\n  anuncios_ativos:           anuncios_facebook,\n}, null, 2);\n\nconst systemPrompt = `Você é um Growth Hacker Sênior com 12 anos de experiência em marketing digital no Brasil, especializado em análise competitiva de Instagram, criação de conteúdo de alta conversão e escalonamento de negócios via redes sociais.\n\nMISSÃO: Produzir um DOSSIÊ DE AUDITORIA COMPETITIVA ULTRA-PERSONALIZADO baseado EXCLUSIVAMENTE nos dados do JSON fornecido. Nunca seja genérico. Cada insight deve ter um dado como evidência. Se um dado não estiver disponível, declare: [dado não disponível no input].\n\nESTRUTURA DO DOSSIÊ — gere todos os módulos em Markdown:\n\n## 🔬 MÓDULO 1: DIAGNÓSTICO CLÍNICO DO PERFIL\n### 1.1 Autópsia da Bio (compare bio atual vs concorrentes. Marque ✅/❌ para: keyword do nicho, CTA, prova social, link rastreável. Reescreva em 2 versões: 80 e 150 caracteres)\n### 1.2 Padrão Editorial Atual (mix de formatos %, frequência estimada, tema dominante, CTA mais usado, análise dos 3 top posts — o que os diferencia, ganchos fortes/fracos)\n### 1.3 Tabela Score de Competitividade (Handle | Seguidores | Eng% | Mix Reels% | Curtidas Médias | Comentários Médios — com dados reais. Calcule o gap % do cliente vs melhor concorrente)\n\n## 📊 MÓDULO 2: INTELIGÊNCIA COMPETITIVA\n### 2.1 Táticas que Concorrentes Usam e o Cliente NÃO (MÍNIMO 8 táticas. Para cada: nome da tática, @handle que usa, evidência literal nos dados, por que funciona, como adaptar para o cliente)\n### 2.2 Análise dos Anúncios Ativos (para cada anúncio: CTA exato, promessa central, dor ativada, formato, padrão de copy. Identifique o padrão dominante entre todos)\n### 2.3 Mapa de Ganchos Virais (tabela: Concorrente | Gancho 0-3s | Promessa | Prova/Dado | CTA Final | Engajamento. Identifique o padrão dominante)\n\n## 👥 MÓDULO 3: PERFIL PSICOGRÁFICO DO PÚBLICO\n### 3.1 Mapeamento das 5 Maiores Dores/Desejos (evidência de comentários ou anúncios, intensidade Alta/Média/Baixa, formato de conteúdo para explorar)\n### 3.2 Vocabulário Nativo do Público (20 palavras/expressões/gírias do nicho que o cliente DEVE usar nas legendas para criar identificação imediata)\n### 3.3 Tendências de Mercado para Capitalizar (5 tendências dos dados Google: Tendência | Volume/Relevância | Formato Recomendado | Exemplo de Gancho)\n\n## 🎯 MÓDULO 4: PLANO DE AÇÃO ESTRATÉGICO\n### 4.1 Quick Wins — Execute Esta Semana (5 ações de alto impacto, baixo esforço: o que fazer, como fazer em 3 passos, resultado esperado mensurável)\n### 4.2 Linha Editorial 30 Dias (mix de formatos%, frequência posts+stories, 4 pilares de conteúdo com exemplo de post cada, template de gancho das primeiras 2 linhas)\n### 4.3 Roadmap 90 Dias (Sprint 1 Dias 1-30 Fundação | Sprint 2 Dias 31-60 Aceleração | Sprint 3 Dias 61-90 Escala — cada um com objetivo e KPI mensurável)\n\n## ✍️ MÓDULO 5: ARSENAL DE CONTEÚDO PRONTO\n### 5.1 — 10 Legendas Prontas (cada uma: GANCHO linha 1 que para o scroll + CORPO 80-120 palavras com quebras curtas para mobile + CTA específico + 8-10 hashtags. Estrutura PSC ou SAS. Cada legenda aborda uma dor diferente)\n### 5.2 — 5 Roteiros de Reels (cada um: CENA 1 0-3s gancho | CENA 2 3-15s desenvolvimento | CENA 3 15-25s prova com dado | CENA 4 25-30s CTA + instrução de engajamento. Máx 90 palavras de fala. + legenda completa + props necessários + referência de gancho viral)\n\n## 📈 MÓDULO 6: MÉTRICAS E MONITORAMENTO\n### 6.1 KPIs 90 Dias (tabela: KPI | Baseline Cliente | Benchmark Melhor Concorrente | Meta 30d | Meta 60d | Meta 90d | Ferramenta de Medição)\n### 6.2 Sinais de Alerta — Revisar Estratégia Imediatamente Se (3 gatilhos específicos com números)\n### 6.3 Checklist Semanal do Criador (10 itens práticos e específicos, com checkbox markdown)\n\nREGRAS ABSOLUTAS DE OUTPUT:\n1. PROIBIDO: \"é importante\", \"é fundamental\", \"é essencial\", \"recomendo que\" — seja DIRETO e IMPERATIVO\n2. OBRIGATÓRIO: citar a fonte de cada dado (@handle teve X curtidas no post Y, anúncio conforme Ads Library)\n3. PROIBIDO: inventar dados. Se ausente: [dado não disponível no input]\n4. OBRIGATÓRIO: todo conteúdo em português brasileiro coloquial do nicho informado\n5. OBRIGATÓRIO: roteiros de Reels máximo 30s de fala (~90 palavras)\n6. OBRIGATÓRIO: mínimo 3.000 palavras no dossiê completo\n7. Comece DIRETAMENTE pelo Módulo 1. Sem saudações ou introduções.\n8. Termine com: 📋 FIM DO DOSSIÊ — Gerado em ${new Date().toLocaleDateString('pt-BR')}`;\n\nreturn [{ json: {\n  nome_cliente:      base.nome_cliente,\n  nicho:             base.nicho,\n  handle_cliente:    base.handle_cliente,\n  cliente_dados:     base.cliente_dados,\n  concorrentes_dados:base.concorrentes_dados,\n  tendencias_google,\n  keywords_google,\n  anuncios_facebook,\n  videos_transcritos,\n  gap_engajamento_pct: base.gap_engajamento_pct,\n  gpt_payload: {\n    model:       'gpt-4o',\n    messages: [\n      { role: 'system', content: systemPrompt },\n      { role: 'user',   content: userContent  },\n    ],\n    max_tokens:  8000,\n    temperature: 0.72,\n  },\n}}];\n"
+      },
+      "id": "7680c2c6-abf9-4c1b-88db-939a6b77c9cf",
+      "name": "Montar Payload GPT-4o",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Caminho alternativo: sem vídeos para transcrever\nconst item = $input.first().json;\n\nconst base = $('Separar Cliente e Concorrentes').first().json;\nconst tendencias = $('Serper — Tendências do Nicho3').first().json;\nconst keywords   = $('Serper — Keywords do Nicho').first().json;\nconst adsRaw     = $('Facebook Ads Library').first().json;\n\nconst _orgT = (tendencias.organic || tendencias.organic_results || []).slice(0, 8).map(r => ({ title: r.title, snippet: r.snippet, link: r.link || r.redirect_link }));\nconst tendencias_google = _orgT.map(r => ({ titulo: r.title, snippet: r.snippet, link: r.link }));\nconst keywords_google = (keywords.organic || keywords.organic_results || []).slice(0, 8).map(r => ({ titulo: r.title, snippet: r.snippet }));\nfunction _flatAds(raw) { if (!raw) return []; const g = raw?.data?.ads || raw?.ads; if (!Array.isArray(g)) return Array.isArray(raw) ? raw.slice(0, 20) : []; const o = []; for (const x of g) { const a = Array.isArray(x) ? x : [x]; for (const ad of a) { const s = ad?.snapshot; if (s) o.push({ pageName: ad.page_name || s.page_name, title: s.title || s.body?.text, ad_creative_body: s.body?.text, cta_text: s.cta_text, call_to_action_type: s.cta_type, ad_type: s.display_format, snapshot_url: s.link_url, is_active: ad.is_active }); } } return o; }\nconst anuncios_facebook = _flatAds(adsRaw).slice(0, 15).map(ad => ({\n  page_name: ad.pageName || ad.page_name || '',\n  titulo:    ad.title || ad.ad_creative_body || '',\n  cta:       ad.cta_text || ad.call_to_action_type || '',\n  formato:   ad.ad_type || '',\n}));\n\nconst c = base.cliente_dados || {};\nconst cliente_resumo = {\n  nome:              base.nome_cliente,\n  nicho:             base.nicho,\n  handle:            `@${base.handle_cliente}`,\n  nome_exibicao:     c.full_name || c.page_name || '',\n  page_name:         c.page_name || '',\n  bio:               c.bio               || '',\n  link_bio:          c.link_externo || '',\n  bio_links:         c.bio_links || [],\n  is_private:        !!c.is_private,\n  is_business_perfil: !!c.is_business,\n  profile_pic_url:   c.profile_pic_url || '',\n  contatos_publicos: c.contatos_publicos || {},\n  seguidores:        c.seguidores         || 0,\n  taxa_engajamento:  `${c.taxa_engajamento || '0.00'}%`,\n  media_curtidas:    c.media_curtidas     || 0,\n  media_comentarios: c.media_comentarios  || 0,\n  mix_formatos:      c.mix_formatos       || {},\n  top_5_posts:       (c.top_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n  ultimos_15_posts:  (c.ultimos_15_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n};\n\nconst concorrentes_resumo = (base.concorrentes_dados || []).map(cc => ({\n  handle:            `@${cc.handle}`,\n  bio:               cc.bio,\n  seguidores:        cc.seguidores,\n  taxa_engajamento:  `${cc.taxa_engajamento}%`,\n  media_curtidas:    cc.media_curtidas,\n  mix_formatos:      cc.mix_formatos || {},\n  top_5_posts:       (cc.top_posts || []).map(p => ({ legenda: p.legenda, curtidas: p.curtidas, comentarios: p.comentarios, tipo: p.tipo })),\n}));\n\nconst userContent = JSON.stringify({\n  matriz_comparativa:        base.matriz_comparativa || [],\n  insights_rapidos:          base.insights_rapidos || {},\n  cliente:                   cliente_resumo,\n  concorrentes:              concorrentes_resumo,\n  videos_virais_transcritos: [],\n  tendencias_google,\n  palavras_chave:            keywords_google,\n  anuncios_ativos:           anuncios_facebook,\n}, null, 2);\n\nconst systemPrompt = `Você é um Growth Hacker Sênior com 12 anos de experiência em marketing digital no Brasil. MISSÃO: Produzir um DOSSIÊ DE AUDITORIA COMPETITIVA baseado EXCLUSIVAMENTE nos dados do JSON. Nunca seja genérico. Cite dados. Se ausente: [dado não disponível]. Gere os 6 módulos completos em Markdown. Mínimo 3.000 palavras. Comece pelo Módulo 1 sem introduções. Termine com: 📋 FIM DO DOSSIÊ — Gerado em ${new Date().toLocaleDateString('pt-BR')}`;\n\nreturn [{ json: {\n  nome_cliente:       base.nome_cliente,\n  nicho:              base.nicho,\n  handle_cliente:     base.handle_cliente,\n  cliente_dados:      base.cliente_dados,\n  concorrentes_dados: base.concorrentes_dados,\n  tendencias_google,\n  keywords_google,\n  anuncios_facebook,\n  videos_transcritos: [],\n  gap_engajamento_pct: base.gap_engajamento_pct,\n  gpt_payload: {\n    model:       'gpt-4o',\n    messages: [\n      { role: 'system', content: systemPrompt },\n      { role: 'user',   content: userContent  },\n    ],\n    max_tokens:  8000,\n    temperature: 0.72,\n  },\n}}];\n"
+      },
+      "id": "af7b6d23-ec50-4054-b4f1-2c44b69f1463",
+      "name": "Montar Payload GPT-4o (sem vídeos)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "both"
+      },
+      "id": "38e4af3b-2c42-4ea8-9a71-b645960760f9",
+      "name": "Unir Caminhos GPT",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1680,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.OPENAI_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.gpt_payload) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "0ad61afc-b2ec-4472-b5e9-ec79de92164a",
+      "name": "OpenAI GPT-4o — Gerar Dossiê",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1952,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://docs.googleapis.com/v1/documents",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $json.titulo_documento }) }}",
+        "options": {}
+      },
+      "id": "2bd133a9-9b9b-4e48-95d7-32a7443c56b2",
+      "name": "Google Docs — Criar Documento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2512,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://docs.googleapis.com/v1/documents/' + $('Google Docs — Criar Documento').first().json.documentId + ':batchUpdate' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ requests: [{ insertText: { location: { index: 1 }, text: $('Formatar Dossiê1').first().json.dossie_markdown } }] }) }}",
+        "options": {}
+      },
+      "id": "b920ce57-a78d-406c-93ca-b2947e7f1a8d",
+      "name": "Google Docs — Inserir Conteúdo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2800,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Payload: { nome_cliente, nicho, handle_cliente, concorrentes: ['@c1','@c2'] }\nconst raw  = $input.first().json;\nconst body = raw.body ?? raw;\n\nconst nome_cliente   = (body.nome_cliente   || '').trim();\nconst nicho          = (body.nicho          || '').trim();\nconst handle_cliente = (body.handle_cliente || '').replace('@','').trim();\nconst concorrentes   = (body.concorrentes   || [])\n  .map(h => String(h).replace('@','').trim())\n  .filter(Boolean);\n\nif (!nome_cliente || !nicho || !handle_cliente || concorrentes.length === 0) {\n  throw new Error('Payload incompleto. Envie: nome_cliente, nicho, handle_cliente, concorrentes[].');\n}\n\nconst todos_handles = [handle_cliente, ...concorrentes];\n\nreturn [{ json: {\n  nome_cliente,\n  nicho,\n  handle_cliente,\n  concorrentes,\n  todos_handles,\n  iniciado_em: new Date().toISOString(),\n}}];\n"
+      },
+      "id": "32c44523-7dd1-4d0e-a0f8-74a55d4c0f4e",
+      "name": "Validar e Preparar Input1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2816,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.video_atual.videoUrl }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 5
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "videoFile"
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "6286f454-141f-4d57-b1a4-7c5db75858bb",
+      "name": "Download Vídeo Viral1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        272,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compatível com n8n Cloud (sem child_process / fs).\n// Limite seguro da API OpenAI: 26214400 bytes (~25 MiB) — usamos 24 MiB de margem.\nconst MAX_BYTES = 24 * 1024 * 1024;\nconst OPENAI_HARD_LIMIT = 26214400;\n\nconst items = $input.all();\nconst out = [];\n\n/** Webhook opcional (self-hosted): POST JSON { data: \"<base64 do ficheiro>\", fileName: \"x.mp4\" }\n *  Resposta esperada: JSON com MP3 em base64 num destes campos: mp3Base64 | data | file | audio\n */\nconst compressWebhook = String(\n  (typeof process !== 'undefined' && process.env && process.env.RADAR_FFMPEG_WEBHOOK) ||\n    (typeof $env !== 'undefined' && $env.RADAR_FFMPEG_WEBHOOK) ||\n    ''\n).trim();\n\nfor (let i = 0; i < items.length; i++) {\n  const row = items[i];\n  const buf = await this.helpers.getBinaryDataBuffer(i, 'videoFile');\n  if (!buf || !buf.length) {\n    throw new Error(`Item ${i}: binary \"videoFile\" vazio.`);\n  }\n\n  if (buf.length <= MAX_BYTES) {\n    out.push({\n      json: {\n        ...(row.json || {}),\n        whisper_audio_prep: { original_bytes: buf.length, pass_through: true },\n      },\n      binary: row.binary,\n    });\n    continue;\n  }\n\n  if (!compressWebhook) {\n    throw new Error(\n      `Item ${i}: ficheiro com ${buf.length} bytes (limite seguro ${MAX_BYTES} / OpenAI ${OPENAI_HARD_LIMIT}). ` +\n      'No n8n Cloud não é possível usar ffmpeg dentro deste nó. ' +\n      'Opções: (1) Crie variável de ambiente RADAR_FFMPEG_WEBHOOK com URL de um serviço que receba base64 e devolva MP3 em base64 no JSON; ' +\n      '(2) Use n8n self‑hosted com nó Execute Command + ffmpeg entre Download e Whisper; ' +\n      '(3) Reduza vídeos muito longos no fluxo (menos minutos = ficheiro menor).'\n    );\n  }\n\n  const raw = await this.helpers.httpRequest({\n    method: 'POST',\n    url: compressWebhook,\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({\n      fileName: 'reel_input.mp4',\n      data: buf.toString('base64'),\n    }),\n  });\n  const res = typeof raw === 'string' ? JSON.parse(raw) : raw;\n\n  const b64 = res.mp3Base64 || res.data || res.file || res.audio || res.mp3;\n  if (!b64 || typeof b64 !== 'string') {\n    throw new Error(\n      `Item ${i}: RADAR_FFMPEG_WEBHOOK não devolveu base64 (campos esperados: mp3Base64, data, file ou audio).`\n    );\n  }\n\n  const mp3 = Buffer.from(b64, 'base64');\n  if (mp3.length > OPENAI_HARD_LIMIT) {\n    throw new Error(`Item ${i}: MP3 devolvido ainda excede 25 MB (${mp3.length} bytes).`);\n  }\n\n  out.push({\n    json: {\n      ...(row.json || {}),\n      whisper_audio_prep: {\n        original_bytes: buf.length,\n        mp3_bytes: mp3.length,\n        via_webhook: true,\n      },\n    },\n    binary: {\n      videoFile: {\n        data: mp3.toString('base64'),\n        mimeType: 'audio/mpeg',\n        fileName: 'whisper_input.mp3',\n      },\n    },\n  });\n}\n\nreturn out;\n"
+      },
+      "id": "c62805c3-6da7-4d52-b19d-2ac0c0860dab",
+      "name": "Comprimir áudio p/ Whisper (≤25MB)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const gptResponse = $input.first().json;\nconst baseData    = $('Unir Caminhos GPT').first().json;\n\nconst dossie_markdown = gptResponse?.choices?.[0]?.message?.content || '[Erro: GPT-4o não retornou conteúdo]';\nconst tokens_usados   = gptResponse?.usage?.total_tokens || 0;\nconst titulo          = `Dossiê Auditoria IA — ${baseData.nome_cliente} | ${baseData.nicho} | ${new Date().toLocaleDateString('pt-BR')}`;\n\nreturn [{ json: {\n  ...baseData,\n  dossie_markdown,\n  titulo_documento: titulo,\n  tokens_usados,\n  gerado_em: new Date().toISOString(),\n}}];\n"
+      },
+      "id": "673ec75d-6936-4c9d-a2c8-3e32bbbcbefc",
+      "name": "Formatar Dossiê1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const base       = $('Formatar Dossiê1').first().json;\nconst docCreated = $('Google Docs — Criar Documento').first().json;\nconst docId      = docCreated.documentId || '';\n\nreturn [{ json: {\n  sucesso:                 true,\n  cliente:                 base.nome_cliente,\n  nicho:                   base.nicho,\n  handle_cliente:          `@${base.handle_cliente}`,\n  concorrentes_analisados: (base.concorrentes_dados || []).map(c => `@${c.handle}`),\n  total_perfis_analisados: base.total_perfis || 0,\n  gap_engajamento_pct:     base.gap_engajamento_pct || '0.00',\n  melhor_concorrente:      base.melhor_concorrente_handle ? `@${base.melhor_concorrente_handle}` : null,\n  videos_transcritos:      (base.videos_transcritos || []).length,\n  tokens_usados:           base.tokens_usados,\n  gerado_em:               base.gerado_em,\n  documento: {\n    titulo:      base.titulo_documento,\n    id:          docId,\n    link_editar: docId ? `https://docs.google.com/document/d/${docId}/edit`      : null,\n    link_pdf:    docId ? `https://docs.google.com/document/d/${docId}/export?format=pdf` : null,\n  },\n}}];\n"
+      },
+      "id": "134c02ac-51ad-4302-b822-87452bf5dc42",
+      "name": "Montar Resposta Final1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3072,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "b1e4ad96-5089-4bda-a21f-0ea201719034",
+      "name": "Respond to Webhook1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        3360,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auditor-ia",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ed9b9ad1-ec81-4b0a-86c6-6392e76db7ee",
+      "name": "Webhook Trigger2",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -3072,
+        976
+      ],
+      "webhookId": "auditor-ia-trigger-v1"
+    },
+    {
+      "parameters": {
+        "url": "https://google.serper.dev/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $('Separar Cliente e Concorrentes').first().json.nicho + ' estratégia conteúdo instagram crescimento' }}"
+            },
+            {
+              "name": "gl",
+              "value": "br"
+            },
+            {
+              "name": "hl",
+              "value": "pt-br"
+            },
+            {
+              "name": "num",
+              "value": "10"
+            },
+            {
+              "name": "api_key",
+              "value": "a112b81a9e72801a78108e33c40ebada57ac7bc2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4b854562-56dd-42d8-adb1-079a5b447252",
+      "name": "Serper — Keywords do Nicho",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -800,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search?engine=google",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $('Separar Cliente e Concorrentes').first().json.nicho + ' tendências do ano para o instagram Brasil' }}"
+            },
+            {
+              "name": "gl",
+              "value": "br"
+            },
+            {
+              "name": "hl",
+              "value": "pt-br"
+            },
+            {
+              "name": "num",
+              "value": "10"
+            },
+            {
+              "name": "api_key",
+              "value": "1275b8bf102a5db3205066d296e4854c49ff79964df91be424ab990c91759a6c"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ae520efd-6f05-47ca-8860-eda658882413",
+      "name": "Serper — Tendências do Nicho3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://facebook-scraper-api4.p.rapidapi.com/fetch_search_ads_pages",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $('Separar Cliente e Concorrentes').item.json.nicho }}"
+            },
+            {
+              "name": "country",
+              "value": "BR"
+            },
+            {
+              "name": "activeStatus",
+              "value": "Active"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Rapidapi-Key",
+              "value": "={{ $env.RAPIDAPI_KEY || '0127634a29msh4a303edef58f6dbp1430c6jsnd00af7a6bc1e' }}"
+            },
+            {
+              "name": "X-Rapidapi-Host",
+              "value": "facebook-scraper-api4.p.rapidapi.com"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": false,
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "94bd8ccd-c289-49b1-a051-51ffcf15d46e",
+      "name": "Facebook Ads Library",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -560,
+        976
+      ]
+    }
+  ],
+  "connections": {
+    "Expandir Handles": {
+      "main": [
+        [
+          {
+            "node": "RapidAPI — UserInfo Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RapidAPI — Buscar Perfil Instagram": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Perfil": {
+      "main": [
+        [
+          {
+            "node": "Agregar Perfis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agregar Perfis": {
+      "main": [
+        [
+          {
+            "node": "Separar Cliente e Concorrentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Cliente e Concorrentes": {
+      "main": [
+        [
+          {
+            "node": "Serper — Tendências do Nicho3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enriquecer Dados + Identificar Vídeos Virais": {
+      "main": [
+        [
+          {
+            "node": "Tem Vídeos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Vídeos?": {
+      "main": [
+        [
+          {
+            "node": "Download Vídeo Viral1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar Payload GPT-4o (sem vídeos)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Whisper — Transcrição": {
+      "main": [
+        [
+          {
+            "node": "Enriquecer Transcrição",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enriquecer Transcrição": {
+      "main": [
+        [
+          {
+            "node": "Agregar Transcrições",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agregar Transcrições": {
+      "main": [
+        [
+          {
+            "node": "Montar Payload GPT-4o",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Payload GPT-4o": {
+      "main": [
+        [
+          {
+            "node": "Unir Caminhos GPT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Payload GPT-4o (sem vídeos)": {
+      "main": [
+        [
+          {
+            "node": "Unir Caminhos GPT",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Unir Caminhos GPT": {
+      "main": [
+        [
+          {
+            "node": "OpenAI GPT-4o — Gerar Dossiê",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4o — Gerar Dossiê": {
+      "main": [
+        [
+          {
+            "node": "Formatar Dossiê1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs — Criar Documento": {
+      "main": [
+        [
+          {
+            "node": "Google Docs — Inserir Conteúdo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs — Inserir Conteúdo": {
+      "main": [
+        [
+          {
+            "node": "Montar Resposta Final1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar e Preparar Input1": {
+      "main": [
+        [
+          {
+            "node": "Expandir Handles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Vídeo Viral1": {
+      "main": [
+        [
+          {
+            "node": "Comprimir áudio p/ Whisper (≤25MB)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Dossiê1": {
+      "main": [
+        [
+          {
+            "node": "Google Docs — Criar Documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Resposta Final1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger2": {
+      "main": [
+        [
+          {
+            "node": "Validar e Preparar Input1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serper — Keywords do Nicho": {
+      "main": [
+        [
+          {
+            "node": "Facebook Ads Library",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serper — Tendências do Nicho3": {
+      "main": [
+        [
+          {
+            "node": "Serper — Keywords do Nicho",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Ads Library": {
+      "main": [
+        [
+          {
+            "node": "Enriquecer Dados + Identificar Vídeos Virais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RapidAPI — UserInfo Instagram": {
+      "main": [
+        [
+          {
+            "node": "RapidAPI — Buscar Perfil Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comprimir áudio p/ Whisper (≤25MB)": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Whisper — Transcrição",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook Trigger2": [
+      {
+        "headers": {
+          "host": "remotion-n8n.0lvvwf.easypanel.host",
+          "user-agent": "curl/8.4.0",
+          "content-length": "172",
+          "accept": "*/*",
+          "content-type": "application/json",
+          "x-forwarded-for": "177.136.98.167",
+          "x-forwarded-host": "remotion-n8n.0lvvwf.easypanel.host",
+          "x-forwarded-port": "443",
+          "x-forwarded-proto": "https",
+          "x-forwarded-server": "8cd32d1ee618",
+          "x-real-ip": "177.136.98.167",
+          "accept-encoding": "gzip"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "nome_cliente": "Claudio Damasco",
+          "nicho": "marketing digital",
+          "handle_cliente": "saadamasco",
+          "concorrentes": [
+            "@rodolfooviedo",
+            "@conradoadolpho"
+          ]
+        },
+        "webhookUrl": "https://remotion-n8n.0lvvwf.easypanel.host/webhook-test/auditor-ia",
+        "executionMode": "test"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2d10f67b116dd2526ffb0deb4cd7aab872d172d14a905e1c2a5236ee59c9640d"
+  }
+}

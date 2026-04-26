@@ -1,0 +1,1144 @@
+{
+  "name": "🔍 Auditoria Expressa IA v2",
+  "nodes": [
+
+    {
+      "id": "n01",
+      "name": "Webhook Entrada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 500],
+      "webhookId": "auditoria-ia-entrada",
+      "parameters": {
+        "path": "auditoria-ia",
+        "responseMode": "onReceived",
+        "responseData": "noData",
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n02",
+      "name": "Extrair Dados Brutos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 500],
+      "parameters": {
+        "jsCode": "// n8n envolve o payload do webhook em { headers, params, query, body }\n// então $input.first().json.body é o payload real da Evolution API\nconst raw  = $input.first().json;\nconst body = raw.body ?? raw; // fallback para chamadas diretas\n\nconst remoteJid =\n  body?.data?.key?.remoteJid ||\n  body?.key?.remoteJid || '';\n\n// Ignorar mensagens de grupos\nif (remoteJid.includes('@g.us')) return [];\n\nconst phone = remoteJid\n  .replace('@s.whatsapp.net', '')\n  .replace('@c.us', '')\n  .trim();\n\nif (!phone) return [];\n\n// Ignorar mensagens enviadas pelo próprio bot\nconst fromMe = body?.data?.key?.fromMe ?? body?.key?.fromMe ?? false;\nif (fromMe) return [];\n\n// Extrair texto (múltiplos tipos de mensagem)\nconst msgObj = body?.data?.message || body?.message || {};\nconst message = (\n  msgObj?.conversation ||\n  msgObj?.extendedTextMessage?.text ||\n  msgObj?.imageMessage?.caption ||\n  msgObj?.videoMessage?.caption ||\n  msgObj?.listResponseMessage?.singleSelectReply?.selectedRowId ||\n  msgObj?.buttonsResponseMessage?.selectedButtonId ||\n  ''\n).trim();\n\nif (!message) return [];\n\nreturn [{ json: { phone, message, rawBody: body } }];\n"
+      }
+    },
+
+    {
+      "id": "n03",
+      "name": "Redis GET Sessão",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [520, 400],
+      "parameters": {
+        "operation": "get",
+        "key": "=auditoria:session:{{ $json.phone }}"
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n04",
+      "name": "Redis LRANGE Histórico",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [520, 600],
+      "parameters": {
+        "operation": "lrange",
+        "key": "=auditoria:history:{{ $('Extrair Dados Brutos').first().json.phone }}",
+        "start": -20,
+        "stop": -1
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n05",
+      "name": "Montar Contexto Completo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 500],
+      "parameters": {
+        "jsCode": "const extracted  = $('Extrair Dados Brutos').first().json;\nconst phone      = extracted.phone;\nconst message    = extracted.message;\n\n// ── Sessão ──────────────────────────────────────────────────\nconst sessionRaw = $('Redis GET Sessão').first().json?.value;\nlet session = {};\ntry { session = sessionRaw ? JSON.parse(sessionRaw) : {}; } catch {}\n\nconst defaults = {\n  state: 'INICIO',\n  cliente_arroba: '',\n  concorrentes: '',\n  nicho: '',\n  followers: 0,\n  taxa_engajamento_cliente: '0.00',\n  taxa_engajamento_concorrente: '',\n  gap_principal: '',\n  oportunidade_principal: '',\n  erro_critico: '',\n  msg_espera_1: '',\n  msg_espera_2: '',\n  prova_social: '',\n  link_pagamento: '',\n  pdf_url: '',\n};\nconst fullSession = { ...defaults, ...session };\n\n// ── Histórico ────────────────────────────────────────────────\nconst historyRaw = $('Redis LRANGE Histórico').first().json?.value ?? [];\nconst history = (Array.isArray(historyRaw) ? historyRaw : [])\n  .map(h => { try { return JSON.parse(h); } catch { return null; } })\n  .filter(Boolean);\n\n// Últimas 10 trocas (20 mensagens) para contexto da IA\nconst historyForAI = history.slice(-20).map(h => ({\n  role: h.role,\n  content: h.content,\n}));\n\nreturn [{ json: { phone, message, history, historyForAI, ...fullSession } }];\n"
+      }
+    },
+
+    {
+      "id": "n06",
+      "name": "Redis RPUSH Mensagem Usuário",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1060, 500],
+      "parameters": {
+        "operation": "rpush",
+        "key": "=auditoria:history:{{ $json.phone }}",
+        "value": "={{ JSON.stringify({ role: 'user', content: $json.message, ts: Date.now() }) }}"
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n07",
+      "name": "Switch Estado",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1320, 500],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": { "combinator": "and", "conditions": [{ "id": "s1", "leftValue": "={{ $json.state }}", "rightValue": "INICIO", "operator": { "type": "string", "operation": "equals" } }] },
+              "renameOutput": true, "outputKey": "INICIO"
+            },
+            {
+              "conditions": { "combinator": "and", "conditions": [{ "id": "s2", "leftValue": "={{ $json.state }}", "rightValue": "AGUARDANDO_HANDLE", "operator": { "type": "string", "operation": "equals" } }] },
+              "renameOutput": true, "outputKey": "AGUARDANDO_HANDLE"
+            },
+            {
+              "conditions": { "combinator": "and", "conditions": [{ "id": "s3", "leftValue": "={{ $json.state }}", "rightValue": "AGUARDANDO_CONCORRENTES", "operator": { "type": "string", "operation": "equals" } }] },
+              "renameOutput": true, "outputKey": "AGUARDANDO_CONCORRENTES"
+            },
+            {
+              "conditions": { "combinator": "and", "conditions": [{ "id": "s4", "leftValue": "={{ $json.state }}", "rightValue": "AGUARDANDO_PAGAMENTO", "operator": { "type": "string", "operation": "equals" } }] },
+              "renameOutput": true, "outputKey": "AGUARDANDO_PAGAMENTO"
+            },
+            {
+              "conditions": { "combinator": "and", "conditions": [{ "id": "s5", "leftValue": "={{ $json.state }}", "rightValue": "AGUARDANDO_UPSELL", "operator": { "type": "string", "operation": "equals" } }] },
+              "renameOutput": true, "outputKey": "AGUARDANDO_UPSELL"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n08",
+      "name": "INICIO WA Msg 1",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1580, 80],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $json.phone }}@s.whatsapp.net",
+        "messageText": "Excelente. Eu sou a IA de diagnóstico da [Sua Marca].\n\nO que nós vamos fazer aqui é dissecar o seu perfil e descobrir *exatamente* por que você está deixando dinheiro na mesa.",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n09",
+      "name": "INICIO Wait 2s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1840, 80],
+      "webhookId": "wait-inicio-1",
+      "parameters": { "resume": "timeInterval", "unit": "seconds", "amount": 2, "options": {} }
+    },
+
+    {
+      "id": "n10",
+      "name": "INICIO WA Msg 2 Pedir Handle",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [2100, 80],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('Montar Contexto Completo').first().json.phone }}@s.whatsapp.net",
+        "messageText": "Para eu calibrar minha análise, me manda o link do seu Instagram ou o seu @ (ex: @meunegocio).",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n11",
+      "name": "Redis SET Sessão AGUARDANDO_HANDLE",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [2360, 80],
+      "parameters": {
+        "operation": "set",
+        "key": "=auditoria:session:{{ $('Montar Contexto Completo').first().json.phone }}",
+        "value": "={{ JSON.stringify({ ...JSON.parse($('Redis GET Sessão').first().json?.value ?? '{}'), state: 'AGUARDANDO_HANDLE' }) }}",
+        "expire": true,
+        "ttl": 86400
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n12",
+      "name": "HANDLE If Validar Handle",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1580, 340],
+      "parameters": {
+        "conditions": {
+          "combinator": "or",
+          "conditions": [
+            { "id": "h1", "leftValue": "={{ $json.message }}", "rightValue": "@", "operator": { "type": "string", "operation": "contains" } },
+            { "id": "h2", "leftValue": "={{ $json.message }}", "rightValue": "instagram.com", "operator": { "type": "string", "operation": "contains" } }
+          ]
+        },
+        "options": { "caseSensitive": false }
+      }
+    },
+
+    {
+      "id": "n13",
+      "name": "HANDLE WA Corrigir",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1840, 500],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $json.phone }}@s.whatsapp.net",
+        "messageText": "Preciso do seu @ exato para puxar os dados. Digite novamente (ex: @meunegocio):",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n14",
+      "name": "HANDLE HTTP Apify Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1840, 240],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token={{ $env.APIFY_TOKEN }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ usernames: [$json.message.replace('@','').replace(/.*instagram\\.com\\//,'').split('/')[0].split('?')[0].trim()] }) }}",
+        "options": { "timeout": 30000 }
+      }
+    },
+
+    {
+      "id": "n15",
+      "name": "HANDLE HTTP OpenAI Detectar Nicho",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2100, 240],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.OPENAI_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'system', content: 'Classifique o nicho do perfil em UMA palavra em português. Exemplos: restaurante, coach, ecommerce, academia, clínica, barbearia, infoprodutor, moda, pet, imóveis. Responda SOMENTE a palavra, sem pontuação.' }, { role: 'user', content: 'Bio: ' + ($input.first().json[0]?.biography ?? '') + ' | Últimas legendas: ' + ($input.first().json[0]?.latestPosts ?? []).slice(0,5).map(p => p.caption?.slice(0,60)).join(' | ') }], max_tokens: 10 }) }}"
+      }
+    },
+
+    {
+      "id": "n16",
+      "name": "HANDLE Code Preparar Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2360, 240],
+      "parameters": {
+        "jsCode": "const ctx        = $('Montar Contexto Completo').first().json;\nconst apifyData  = $('HANDLE HTTP Apify Instagram').first().json;\nconst nichoRaw   = $('HANDLE HTTP OpenAI Detectar Nicho').first().json;\n\nconst profile  = Array.isArray(apifyData) ? apifyData[0] : apifyData;\nconst nicho    = (nichoRaw?.choices?.[0]?.message?.content ?? 'negócio').trim().toLowerCase();\n\nconst followers    = profile?.followersCount ?? 1000;\nconst posts        = profile?.latestPosts ?? [];\nconst avgLikes     = posts.length ? Math.round(posts.reduce((s,p) => s+(p.likesCount||0),0)/posts.length) : 0;\nconst avgComments  = posts.length ? Math.round(posts.reduce((s,p) => s+(p.commentsCount||0),0)/posts.length) : 0;\nconst taxa         = followers > 0 ? (((avgLikes+avgComments)/followers)*100).toFixed(2) : '0.00';\n\nconst handle = ctx.message.replace('@','').replace(/.*instagram\\.com\\//,'').split('/')[0].split('?')[0].trim();\n\nreturn [{ json: {\n  ...ctx,\n  cliente_arroba: handle,\n  nicho,\n  followers,\n  taxa_engajamento_cliente: taxa,\n  profileBio: profile?.biography ?? '',\n} }];\n"
+      }
+    },
+
+    {
+      "id": "n17",
+      "name": "HANDLE HTTP GPT4o Confirmar Handle",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2620, 240],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.OPENAI_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-4o', messages: [ { role: 'system', content: 'Você é um consultor de marketing direto. Tom confiante e humano, nunca robótico. Frases curtas. Nunca diga \"Achei aqui\". Não use emoji excessivo.' }, ...($json.historyForAI ?? []), { role: 'user', content: 'Gere UMA mensagem (máx 2 linhas) confirmando que encontrou o perfil @' + $json.cliente_arroba + ' no nicho de ' + $json.nicho + ' com ' + $json.followers + ' seguidores. Já diga que está rodando a pré-leitura dos últimos posts.' } ], max_tokens: 120, temperature: 0.9 }) }}"
+      }
+    },
+
+    {
+      "id": "n18",
+      "name": "HANDLE WA Confirmar Handle",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [2880, 240],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('HANDLE Code Preparar Dados').first().json.phone }}@s.whatsapp.net",
+        "messageText": "={{ $json.choices[0].message.content }}",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n19",
+      "name": "HANDLE Redis RPUSH Bot Confirmação",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [3140, 240],
+      "parameters": {
+        "operation": "rpush",
+        "key": "=auditoria:history:{{ $('HANDLE Code Preparar Dados').first().json.phone }}",
+        "value": "={{ JSON.stringify({ role: 'assistant', content: $('HANDLE HTTP GPT4o Confirmar Handle').first().json.choices[0].message.content, ts: Date.now() }) }}"
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n20",
+      "name": "HANDLE Redis SET Sessão CONC",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [3400, 240],
+      "parameters": {
+        "operation": "set",
+        "key": "=auditoria:session:{{ $('HANDLE Code Preparar Dados').first().json.phone }}",
+        "value": "={{ JSON.stringify({ state: 'AGUARDANDO_CONCORRENTES', cliente_arroba: $('HANDLE Code Preparar Dados').first().json.cliente_arroba, nicho: $('HANDLE Code Preparar Dados').first().json.nicho, followers: $('HANDLE Code Preparar Dados').first().json.followers, taxa_engajamento_cliente: $('HANDLE Code Preparar Dados').first().json.taxa_engajamento_cliente }) }}",
+        "expire": true,
+        "ttl": 86400
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n21",
+      "name": "HANDLE Wait 3s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [3660, 240],
+      "webhookId": "wait-handle-1",
+      "parameters": { "resume": "timeInterval", "unit": "seconds", "amount": 3, "options": {} }
+    },
+
+    {
+      "id": "n22",
+      "name": "HANDLE WA Pedir Concorrentes",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [3920, 240],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('HANDLE Code Preparar Dados').first().json.phone }}@s.whatsapp.net",
+        "messageText": "Enquanto processo isso, preciso de um alvo. 🎯\n\nQuem são os 2 concorrentes do seu nicho que mais te irritam? Aqueles que estão roubando os clientes que deveriam ser seus.\n\nManda o @ deles aqui.",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n23",
+      "name": "CONC If Verificar Sem Concorrente",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1580, 600],
+      "parameters": {
+        "conditions": {
+          "combinator": "or",
+          "conditions": [
+            { "id": "c1", "leftValue": "={{ $json.message }}", "rightValue": "não sei", "operator": { "type": "string", "operation": "contains" } },
+            { "id": "c2", "leftValue": "={{ $json.message }}", "rightValue": "nao sei", "operator": { "type": "string", "operation": "contains" } },
+            { "id": "c3", "leftValue": "={{ $json.message }}", "rightValue": "não tenho", "operator": { "type": "string", "operation": "contains" } },
+            { "id": "c4", "leftValue": "={{ $json.message }}", "rightValue": "nao tenho", "operator": { "type": "string", "operation": "contains" } },
+            { "id": "c5", "leftValue": "={{ $json.message }}", "rightValue": "nenhum", "operator": { "type": "string", "operation": "contains" } }
+          ]
+        },
+        "options": { "caseSensitive": false }
+      }
+    },
+
+    {
+      "id": "n24",
+      "name": "CONC WA Dor Empática",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1840, 760],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $json.phone }}@s.whatsapp.net",
+        "messageText": "Tudo bem — é mais comum do que parece.\n\nMe diz: qual o maior {{ $json.nicho }} da sua cidade ou região? Pode ser alguém que você admira ou que você sabe que está crescendo.\n\nManda o @ para eu conseguir trabalhar.",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n25",
+      "name": "CONC Code Salvar Concorrentes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1840, 560],
+      "parameters": {
+        "jsCode": "// Passa os dados adiante enriquecidos com os concorrentes\nconst ctx = $input.first().json;\nreturn [{ json: { ...ctx, concorrentes: ctx.message } }];\n"
+      }
+    },
+
+    {
+      "id": "n26",
+      "name": "CONC HTTP DeepSeek Análise",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2100, 560],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.DEEPSEEK_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'deepseek-reasoner', messages: [ { role: 'system', content: 'Você é um analista sênior de marketing digital especializado em Instagram. Pense passo a passo antes de responder. Seja específico. Retorne APENAS JSON válido, sem markdown.' }, { role: 'user', content: 'Perfil analisado: @' + $json.cliente_arroba + '\\nNicho: ' + $json.nicho + '\\nSeguidores: ' + $json.followers + '\\nEngajamento do cliente: ' + $json.taxa_engajamento_cliente + '%\\nConcorrentes informados: ' + $json.concorrentes + '\\n\\nFaça análise competitiva e retorne: { \"taxa_concorrente\": \"<taxa estimada dos concorrentes>\", \"gap_principal\": \"<diferença crítica em 1 frase curta>\", \"oportunidade_principal\": \"<maior oportunidade em 1 frase de ação>\", \"erro_critico\": \"<erro mais grave detectado em 1 frase>\", \"raciocinio\": \"<chain-of-thought resumido>\" }' } ], response_format: { type: 'json_object' }, max_tokens: 800 }) }}",
+        "options": { "timeout": 60000 }
+      }
+    },
+
+    {
+      "id": "n27",
+      "name": "CONC HTTP GPT4o Mensagens Espera",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2360, 560],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.OPENAI_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => { const analysis = JSON.parse($('CONC HTTP DeepSeek Análise').first().json.choices[0].message.content); const ctx = $('CONC Code Salvar Concorrentes').first().json; const history = ctx.historyForAI ?? []; return JSON.stringify({ model: 'gpt-4o', messages: [ { role: 'system', content: 'Você é um copywriter de alta conversão especializado em chatbots de vendas. Tom: direto, confiante, levemente urgente. Nunca robótico. Frases curtas. Use dados numéricos reais quando disponíveis.' }, ...history, { role: 'user', content: 'Gere exatamente este JSON sem markdown:\\n{ \"msg_espera_1\": \"<msg conectando dados — menciona taxa de engajamento ' + ctx.taxa_engajamento_cliente + '% vs ' + analysis.gap_principal + ' — máx 3 linhas>\", \"msg_espera_2\": \"<revela o erro crítico de forma intrigante, termina com reticências — máx 2 linhas>\", \"prova_social\": \"<case crível de cliente do nicho ' + ctx.nicho + ' com números — máx 2 linhas>\" }' } ], response_format: { type: 'json_object' }, max_tokens: 400, temperature: 0.85 }); })() }}"
+      }
+    },
+
+    {
+      "id": "n28",
+      "name": "CONC Code Parsear Respostas IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2620, 560],
+      "parameters": {
+        "jsCode": "const ctx         = $('CONC Code Salvar Concorrentes').first().json;\nconst deepseekRaw = $('CONC HTTP DeepSeek Análise').first().json;\nconst gptRaw      = $('CONC HTTP GPT4o Mensagens Espera').first().json;\n\nlet analysis = {};\nlet msgs = {};\ntry { analysis = JSON.parse(deepseekRaw.choices[0].message.content); } catch {}\ntry { msgs     = JSON.parse(gptRaw.choices[0].message.content); } catch {}\n\nconsole.log('[DeepSeek raciocinio]', analysis.raciocinio);\n\nreturn [{ json: {\n  ...ctx,\n  taxa_engajamento_concorrente: analysis.taxa_concorrente ?? '',\n  gap_principal:                analysis.gap_principal    ?? '',\n  oportunidade_principal:       analysis.oportunidade_principal ?? '',\n  erro_critico:                 analysis.erro_critico     ?? '',\n  msg_espera_1:                 msgs.msg_espera_1         ?? '',\n  msg_espera_2:                 msgs.msg_espera_2         ?? '',\n  prova_social:                 msgs.prova_social         ?? '',\n} }];\n"
+      }
+    },
+
+    {
+      "id": "n29",
+      "name": "CONC Redis SET Sessão Análise",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [2880, 560],
+      "parameters": {
+        "operation": "set",
+        "key": "=auditoria:session:{{ $json.phone }}",
+        "value": "={{ JSON.stringify({ state: 'AGUARDANDO_PAGAMENTO', cliente_arroba: $json.cliente_arroba, concorrentes: $json.concorrentes, nicho: $json.nicho, followers: $json.followers, taxa_engajamento_cliente: $json.taxa_engajamento_cliente, taxa_engajamento_concorrente: $json.taxa_engajamento_concorrente, gap_principal: $json.gap_principal, oportunidade_principal: $json.oportunidade_principal, erro_critico: $json.erro_critico, msg_espera_1: $json.msg_espera_1, msg_espera_2: $json.msg_espera_2, prova_social: $json.prova_social }) }}",
+        "expire": true,
+        "ttl": 86400
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n30",
+      "name": "CONC WA Espera 1",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [3140, 560],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $json.phone }}@s.whatsapp.net",
+        "messageText": "Perfeito. Na mira: {{ $json.concorrentes }} 🎯",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n31",
+      "name": "CONC Wait 4s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [3400, 560],
+      "webhookId": "wait-conc-1",
+      "parameters": { "resume": "timeInterval", "unit": "seconds", "amount": 4, "options": {} }
+    },
+
+    {
+      "id": "n32",
+      "name": "CONC WA Espera 2",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [3660, 560],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('CONC Code Parsear Respostas IA').first().json.phone }}@s.whatsapp.net",
+        "messageText": "={{ $('CONC Code Parsear Respostas IA').first().json.msg_espera_1 }}",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n33",
+      "name": "CONC Wait 6s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [3920, 560],
+      "webhookId": "wait-conc-2",
+      "parameters": { "resume": "timeInterval", "unit": "seconds", "amount": 6, "options": {} }
+    },
+
+    {
+      "id": "n34",
+      "name": "CONC WA Espera 3",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [4180, 560],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('CONC Code Parsear Respostas IA').first().json.phone }}@s.whatsapp.net",
+        "messageText": "={{ $('CONC Code Parsear Respostas IA').first().json.msg_espera_2 }}",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n35",
+      "name": "CONC Wait 3s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [4440, 560],
+      "webhookId": "wait-conc-3",
+      "parameters": { "resume": "timeInterval", "unit": "seconds", "amount": 3, "options": {} }
+    },
+
+    {
+      "id": "n36",
+      "name": "CONC WA Prova Social",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [4700, 560],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('CONC Code Parsear Respostas IA').first().json.phone }}@s.whatsapp.net",
+        "messageText": "={{ $('CONC Code Parsear Respostas IA').first().json.prova_social }}",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n37",
+      "name": "CONC Wait 2s Paywall",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [4960, 560],
+      "webhookId": "wait-conc-4",
+      "parameters": { "resume": "timeInterval", "unit": "seconds", "amount": 2, "options": {} }
+    },
+
+    {
+      "id": "n38",
+      "name": "CONC WA Paywall",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [5220, 560],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('CONC Code Parsear Respostas IA').first().json.phone }}@s.whatsapp.net",
+        "messageText": "={{ 'O relatório completo ficou pronto. Ele traz:\\n\\n✅ ' + $('CONC Code Parsear Respostas IA').first().json.erro_critico + '\\n✅ O que ' + $('CONC Code Parsear Respostas IA').first().json.concorrentes + ' fez diferente nos últimos 30 dias\\n✅ ' + $('CONC Code Parsear Respostas IA').first().json.oportunidade_principal + '\\n\\nPara eu te liberar o PDF agora, a taxa de emissão é de apenas *R$ 47,00*\\n\\n1️⃣ Sim, gerar PIX 💸\\n2️⃣ Agora não' }}",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n39",
+      "name": "PAG If Quer PIX",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1580, 860],
+      "parameters": {
+        "conditions": {
+          "combinator": "or",
+          "conditions": [
+            { "id": "p1", "leftValue": "={{ $json.message }}", "rightValue": "1", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "p2", "leftValue": "={{ $json.message }}", "rightValue": "pix", "operator": { "type": "string", "operation": "contains" } },
+            { "id": "p3", "leftValue": "={{ $json.message }}", "rightValue": "sim", "operator": { "type": "string", "operation": "contains" } },
+            { "id": "p4", "leftValue": "={{ $json.message }}", "rightValue": "gerar", "operator": { "type": "string", "operation": "contains" } }
+          ]
+        },
+        "options": { "caseSensitive": false }
+      }
+    },
+
+    {
+      "id": "n40",
+      "name": "PAG WA Abandono",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1840, 1020],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $json.phone }}@s.whatsapp.net",
+        "messageText": "A IA vai deletar sua análise em 30 minutos.\n\nVai deixar seus concorrentes continuarem nadando de braçada?\n\n{{ $json.link_pagamento || $env.CHECKOUT_URL_FALLBACK }}",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n41",
+      "name": "PAG HTTP Stripe Criar Checkout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1840, 720],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.stripe.com/v1/checkout/sessions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.STRIPE_SECRET_KEY }}" },
+            { "name": "Content-Type", "value": "application/x-www-form-urlencoded" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "form",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "mode",                              "value": "payment" },
+            { "name": "currency",                          "value": "brl" },
+            { "name": "line_items[0][price_data][currency]","value": "brl" },
+            { "name": "line_items[0][price_data][product_data][name]", "value": "=Auditoria Expressa IA — @{{ $json.cliente_arroba }}" },
+            { "name": "line_items[0][price_data][unit_amount]", "value": "4700" },
+            { "name": "line_items[0][quantity]",           "value": "1" },
+            { "name": "metadata[phone]",                   "value": "={{ $json.phone }}" },
+            { "name": "metadata[handle]",                  "value": "={{ $json.cliente_arroba }}" },
+            { "name": "success_url",                       "value": "=https://{{ $env.DOMAIN }}/obrigado" },
+            { "name": "cancel_url",                        "value": "=https://{{ $env.DOMAIN }}/cancelado" }
+          ]
+        },
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n42",
+      "name": "PAG Code Salvar Link",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2100, 720],
+      "parameters": {
+        "jsCode": "const ctx = $('Montar Contexto Completo').first().json;\nconst stripeSession = $('PAG HTTP Stripe Criar Checkout').first().json;\nconst checkoutUrl = stripeSession.url || process.env.CHECKOUT_URL_FALLBACK || 'https://pay.exemplo.com/auditoria';\nreturn [{ json: { ...ctx, link_pagamento: checkoutUrl } }];\n"
+      }
+    },
+
+    {
+      "id": "n43",
+      "name": "PAG Redis SET Sessão Link",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [2360, 720],
+      "parameters": {
+        "operation": "set",
+        "key": "=auditoria:session:{{ $json.phone }}",
+        "value": "={{ JSON.stringify({ ...JSON.parse($('Redis GET Sessão').first().json?.value ?? '{}'), link_pagamento: $json.link_pagamento }) }}",
+        "expire": true,
+        "ttl": 86400
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n44",
+      "name": "PAG WA Enviar Link PIX",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [2620, 720],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('PAG Code Salvar Link').first().json.phone }}@s.whatsapp.net",
+        "messageText": "Perfeito! Aqui está o seu link:\n\n👉 {{ $('PAG Code Salvar Link').first().json.link_pagamento }}\n\nAssim que confirmar, o relatório cai aqui automaticamente. 🚀\n\n⏳ Aguardando seu pagamento...",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n45",
+      "name": "UPSELL If Aceita",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1580, 1120],
+      "parameters": {
+        "conditions": {
+          "combinator": "or",
+          "conditions": [
+            { "id": "u1", "leftValue": "={{ $json.message }}", "rightValue": "1", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "u2", "leftValue": "={{ $json.message }}", "rightValue": "implementa", "operator": { "type": "string", "operation": "contains" } },
+            { "id": "u3", "leftValue": "={{ $json.message }}", "rightValue": "adicionar", "operator": { "type": "string", "operation": "contains" } }
+          ]
+        },
+        "options": { "caseSensitive": false }
+      }
+    },
+
+    {
+      "id": "n46",
+      "name": "UPSELL WA Aceito",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1840, 980],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $json.phone }}@s.whatsapp.net",
+        "messageText": "Excelente decisão! 🎯\n\nAqui está o link para o Modo Implementação:\n\n👉 {{ $env.CHECKOUT_URL_UPSELL }}\n\nAmanhã às 8h você já recebe sua primeira missão. Sem desculpa. 💪",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n47",
+      "name": "UPSELL WA Recusado",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1840, 1260],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $json.phone }}@s.whatsapp.net",
+        "messageText": "Fechado. Boa sorte na execução!\n\nSe precisar de mim depois, é só chamar. 💪",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n48",
+      "name": "UPSELL Redis SET Sessão Concluído",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [2100, 1120],
+      "parameters": {
+        "operation": "set",
+        "key": "=auditoria:session:{{ $('Montar Contexto Completo').first().json.phone }}",
+        "value": "={{ JSON.stringify({ ...JSON.parse($('Redis GET Sessão').first().json?.value ?? '{}'), state: 'CONCLUIDO' }) }}",
+        "expire": true,
+        "ttl": 86400
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n49",
+      "name": "Webhook Stripe Pagamento",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 1500],
+      "webhookId": "stripe-pagamento-auditoria",
+      "parameters": {
+        "path": "stripe-pagamento",
+        "responseMode": "onReceived",
+        "responseData": "noData",
+        "options": {}
+      }
+    },
+
+    {
+      "id": "n50",
+      "name": "STRIPE Code Extrair Phone",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 1500],
+      "parameters": {
+        "jsCode": "const body = $input.first().json;\n\n// Stripe envia o evento como JSON\nconst event = body;\nif (event.type !== 'checkout.session.completed') return [];\n\nconst session = event.data?.object ?? {};\nconst phone   = session.metadata?.phone ?? '';\nconst handle  = session.metadata?.handle ?? '';\n\nif (!phone) return [];\n\nreturn [{ json: { phone, handle, stripeSessionId: session.id } }];\n"
+      }
+    },
+
+    {
+      "id": "n51",
+      "name": "STRIPE Redis GET Sessão",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [520, 1500],
+      "parameters": {
+        "operation": "get",
+        "key": "=auditoria:session:{{ $json.phone }}"
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n52",
+      "name": "STRIPE Code Montar Dados PDF",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 1500],
+      "parameters": {
+        "jsCode": "const stripe = $('STRIPE Code Extrair Phone').first().json;\nconst sessionRaw = $('STRIPE Redis GET Sessão').first().json?.value;\nlet session = {};\ntry { session = JSON.parse(sessionRaw); } catch {}\n\nreturn [{ json: { ...stripe, ...session, phone: stripe.phone } }];\n"
+      }
+    },
+
+    {
+      "id": "n53",
+      "name": "STRIPE HTTP Gerar PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 1500],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL }}/api/generate-pdf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "x-api-key",    "value": "={{ $env.API_SECRET }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ handle: $json.cliente_arroba, nicho: $json.nicho, concorrentes: $json.concorrentes, taxa_cliente: $json.taxa_engajamento_cliente, taxa_concorrente: $json.taxa_engajamento_concorrente, gap: $json.gap_principal, oportunidade: $json.oportunidade_principal, erro: $json.erro_critico }) }}",
+        "options": { "timeout": 60000 }
+      }
+    },
+
+    {
+      "id": "n54",
+      "name": "STRIPE Code Salvar PDF URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 1500],
+      "parameters": {
+        "jsCode": "const ctx    = $('STRIPE Code Montar Dados PDF').first().json;\nconst pdfRes = $('STRIPE HTTP Gerar PDF').first().json;\nreturn [{ json: { ...ctx, pdf_url: pdfRes.pdf_url ?? '' } }];\n"
+      }
+    },
+
+    {
+      "id": "n55",
+      "name": "STRIPE Redis SET PDF URL",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1560, 1500],
+      "parameters": {
+        "operation": "set",
+        "key": "=auditoria:session:{{ $json.phone }}",
+        "value": "={{ JSON.stringify({ ...JSON.parse($('STRIPE Redis GET Sessão').first().json?.value ?? '{}'), pdf_url: $json.pdf_url, state: 'AGUARDANDO_UPSELL' }) }}",
+        "expire": true,
+        "ttl": 86400
+      },
+      "credentials": {
+        "redis": { "id": "REDIS_CRED_ID", "name": "Redis" }
+      }
+    },
+
+    {
+      "id": "n56",
+      "name": "STRIPE WA Confirmação Pagamento",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1820, 1500],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $json.phone }}@s.whatsapp.net",
+        "messageText": "Pagamento confirmado! 🚀\n\nO sistema já gerou o seu documento personalizado.",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n57",
+      "name": "STRIPE WA Enviar PDF",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [2080, 1500],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('STRIPE Code Salvar PDF URL').first().json.phone }}@s.whatsapp.net",
+        "messageText": "={{ '📄 Aqui está o seu relatório:\\n\\n' + $('STRIPE Code Salvar PDF URL').first().json.pdf_url }}",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n58",
+      "name": "STRIPE Wait 5s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2340, 1500],
+      "webhookId": "wait-stripe-1",
+      "parameters": { "resume": "timeInterval", "unit": "seconds", "amount": 5, "options": {} }
+    },
+
+    {
+      "id": "n59",
+      "name": "STRIPE WA Upsell Msg 1",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [2600, 1500],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('STRIPE Code Salvar PDF URL').first().json.phone }}@s.whatsapp.net",
+        "messageText": "Antes de você ir: a maioria lê isso e não aplica nada por falta de tempo ou disciplina.",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    },
+
+    {
+      "id": "n60",
+      "name": "STRIPE Wait 3s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2860, 1500],
+      "webhookId": "wait-stripe-2",
+      "parameters": { "resume": "timeInterval", "unit": "seconds", "amount": 3, "options": {} }
+    },
+
+    {
+      "id": "n61",
+      "name": "STRIPE WA Upsell Oferta",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [3120, 1500],
+      "parameters": {
+        "resource": "messages",
+        "operation": "sendText",
+        "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
+        "remoteJid": "={{ $('STRIPE Code Salvar PDF URL').first().json.phone }}@s.whatsapp.net",
+        "messageText": "Eu posso me plugar aqui no seu WhatsApp e te mandar *1 tarefa mastigada por dia durante 30 dias* para executar esse plano, além de cobrar você se não fizer.\n\nO 'Modo Implementação' custa só mais *R$ 97*.\n\n1️⃣ Adicionar Modo Implementação 🔥\n2️⃣ Vou aplicar sozinho",
+        "options": {}
+      },
+      "credentials": {
+        "evolutionApi": { "id": "EVOLUTION_CRED_ID", "name": "Evolution API" }
+      }
+    }
+
+  ],
+
+  "connections": {
+    "Webhook Entrada":                   { "main": [[{ "node": "Extrair Dados Brutos",          "type": "main", "index": 0 }]] },
+    "Extrair Dados Brutos":              { "main": [[{ "node": "Redis GET Sessão",               "type": "main", "index": 0 }, { "node": "Redis LRANGE Histórico", "type": "main", "index": 0 }]] },
+    "Redis GET Sessão":                  { "main": [[{ "node": "Montar Contexto Completo",       "type": "main", "index": 0 }]] },
+    "Redis LRANGE Histórico":            { "main": [[{ "node": "Montar Contexto Completo",       "type": "main", "index": 0 }]] },
+    "Montar Contexto Completo":          { "main": [[{ "node": "Redis RPUSH Mensagem Usuário",   "type": "main", "index": 0 }]] },
+    "Redis RPUSH Mensagem Usuário":      { "main": [[{ "node": "Switch Estado",                  "type": "main", "index": 0 }]] },
+
+    "Switch Estado": {
+      "main": [
+        [{ "node": "INICIO WA Msg 1",                 "type": "main", "index": 0 }],
+        [{ "node": "HANDLE If Validar Handle",         "type": "main", "index": 0 }],
+        [{ "node": "CONC If Verificar Sem Concorrente","type": "main", "index": 0 }],
+        [{ "node": "PAG If Quer PIX",                  "type": "main", "index": 0 }],
+        [{ "node": "UPSELL If Aceita",                 "type": "main", "index": 0 }]
+      ]
+    },
+
+    "INICIO WA Msg 1":                   { "main": [[{ "node": "INICIO Wait 2s",                 "type": "main", "index": 0 }]] },
+    "INICIO Wait 2s":                    { "main": [[{ "node": "INICIO WA Msg 2 Pedir Handle",   "type": "main", "index": 0 }]] },
+    "INICIO WA Msg 2 Pedir Handle":      { "main": [[{ "node": "Redis SET Sessão AGUARDANDO_HANDLE", "type": "main", "index": 0 }]] },
+
+    "HANDLE If Validar Handle": {
+      "main": [
+        [{ "node": "HANDLE HTTP Apify Instagram",       "type": "main", "index": 0 }],
+        [{ "node": "HANDLE WA Corrigir",                "type": "main", "index": 0 }]
+      ]
+    },
+    "HANDLE HTTP Apify Instagram":       { "main": [[{ "node": "HANDLE HTTP OpenAI Detectar Nicho",  "type": "main", "index": 0 }]] },
+    "HANDLE HTTP OpenAI Detectar Nicho": { "main": [[{ "node": "HANDLE Code Preparar Dados",         "type": "main", "index": 0 }]] },
+    "HANDLE Code Preparar Dados":        { "main": [[{ "node": "HANDLE HTTP GPT4o Confirmar Handle", "type": "main", "index": 0 }]] },
+    "HANDLE HTTP GPT4o Confirmar Handle":{ "main": [[{ "node": "HANDLE WA Confirmar Handle",         "type": "main", "index": 0 }]] },
+    "HANDLE WA Confirmar Handle":        { "main": [[{ "node": "HANDLE Redis RPUSH Bot Confirmação", "type": "main", "index": 0 }]] },
+    "HANDLE Redis RPUSH Bot Confirmação":{ "main": [[{ "node": "HANDLE Redis SET Sessão CONC",       "type": "main", "index": 0 }]] },
+    "HANDLE Redis SET Sessão CONC":      { "main": [[{ "node": "HANDLE Wait 3s",                     "type": "main", "index": 0 }]] },
+    "HANDLE Wait 3s":                    { "main": [[{ "node": "HANDLE WA Pedir Concorrentes",       "type": "main", "index": 0 }]] },
+
+    "CONC If Verificar Sem Concorrente": {
+      "main": [
+        [{ "node": "CONC Code Salvar Concorrentes",     "type": "main", "index": 0 }],
+        [{ "node": "CONC WA Dor Empática",              "type": "main", "index": 0 }]
+      ]
+    },
+    "CONC Code Salvar Concorrentes":     { "main": [[{ "node": "CONC HTTP DeepSeek Análise",         "type": "main", "index": 0 }]] },
+    "CONC HTTP DeepSeek Análise":        { "main": [[{ "node": "CONC HTTP GPT4o Mensagens Espera",   "type": "main", "index": 0 }]] },
+    "CONC HTTP GPT4o Mensagens Espera":  { "main": [[{ "node": "CONC Code Parsear Respostas IA",     "type": "main", "index": 0 }]] },
+    "CONC Code Parsear Respostas IA":    { "main": [[{ "node": "CONC Redis SET Sessão Análise",      "type": "main", "index": 0 }]] },
+    "CONC Redis SET Sessão Análise":     { "main": [[{ "node": "CONC WA Espera 1",                   "type": "main", "index": 0 }]] },
+    "CONC WA Espera 1":                  { "main": [[{ "node": "CONC Wait 4s",                       "type": "main", "index": 0 }]] },
+    "CONC Wait 4s":                      { "main": [[{ "node": "CONC WA Espera 2",                   "type": "main", "index": 0 }]] },
+    "CONC WA Espera 2":                  { "main": [[{ "node": "CONC Wait 6s",                       "type": "main", "index": 0 }]] },
+    "CONC Wait 6s":                      { "main": [[{ "node": "CONC WA Espera 3",                   "type": "main", "index": 0 }]] },
+    "CONC WA Espera 3":                  { "main": [[{ "node": "CONC Wait 3s",                       "type": "main", "index": 0 }]] },
+    "CONC Wait 3s":                      { "main": [[{ "node": "CONC WA Prova Social",               "type": "main", "index": 0 }]] },
+    "CONC WA Prova Social":              { "main": [[{ "node": "CONC Wait 2s Paywall",               "type": "main", "index": 0 }]] },
+    "CONC Wait 2s Paywall":              { "main": [[{ "node": "CONC WA Paywall",                    "type": "main", "index": 0 }]] },
+
+    "PAG If Quer PIX": {
+      "main": [
+        [{ "node": "PAG HTTP Stripe Criar Checkout",    "type": "main", "index": 0 }],
+        [{ "node": "PAG WA Abandono",                   "type": "main", "index": 0 }]
+      ]
+    },
+    "PAG HTTP Stripe Criar Checkout":    { "main": [[{ "node": "PAG Code Salvar Link",             "type": "main", "index": 0 }]] },
+    "PAG Code Salvar Link":              { "main": [[{ "node": "PAG Redis SET Sessão Link",         "type": "main", "index": 0 }]] },
+    "PAG Redis SET Sessão Link":         { "main": [[{ "node": "PAG WA Enviar Link PIX",            "type": "main", "index": 0 }]] },
+
+    "UPSELL If Aceita": {
+      "main": [
+        [{ "node": "UPSELL WA Aceito",                  "type": "main", "index": 0 }],
+        [{ "node": "UPSELL WA Recusado",                "type": "main", "index": 0 }]
+      ]
+    },
+    "UPSELL WA Aceito":                  { "main": [[{ "node": "UPSELL Redis SET Sessão Concluído","type": "main", "index": 0 }]] },
+    "UPSELL WA Recusado":                { "main": [[{ "node": "UPSELL Redis SET Sessão Concluído","type": "main", "index": 0 }]] },
+
+    "Webhook Stripe Pagamento":          { "main": [[{ "node": "STRIPE Code Extrair Phone",         "type": "main", "index": 0 }]] },
+    "STRIPE Code Extrair Phone":         { "main": [[{ "node": "STRIPE Redis GET Sessão",           "type": "main", "index": 0 }]] },
+    "STRIPE Redis GET Sessão":           { "main": [[{ "node": "STRIPE Code Montar Dados PDF",      "type": "main", "index": 0 }]] },
+    "STRIPE Code Montar Dados PDF":      { "main": [[{ "node": "STRIPE HTTP Gerar PDF",             "type": "main", "index": 0 }]] },
+    "STRIPE HTTP Gerar PDF":             { "main": [[{ "node": "STRIPE Code Salvar PDF URL",        "type": "main", "index": 0 }]] },
+    "STRIPE Code Salvar PDF URL":        { "main": [[{ "node": "STRIPE Redis SET PDF URL",          "type": "main", "index": 0 }]] },
+    "STRIPE Redis SET PDF URL":          { "main": [[{ "node": "STRIPE WA Confirmação Pagamento",   "type": "main", "index": 0 }]] },
+    "STRIPE WA Confirmação Pagamento":   { "main": [[{ "node": "STRIPE WA Enviar PDF",              "type": "main", "index": 0 }]] },
+    "STRIPE WA Enviar PDF":              { "main": [[{ "node": "STRIPE Wait 5s",                    "type": "main", "index": 0 }]] },
+    "STRIPE Wait 5s":                    { "main": [[{ "node": "STRIPE WA Upsell Msg 1",            "type": "main", "index": 0 }]] },
+    "STRIPE WA Upsell Msg 1":            { "main": [[{ "node": "STRIPE Wait 3s",                    "type": "main", "index": 0 }]] },
+    "STRIPE Wait 3s":                    { "main": [[{ "node": "STRIPE WA Upsell Oferta",           "type": "main", "index": 0 }]] }
+  },
+
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "2.0.0",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "auditoria-ia"
+  },
+  "id": "auditoria-ia-v2",
+  "tags": ["chatbot", "whatsapp", "ia", "vendas"]
+}

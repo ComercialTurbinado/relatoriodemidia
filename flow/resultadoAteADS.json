@@ -1,0 +1,1353 @@
+[
+  {
+    "data": {
+      "page_info": {
+        "end_cursor": "AQHSRvvkHAtd12ciBhPlDhNCaCSFJV9RGtAwanbtbq9SAHOMKU0mmMq_yyJorbeIyHKe",
+        "has_next_page": true
+      },
+      "ads": [
+        [
+          {
+            "ad_archive_id": "814063249183104",
+            "collation_count": 1,
+            "collation_id": "256950786102991",
+            "page_id": "116046225140581",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "116046225140581",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/DigitalMarketer/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "DigitalMarketer",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/159975634_147296873922536_8783871508027391319_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=c5o-AQmyxekQ7kNvwF3Lboq&_nc_oc=AdoLPEFHLsX_SPH7mxFbpKJOOYznwN5aiZ75hnC3F5TJ4hQoFzMicxvSK59kp1-QzxY&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af0US_NQcKqB6kKyytb9vvDPgb_tpof00ITiWxACV2yXrw&oe=69E6C850",
+              "event": null,
+              "caption": "facebook.com",
+              "cta_text": "Like Page",
+              "cards": [],
+              "body": {
+                "text": "Tools and trainings to out-market the competition."
+              },
+              "cta_type": "LIKE_PAGE",
+              "display_format": "IMAGE",
+              "link_description": "Tools and trainings to out-market the competition. \n",
+              "link_url": "https://www.facebook.com/116046225140581",
+              "images": [
+                {
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/160187970_4002679086460555_7747717006088123594_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XcbW9DQRAGYQ7kNvwGhsZFs&_nc_oc=AdqrE1jQutF65modvtximbmd4zIkRmb0YnD7h57xzAgaPfvl9a3jXJAk9UMPL8tDxks&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af0KlBD3aD7RKhCDQrQCJlLhq6RYH9DHLoup3hewb8hacA&oe=69E6B572",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/159963863_434082920994524_835704970370817026_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cLwhtHOePNUQ7kNvwGUXQPt&_nc_oc=AdrF_6SBezOxxHUtZjWt-yQ_rXrJKnxRnJDdonNkJXHBk22nzMd8FZD59Ra3QGd6iL8&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1TQIlfXh9cHX4vnVkWR5YMa-I54SrxQSQZ_lIkwszL3A&oe=69E6C6E4",
+                  "watermarked_resized_image_url": ""
+                }
+              ],
+              "page_categories": [
+                "Product/Service"
+              ],
+              "page_like_count": 822831,
+              "title": "DigitalMarketer",
+              "videos": [],
+              "is_reshared": false,
+              "extra_links": [],
+              "extra_texts": [],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "DigitalMarketer",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": false,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776236400,
+            "publisher_platform": [
+              "FACEBOOK"
+            ],
+            "start_date": 1615449600,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": true
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ],
+        [
+          {
+            "ad_archive_id": "1259024639537170",
+            "collation_count": null,
+            "collation_id": null,
+            "page_id": "171592649539568",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "171592649539568",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/belasartes/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "Centro Universitário Belas Artes de São Paulo",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/653031382_1456563499289324_1251255680962446830_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=1iYNCMk31PAQ7kNvwELP7Ge&_nc_oc=AdpWezMvsYsueNQ1xyBgjN9LW-4aiSS-giWtuhRuAymnWFxMpX28DLvFbp_J4sD4yZI&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3VUoaCRqCv-MKPpsKE2HHX0TojMspQWev-67DyLJ4eLA&oe=69E6AEFC",
+              "event": null,
+              "caption": "online.belasartes.br",
+              "cta_text": "Shop now",
+              "cards": [
+                {
+                  "body": "",
+                  "cta_type": "SHOP_NOW",
+                  "caption": "online.belasartes.br",
+                  "link_description": "100+ anos de excelência. Cursos, certificações e pós-graduações com certificação MEC em economia criativa. Metodologia de profundidade que transforma perspectivas.",
+                  "link_url": "https://www.belasartes.br/pos-graduacao/matriz-cursos-de-pos-graduacao/growth-marketing-e-performance/",
+                  "title": "Growth Marketing e Performance",
+                  "cta_text": "Shop Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/652354323_1464059625461465_2040454120374060751_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Up8NhFobYh0Q7kNvwH8gU2o&_nc_oc=AdqEGfxmzIkF1KN993f_HH8qV73_yl0xwMxWB31lckCukrW-AyhiFDI1a0KlNYDLo2U&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2cZSjVwukJay2emQQIpN71o9MMkmefx7DBPvxls11ysQ&oe=69E6A137",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/652354323_1464059625461465_2040454120374060751_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Up8NhFobYh0Q7kNvwH8gU2o&_nc_oc=AdqEGfxmzIkF1KN993f_HH8qV73_yl0xwMxWB31lckCukrW-AyhiFDI1a0KlNYDLo2U&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2h9HkXPixIIdlkzWIS5AoNrED4kpe5efBBfuwVsTedaw&oe=69E6A137",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": "",
+                  "cta_type": "SHOP_NOW",
+                  "caption": "online.belasartes.br",
+                  "link_description": "100+ anos de excelência. Cursos, certificações e pós-graduações com certificação MEC em economia criativa. Metodologia de profundidade que transforma perspectivas.",
+                  "link_url": "https://www.belasartes.br/pos-graduacao/matriz-cursos-de-pos-graduacao/branding-e-gestao-de-marcas/",
+                  "title": "Branding e Gestão de Marcas",
+                  "cta_text": "Shop Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/653202235_734350342975782_5993773412012033897_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=9oXIdTsh42kQ7kNvwHXmz5F&_nc_oc=AdoNYIrempcqu8Ogg16xh80uyNmKnPRIvQsOKopCKI9xo-m2OQxoXFxds52mf82JYBU&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af0X6RQZpFQOh3vo_-PlUNFMvOzahglWdsZIGc3mfyRGaQ&oe=69E6C8F3",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/653202235_734350342975782_5993773412012033897_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=9oXIdTsh42kQ7kNvwHXmz5F&_nc_oc=AdoNYIrempcqu8Ogg16xh80uyNmKnPRIvQsOKopCKI9xo-m2OQxoXFxds52mf82JYBU&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af0-BDRDKQ-ZbFG_tzo1ropDDKdZ20btpmvBbYOpPoks8g&oe=69E6C8F3",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": "",
+                  "cta_type": "SHOP_NOW",
+                  "caption": "online.belasartes.br",
+                  "link_description": "100+ anos de excelência. Cursos, certificações e pós-graduações com certificação MEC em economia criativa. Metodologia de profundidade que transforma perspectivas.",
+                  "link_url": "https://www.belasartes.br/pos-graduacao/matriz-cursos-de-pos-graduacao/marketing-digital-e-e-commerce/",
+                  "title": "Marketing Digital e E-commerce",
+                  "cta_text": "Shop Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/654209555_1839734640072199_4038680034817421819_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=QiUsP3hhqpAQ7kNvwEb-xTX&_nc_oc=AdpgNUIPa-IGbFfKYQJrSyXBlDJsWZS0xae28JrG9mG40khLcvcxOy6-mX1vzccoLtc&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1SSr8xj3ka1v1AIYiesi0eWABZpXvrv5K8AcKRNnUZuw&oe=69E6BA9D",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/654209555_1839734640072199_4038680034817421819_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=QiUsP3hhqpAQ7kNvwEb-xTX&_nc_oc=AdpgNUIPa-IGbFfKYQJrSyXBlDJsWZS0xae28JrG9mG40khLcvcxOy6-mX1vzccoLtc&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2YqQFADqcOsjcVIg5QZ_hLSSIQHAliP9AS3ot45xZm5Q&oe=69E6BA9D",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": "",
+                  "cta_type": "SHOP_NOW",
+                  "caption": "online.belasartes.br",
+                  "link_description": "100+ anos de excelência. Cursos, certificações e pós-graduações com certificação MEC em economia criativa. Metodologia de profundidade que transforma perspectivas.",
+                  "link_url": "https://www.belasartes.br/pos-graduacao/matriz-cursos-de-pos-graduacao/arquitetura-sustentavel-e-bim/",
+                  "title": "Arquitetura Sustentável e BIM",
+                  "cta_text": "Shop Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/654212562_962551202782940_4928232991125639774_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=GYC0fH0ZY_MQ7kNvwHG_ibI&_nc_oc=AdoDIfyyJo_6V1C9Ai5L7wLrLHlgaYxzkIUdMVElqd3bAieh3ODlNLIp_Psca7VEmpw&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1a-x7CqgWNWbJp5nwu7SCJZ-QheaMe1u8sXbabCwaoBw&oe=69E6A1AF",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/654212562_962551202782940_4928232991125639774_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=GYC0fH0ZY_MQ7kNvwHG_ibI&_nc_oc=AdoDIfyyJo_6V1C9Ai5L7wLrLHlgaYxzkIUdMVElqd3bAieh3ODlNLIp_Psca7VEmpw&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af24Fw8jNxxhgqYoSNrpxOlLmyRVo94YWeb46LDKFu2nmw&oe=69E6A1AF",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": "",
+                  "cta_type": "SHOP_NOW",
+                  "caption": "online.belasartes.br",
+                  "link_description": "100+ anos de excelência. Cursos, certificações e pós-graduações com certificação MEC em economia criativa. Metodologia de profundidade que transforma perspectivas.",
+                  "link_url": "https://www.belasartes.br/pos-graduacao/matriz-cursos-de-pos-graduacao/gestao-de-pessoas-e-cultura-organizacional/",
+                  "title": "Gestão de Pessoas e Cultura Organizacional",
+                  "cta_text": "Shop Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/653880115_695300276961353_1547335160520696741_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=F1iW2YakUqEQ7kNvwHctqTb&_nc_oc=AdocqRxxawuV_xg2MuU79uRIaDoeU4PL1GLhr_qfDLV1SioeLIoti_Afg4S-fWP7LKo&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3uEBMrGAy9-97KDTLmUkOjeFXkKcEWC6Lt3EgsQTi8IA&oe=69E6B595",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/653880115_695300276961353_1547335160520696741_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=F1iW2YakUqEQ7kNvwHctqTb&_nc_oc=AdocqRxxawuV_xg2MuU79uRIaDoeU4PL1GLhr_qfDLV1SioeLIoti_Afg4S-fWP7LKo&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af39t6WEncj7JK7Tw6Pcf706D1iFc5pJXHl-dp_3QpPqGg&oe=69E6B595",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": "",
+                  "cta_type": "SHOP_NOW",
+                  "caption": "online.belasartes.br",
+                  "link_description": "100+ anos de excelência. Cursos, certificações e pós-graduações com certificação MEC em economia criativa. Metodologia de profundidade que transforma perspectivas.",
+                  "link_url": "https://www.belasartes.br/pos-graduacao/matriz-cursos-de-pos-graduacao/gestao-de-projetos-e-metodologias-ageis/",
+                  "title": "Gestão de Projetos e Metodologias Ágeis",
+                  "cta_text": "Shop Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/653035519_1726771028691623_6776032200994175015_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=EWoHBjsjMyQQ7kNvwGaNWy7&_nc_oc=Adp8tzpmGVR4Mb526YIm54OBhYvW5P2jGf1Kc2c8-EQZ7bJeEJIdec9R6dY02Y-EwcM&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1LkMEV9jVb9ae0uP2NjxRBb2DsumKJDNoCFbipuIPKQQ&oe=69E69C58",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/653035519_1726771028691623_6776032200994175015_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=EWoHBjsjMyQQ7kNvwGaNWy7&_nc_oc=Adp8tzpmGVR4Mb526YIm54OBhYvW5P2jGf1Kc2c8-EQZ7bJeEJIdec9R6dY02Y-EwcM&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3AsdVNvNmRE5cOgfmfD3upp6pYfGrAxqOG9LypyFcXmQ&oe=69E69C58",
+                  "watermarked_resized_image_url": ""
+                }
+              ],
+              "body": null,
+              "cta_type": "SHOP_NOW",
+              "display_format": "DPA",
+              "link_description": null,
+              "link_url": "http://online.belasartes.br/",
+              "images": [],
+              "page_categories": [
+                "College & university"
+              ],
+              "page_like_count": 187682,
+              "title": "{{product.name}}",
+              "videos": [],
+              "is_reshared": false,
+              "extra_links": [],
+              "extra_texts": [],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "Centro Universitário Belas Artes de São Paulo",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": false,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776322800,
+            "publisher_platform": [
+              "FACEBOOK",
+              "INSTAGRAM",
+              "THREADS"
+            ],
+            "start_date": 1773817200,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": false
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ],
+        [
+          {
+            "ad_archive_id": "824177869954944",
+            "collation_count": null,
+            "collation_id": null,
+            "page_id": "134577187146",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "134577187146",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/Cognizant/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "Cognizant",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/654114079_2518001451948208_54035299206224972_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=4Bn_3YLjkE8Q7kNvwF4lD0x&_nc_oc=AdoydTXP73NegK10bXz34TYE_zrlZ9xW55xPGfo0M3l5pQdY0-SKXr_4op0kksnTIWE&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3gWFq1cal0zWyF4Nxp1ZtL1UVm4ViEeJGHMKYNwxH6hQ&oe=69E69DD6",
+              "event": null,
+              "caption": "careers.cognizant.com",
+              "cta_text": "Apply now",
+              "cards": [],
+              "body": {
+                "text": "Cresça com inovação e diversidade na Cognizant Brasil. Vagas abertas!"
+              },
+              "cta_type": "APPLY_NOW",
+              "display_format": "IMAGE",
+              "link_description": "Desenvolva sua carreira em Marketing Digital na Cognizant! Preencha nosso formulário para ser contatado por nossa equipe de recrutamento e descubra as oportunidades que temos para você. Em 2025, fomos reconhecidos como um dos melhores lugares para trabalhar e como uma das melhores empresas para pr...",
+              "link_url": "https://careers.cognizant.com/latam-pt/caminhos-para-a-cognizant/carreiras-em-marketing-digital/?utm_source=SEM&utm_medium=AppcastMetaBrazil",
+              "images": [
+                {
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/654829754_1911709462780894_5169796548583610005_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=fUTnUwfqm2wQ7kNvwFhOwiN&_nc_oc=Adrfq1KrOghT9tZ1CdM9jZGdEZ27rHlc6v1xWyUmqdweym0u_ONO-SFdAp1UZ9kvmU8&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af06JwTU6fQdz8stWJZu-KHjQInX7dfunGYyPSGW5nbmqQ&oe=69E6AE51",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/655142093_940472531907469_5326886079094164418_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=pWQ9hjSHwlcQ7kNvwG2skkn&_nc_oc=AdpZ6spGJHDG16HVWC8cmxEEUmyOmeXhURA_Iy-C8FxZb306-1vC-nvf9yvYtw4fFb8&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2Gql9ZX_xTthdYfat0faHuZeWPHFSEAiatsGl15us8nw&oe=69E694A5",
+                  "watermarked_resized_image_url": ""
+                }
+              ],
+              "page_categories": [
+                "Business"
+              ],
+              "page_like_count": 418233,
+              "title": "Oportunidades em Mkt digital",
+              "videos": [],
+              "is_reshared": false,
+              "extra_links": [],
+              "extra_texts": [],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "Cognizant",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": false,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776322800,
+            "publisher_platform": [
+              "FACEBOOK",
+              "INSTAGRAM",
+              "AUDIENCE_NETWORK",
+              "MESSENGER",
+              "THREADS"
+            ],
+            "start_date": 1773990000,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": false
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ],
+        [
+          {
+            "ad_archive_id": "316406334718317",
+            "collation_count": 1,
+            "collation_id": "1887792055010281",
+            "page_id": "569418683475917",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "569418683475917",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/maisprofissao/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "Mais Profissão - Projeto Educacional",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420527483_364279149557156_4809078971430075155_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=KZSRLVA5hpgQ7kNvwFyrZAt&_nc_oc=AdqjTF9Fhu7fzrfIU7BepbADHCl1mDmfHH059oysyfW_PUhQoh_5YY6B0EtpCDn861o&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3jfym4Nl2pLsuBgi2Ym8eiJMP37kAoIUwC0WVn_6Lc6A&oe=69E6C486",
+              "event": null,
+              "caption": "https://maisprofissao.com.br/gratis/",
+              "cta_text": "Order now",
+              "cards": [
+                {
+                  "body": ">> CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS - AM ,<<\n\nhttps://maisprofissao.com.br/gratis/ <<\nSelecione agora seu CURSO GRÁTIS e\n✅VAGAS PARA BOLSAS PARCIAIS:\nInformática Avançada\nMarketing Digital\nDesenvolvedor de Games\nDesigner Gráfico\nProgramação de computadores\nMontagem e manutenção de computador\nAdministração\nSecretariado\nGestão de Pessoas\nAtendente de farmácia\nRecepcionista de serviços de saúde\nPower BI\n\n- VAGAS LIMITADAS -",
+                  "cta_type": "SIGN_UP",
+                  "caption": "https://maisprofissao.com.br/gratis/",
+                  "link_description": "",
+                  "link_url": "https://maisprofissao.com.br/gratis/",
+                  "title": "CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS",
+                  "cta_text": "Sign Up",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/419735413_347875911530875_1121334657238780524_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=vMXy8XqO7oYQ7kNvwH842k7&_nc_oc=Adq-Yf4nItOxzc--zExUfZU5nwAHzbdjXukCaQny75XaxiyyZoX7ERNgMoKe_IxqQLU&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2Yb5ORtUouFa1ZabwoYcSDyt0KFQuZbG33FGHnlZiYKQ&oe=69E6C8C0",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420862358_886748959604586_8434828677977253963_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=104&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=vs8sOAI0UwYQ7kNvwEn1fXZ&_nc_oc=AdoZ_oChAmhwoIR2Bd4hpDcvv8WPdaK4ow2cZQ17_YQpQmP9Gnl5a0mtexf1O_qxqfA&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2qsD0q_vfGwTg5NHYY9arWf3iG3KyPLenfJu_muIFHUg&oe=69E6A4F5",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": ">> CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS - AM ,<<\n\nhttps://maisprofissao.com.br/gratis/ <<\nSelecione agora seu CURSO GRÁTIS e\n✅VAGAS PARA BOLSAS PARCIAIS:\nInformática Avançada\nMarketing Digital\nDesenvolvedor de Games\nDesigner Gráfico\nProgramação de computadores\nMontagem e manutenção de computador\nAdministração\nSecretariado\nGestão de Pessoas\nAtendente de farmácia\nRecepcionista de serviços de saúde\nPower BI\n\n- VAGAS LIMITADAS -",
+                  "cta_type": "APPLY_NOW",
+                  "caption": "https://maisprofissao.com.br/gratis/",
+                  "link_description": "",
+                  "link_url": "https://maisprofissao.com.br/gratis/",
+                  "title": "CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS",
+                  "cta_text": "Apply Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420847106_753291130186528_1769475537085055567_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Kjm8SuPGR_MQ7kNvwFI-xW9&_nc_oc=Adp2cIYrbAgkmdmE7fTmI7EtfPl4I5Y-Y-fi3-cH6z5IFviy-5-tqVpulkC-WyV64mo&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af0gZBSDy9S2EfIAQRKfbQfY5Ykac0yNF5vomV3l79PH9g&oe=69E6B24F",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420544084_926120322192577_4068056313864350725_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=sAWEpgnnczgQ7kNvwE482xd&_nc_oc=AdriEc83S5WbWW0e3wZceSDLFLf1mUT0vGbWXLXYktd100EF8j1lTtO3V09bLIrY0L0&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2akJrD4cRXR3nNynvXIGev3w4zjlAPYu1TeIHiqm-rrg&oe=69E6CA8D",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": ">> CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS - AM ,<<\n\nhttps://maisprofissao.com.br/gratis/ <<\nSelecione agora seu CURSO GRÁTIS e\n✅VAGAS PARA BOLSAS PARCIAIS:\nInformática Avançada\nMarketing Digital\nDesenvolvedor de Games\nDesigner Gráfico\nProgramação de computadores\nMontagem e manutenção de computador\nAdministração\nSecretariado\nGestão de Pessoas\nAtendente de farmácia\nRecepcionista de serviços de saúde\nPower BI\n\n- VAGAS LIMITADAS -",
+                  "cta_type": "PAY_TO_ACCESS",
+                  "caption": "https://maisprofissao.com.br/gratis/",
+                  "link_description": "",
+                  "link_url": "https://maisprofissao.com.br/gratis/",
+                  "title": "CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS",
+                  "cta_text": "Get Access",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/419724678_339657958981875_182508812062960920_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=fiWFN_eBtuUQ7kNvwE5tFzV&_nc_oc=AdqwwSQXJqzC-4dk-3JHC2UNANvo9gI1EmOHq9F5SgaD4Pc3sDfXMjq64O8tlTApShY&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3GJzPHNuDbt4npvqRNbI9HM4lXNCisuJpTNlb7J0wnUA&oe=69E69B09",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/421010565_429458482741456_3975396350779618117_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=uEZHqOOUmJMQ7kNvwEejNb7&_nc_oc=AdpLi0JHb4YTeqavJM87CPDzsuJYwEGJOeKpowupTek9ES5Oxiz4-v0eKppB9J8ZoUI&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3SoFFDvNQBo0R-0rzUnEsD6RIsz3lsGjj10IQwS7vS4A&oe=69E6B012",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": ">> CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS - AM ,<<\n\nhttps://maisprofissao.com.br/gratis/ <<\nSelecione agora seu CURSO GRÁTIS e\n✅VAGAS PARA BOLSAS PARCIAIS:\nInformática Avançada\nMarketing Digital\nDesenvolvedor de Games\nDesigner Gráfico\nProgramação de computadores\nMontagem e manutenção de computador\nAdministração\nSecretariado\nGestão de Pessoas\nAtendente de farmácia\nRecepcionista de serviços de saúde\nPower BI\n\n- VAGAS LIMITADAS -",
+                  "cta_type": "BOOK_TRAVEL",
+                  "caption": "https://maisprofissao.com.br/gratis/",
+                  "link_description": "",
+                  "link_url": "https://maisprofissao.com.br/gratis/",
+                  "title": "CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS",
+                  "cta_text": "Book Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420878457_1288642891815313_4576650651541303409_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=X5VKTp-_4gYQ7kNvwHxfEMb&_nc_oc=AdrlWg_ZCAwA8U_LD8ZesJVMkvBGLIm3urdsZ1_jl_EryW1hdjybnmwLeP59zrpSkDY&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3vAuN9AgkNTSDQFNOvJDYyz6DrUswIa8SNbXZXDkDVIw&oe=69E69515",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420933194_3465476836931199_794913854444168950_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=101&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=DNTtAUjH-3cQ7kNvwF1cirS&_nc_oc=Adr93gsICOBLSl89kqHl8r6eTYORmlBFxrd9jVXNN9Z0SLtbwRYqOvYdntu06yXlVkw&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2SKK9WSz-xquOG1Twi6AFJH4NOhdQFdz4TLF1DJCoKZQ&oe=69E6B60B",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": ">> CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS - AM ,<<\n\nhttps://maisprofissao.com.br/gratis/ <<\nSelecione agora seu CURSO GRÁTIS e\n✅VAGAS PARA BOLSAS PARCIAIS:\nInformática Avançada\nMarketing Digital\nDesenvolvedor de Games\nDesigner Gráfico\nProgramação de computadores\nMontagem e manutenção de computador\nAdministração\nSecretariado\nGestão de Pessoas\nAtendente de farmácia\nRecepcionista de serviços de saúde\nPower BI\n\n- VAGAS LIMITADAS -",
+                  "cta_type": "ORDER_NOW",
+                  "caption": "https://maisprofissao.com.br/gratis/",
+                  "link_description": "",
+                  "link_url": "https://maisprofissao.com.br/gratis/",
+                  "title": "CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS",
+                  "cta_text": "Order Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420541470_289375234147750_5971015637854516580_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=NmPb_WyMzfEQ7kNvwE-Whwk&_nc_oc=AdqkrxpsAl9VoNZISOXDOeicjC4JS4JuZWjqxR6tHf8MVSsUKU_EPye3ND6OWMrw5iA&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1i6vNU3Tqwe8Qv1lVBpDEWL6Sip8f81NB9NgnB22Z_Xg&oe=69E6BACA",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420539322_389360146906928_5704895112341807858_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=4ttWntvU7xkQ7kNvwEP8g53&_nc_oc=AdrqwDtkif6I_oUqNuT5wIQLbbrAMl2ae0SA2X8wOKfuVROw_z6-1scD5HeAjN3KFkQ&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2Oo1iskUkWmza7lwGHnqblG1OguYrcGCZYqRC_y92SPQ&oe=69E6C334",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": ">> CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS - AM ,<<\n\nhttps://maisprofissao.com.br/gratis/ <<\nSelecione agora seu CURSO GRÁTIS e\n✅VAGAS PARA BOLSAS PARCIAIS:\nInformática Avançada\nMarketing Digital\nDesenvolvedor de Games\nDesigner Gráfico\nProgramação de computadores\nMontagem e manutenção de computador\nAdministração\nSecretariado\nGestão de Pessoas\nAtendente de farmácia\nRecepcionista de serviços de saúde\nPower BI\n\n- VAGAS LIMITADAS -",
+                  "cta_type": "SIGN_UP",
+                  "caption": "https://maisprofissao.com.br/gratis/",
+                  "link_description": "",
+                  "link_url": "https://maisprofissao.com.br/gratis/",
+                  "title": "CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS",
+                  "cta_text": "Sign Up",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420525142_1079171420011308_6102410088474088062_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Uu_WQTyt0sMQ7kNvwGzF_rR&_nc_oc=AdrwVAnoJC8gCPnpbHCxJp67Y70a6Z8_pbswcKWIW8TpFFWnzeN9HjP4MtriedoOVg8&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af35XXuxvT2Wd1k4bz4JR8VV5apQaW4ZntbXXZs4BrVdlQ&oe=69E6C5E6",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420489581_1100455471143474_7892504890508216529_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=HJ783HvOdAwQ7kNvwGw_oFh&_nc_oc=Adqf1CqXDvVRWxSfKlzWutzXg34olbSfrPDkjF2fqY2ThBrfPpJGHshD0gAT9EuRExw&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2HIw8FZkMWwLgByV_ruDlUUpV0_DH6cXgjshqXlnr28w&oe=69E69B84",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": ">> CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS - AM ,<<\n\nhttps://maisprofissao.com.br/gratis/ <<\nSelecione agora seu CURSO GRÁTIS e\n✅VAGAS PARA BOLSAS PARCIAIS:\nInformática Avançada\nMarketing Digital\nDesenvolvedor de Games\nDesigner Gráfico\nProgramação de computadores\nMontagem e manutenção de computador\nAdministração\nSecretariado\nGestão de Pessoas\nAtendente de farmácia\nRecepcionista de serviços de saúde\nPower BI\n\n- VAGAS LIMITADAS -",
+                  "cta_type": "APPLY_NOW",
+                  "caption": "https://maisprofissao.com.br/gratis/",
+                  "link_description": "",
+                  "link_url": "https://maisprofissao.com.br/gratis/",
+                  "title": "CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS",
+                  "cta_text": "Apply Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420844526_400318975891800_8223314438839358502_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Sivub6sJkooQ7kNvwGf9W4q&_nc_oc=Adpe97m3ufLlpNNLinsZZ0a9svR-rMvlV1IOW2yldCtP_WB3-w8UsA2D05eQVSQVBZ4&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af04Zxrpg-8EKikGIsZ-13ZYRwJEJcAxnhvhOaZCyozHaw&oe=69E6B456",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420521783_735552432121953_6295309335851577486_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=101&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=HnvYF5Y6uqsQ7kNvwEB2RC7&_nc_oc=AdquS7G_feJBJ2DyZArPqBeU80MHsHV-s44WbJ1oh6MBub5fZhFQEY_FghZLZBjhR9M&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af0z93jcWn_TuFVQfN1i_-EvwLZfOWNPopwo3pVYwZ06ng&oe=69E692E9",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": ">> CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS - AM ,<<\n\nhttps://maisprofissao.com.br/gratis/ <<\nSelecione agora seu CURSO GRÁTIS e\n✅VAGAS PARA BOLSAS PARCIAIS:\nInformática Avançada\nMarketing Digital\nDesenvolvedor de Games\nDesigner Gráfico\nProgramação de computadores\nMontagem e manutenção de computador\nAdministração\nSecretariado\nGestão de Pessoas\nAtendente de farmácia\nRecepcionista de serviços de saúde\nPower BI\n\n- VAGAS LIMITADAS -",
+                  "cta_type": "PAY_TO_ACCESS",
+                  "caption": "https://maisprofissao.com.br/gratis/",
+                  "link_description": "",
+                  "link_url": "https://maisprofissao.com.br/gratis/",
+                  "title": "CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS",
+                  "cta_text": "Get Access",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420903497_251103818013766_7682493029016536581_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=4NYnXhTFRHkQ7kNvwGLQ55c&_nc_oc=AdriS6q3j7mVTw3IMR-3DTCGitwfuAlGtVXz0tQHtwnLxnGoTZW0qoWC-shoHTm0VqU&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3tv9qeKTzWu8vWbt7qxa8F9_-As9S1n64M-S8WFNVIzg&oe=69E6ABC8",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420853800_363319852998660_4098777694799266109_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=DwKTxnlgDwkQ7kNvwG8kOVg&_nc_oc=Adpcghrj0Gxv6PB0JuGhtDPT4-XxOI8D4wJ8v3XgJERxg_tqf2gu693tEbg25Ijz0-U&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1u2R5zkqL-5ujg8djHCXkRn4_9VOPkr3YANNTSoQmswQ&oe=69E6C8DF",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": ">> CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS - AM ,<<\n\nhttps://maisprofissao.com.br/gratis/ <<\nSelecione agora seu CURSO GRÁTIS e\n✅VAGAS PARA BOLSAS PARCIAIS:\nInformática Avançada\nMarketing Digital\nDesenvolvedor de Games\nDesigner Gráfico\nProgramação de computadores\nMontagem e manutenção de computador\nAdministração\nSecretariado\nGestão de Pessoas\nAtendente de farmácia\nRecepcionista de serviços de saúde\nPower BI\n\n- VAGAS LIMITADAS -",
+                  "cta_type": "BOOK_TRAVEL",
+                  "caption": "https://maisprofissao.com.br/gratis/",
+                  "link_description": "",
+                  "link_url": "https://maisprofissao.com.br/gratis/",
+                  "title": "CURSOS GRATUITOS E BOLSAS PARCIAIS EM MANAUS",
+                  "cta_text": "Book Now",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420854811_366024852848828_5458259371037756136_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=g1n5hHXcEGkQ7kNvwH80mrp&_nc_oc=Adpy02-rVnD57pNWxk-quv9F4AbL79usTy9JncmpJtWDI4r10wOeVmVHTLoanTRahsM&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af0DGsQnxDEecB11D4_CXHwVjs7URLaIIlB9bPUgYLHvXQ&oe=69E69CFD",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/420538703_715416604027112_8475203298590743851_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=s6gOJd0rBa4Q7kNvwGJSj9K&_nc_oc=AdpFTH6ztlO_a8Kn_mirQUwu9BngTUpdv0b2Ve4LhIm2Xm674eT274lcNtk8BPjRO_8&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af34Glru68NEv53nXNny52KMyGJDpNn1llDj1bsITMmGvw&oe=69E6CAE2",
+                  "watermarked_resized_image_url": ""
+                }
+              ],
+              "body": {
+                "text": "{{product.brand}}"
+              },
+              "cta_type": "ORDER_NOW",
+              "display_format": "DCO",
+              "link_description": "{{product.description}}",
+              "link_url": "https://maisprofissao.com.br/gratis/",
+              "images": [],
+              "page_categories": [
+                "School"
+              ],
+              "page_like_count": 649,
+              "title": "{{product.name}}",
+              "videos": [],
+              "is_reshared": false,
+              "extra_links": [],
+              "extra_texts": [],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "Mais Profissão - Projeto Educacional",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": false,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776322800,
+            "publisher_platform": [
+              "FACEBOOK",
+              "INSTAGRAM",
+              "AUDIENCE_NETWORK",
+              "MESSENGER"
+            ],
+            "start_date": 1705564800,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": false
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ],
+        [
+          {
+            "ad_archive_id": "1456417638251560",
+            "collation_count": 1,
+            "collation_id": "873633217611674",
+            "page_id": "112348703934361",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "112348703934361",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/HandcraftedMarketingSolutions/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "Handcrafted Marketing Solutions LLC.",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/397433775_772158388050307_2291077605517673834_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=F21zhD8bXS0Q7kNvwHydRmM&_nc_oc=AdpLhJdcPfvwaEyEzYUOGWhyZaTSyCv86OKikNfdaiojf2oEC4NSKNOqqyGf1S6qyeA&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af17EWGbZjBqqSgAGdGUYoAiUIDAJpdGDpH6QisHkmspqQ&oe=69E6C6A9",
+              "event": null,
+              "caption": null,
+              "cta_text": "Book now",
+              "cards": [],
+              "body": {
+                "text": "SEO: A Journey, Not a Destination! At Handcrafted Marketing Solutions, we understand that SEO is an ongoing endeavor. There's no 'winning' and stopping – it's about continuous efforts and adapting to Google's evolving algorithms. Every business has unique challenges on the road to their goals. Let us be your guide on this ever-evolving journey to digital success.\n\nHandcrafted Marketing Solutions\n941.999.0105\nhttps://loom.ly/m7sjJWM\n\n#digitalmarketing #localSEO #businesslistings #websitedesign #socialmediamarketing #onlinereputation #storybranding #marketingstrategy #marketingconsulting #onlinepresence #SEOjourney"
+              },
+              "cta_type": "BOOK_TRAVEL",
+              "display_format": "IMAGE",
+              "link_description": null,
+              "link_url": "https://calendly.com/handcraftedmarketingsolutions",
+              "images": [
+                {
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/396880662_1384861809076274_550658455865532518_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=UJ-trjBvJCkQ7kNvwEIgSPM&_nc_oc=AdqQ9GL31R9I2CEOU3b1P24P8yMBJD7P4J58Fa8_nf6nfFbnm1jJFck_ejr_hwSK4aw&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1xfSnIK6XP37eDolO4QmEYZROYsyVroe-0psK423QCeA&oe=69E6AC0C",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/396874496_346895504552786_8969555529744107410_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=5TGXEDXY_UsQ7kNvwEhL4cp&_nc_oc=AdrZeMGuFRvTZV33n4MTNORDwJioC2sX8XC-aL-G5Si-B5JLo8w3ng0zP_rTDTspMWc&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2E5aCaBIaT7eNJxI4DTnYbI6Pp5d7eDkzkUkXfee6_Qw&oe=69E6A3B1",
+                  "watermarked_resized_image_url": ""
+                }
+              ],
+              "page_categories": [
+                "Business"
+              ],
+              "page_like_count": 865,
+              "title": null,
+              "videos": [],
+              "is_reshared": false,
+              "extra_links": [],
+              "extra_texts": [],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "Handcrafted Marketing Solutions LLC.",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": true,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776322800,
+            "publisher_platform": [
+              "FACEBOOK",
+              "INSTAGRAM",
+              "AUDIENCE_NETWORK",
+              "MESSENGER"
+            ],
+            "start_date": 1698822000,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": false
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ],
+        [
+          {
+            "ad_archive_id": "1223380895925488",
+            "collation_count": null,
+            "collation_id": null,
+            "page_id": "1564772383760364",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "1564772383760364",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/Slidebooks/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "Domont Consulting",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/456443769_1645581359702137_5448250618277321710_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=3JklJW1lqKgQ7kNvwE9QBvL&_nc_oc=AdqV5J5uq-8jtmTK2syxvvqm_LWnTZs0N_QwFfl1xSkO1D_Ozgixatz7rkqhe7DL3i8&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2RGNadEmzulRHV3oNjwCi97IR_cXTi5NvclTHxw0LdIg&oe=69E6961C",
+              "event": null,
+              "caption": "www.domontconsulting.com",
+              "cta_text": "Learn more",
+              "cards": [],
+              "body": {
+                "text": "Frameworks, Best Practices & Templates created by ex-McKinsey, Deloitte & BCG Consultants.\n\nJoin 200,000+ Executives, Consultants & Entrepreneurs leveraging our Toolkits to improve the growth & efficiency of their organization."
+              },
+              "cta_type": "LEARN_MORE",
+              "display_format": "IMAGE",
+              "link_description": "Created by Ex-McKinsey, Deloitte & BCG Consultants",
+              "link_url": "https://www.domontconsulting.com/",
+              "images": [
+                {
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/456463626_1504230760233626_6377150084186854032_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=M2rYcIqluZkQ7kNvwHLLN1s&_nc_oc=AdqFOEWuddi4brbyN29aDG-rc7AeCpVp77k4WI04XC31MsCLKd2h3vj-sEpPR72mTi8&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1Cg68gYIhS0pg0fL9VHS6IRF0K8XCtXIGBuHTmVjLMQw&oe=69E6C4B4",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/456380262_519097277262474_1074442943609296960_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=107&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=eQbHP6DSQw0Q7kNvwE-AHXp&_nc_oc=AdrST4aYbuim6jUx3IAmj0tPlPz28Tu521JTPjlntffSUdaLjR0nYgL2F75xXo2uzTs&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af0TMaMhr6rw11p0G9dvy0XijhFNULg_V8RbREdVOZtF6g&oe=69E6BC09",
+                  "watermarked_resized_image_url": ""
+                }
+              ],
+              "page_categories": [
+                "Consulting agency"
+              ],
+              "page_like_count": 18530,
+              "title": "World's Best Business & Consulting Toolkits",
+              "videos": [],
+              "is_reshared": false,
+              "extra_links": [],
+              "extra_texts": [],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "Domont Consulting",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": true,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776322800,
+            "publisher_platform": [
+              "FACEBOOK",
+              "INSTAGRAM",
+              "MESSENGER",
+              "THREADS"
+            ],
+            "start_date": 1769414400,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": false
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ],
+        [
+          {
+            "ad_archive_id": "719265791054858",
+            "collation_count": 1,
+            "collation_id": "1804951760158149",
+            "page_id": "333436446527815",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "333436446527815",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/61561523328020/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "Infinity School",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/619131838_856457787225915_4541511833860724402_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=xnuRZatsM3YQ7kNvwGOJGTM&_nc_oc=AdpCmQ7wzZYhm0mq-LUO0kF7-PRde8jtj6CqlWA0hT2JBJsMgPmvFejvaHVlU6S4TZM&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2ClKuMkYwqAhx8lc1r9Rmk_aXhPMwY0ZZSudZtiRkU3A&oe=69E6B286",
+              "event": null,
+              "caption": "WhatsApp",
+              "cta_text": "Send WhatsApp message",
+              "cards": [],
+              "body": {
+                "text": "Aqui estão as opções de copy focadas no curso/workshop de Programação Full Stack com Inteligência Artificial, mantendo a estratégia da oferta irresistível de R$ 9,00.\n\nO foco aqui muda um pouco: sai a criatividade do marketing e entra a lógica, carreira e altos salários, mostrando como a IA acelera o aprendizado de código.\n\nOpção 1: Anúncio de Alta Conversão (Instagram/Meta Ads)\nHeadline na Imagem: Aprenda a Programar com IA. De ~R$ 200~ por R$ 9,00. Visual sugerido: Aluno em frente a um monitor com código (tema escuro) e ícones de IA (robô/cérebro digital) brilhando ao lado.\n\nLegenda: 💻 QUER ENTRAR NA ÁREA QUE MAIS PAGA NO MUNDO?\n\nDizem que a IA vai substituir os programadores. Mentira. A IA vai substituir os programadores que não usam IA.\n\nA Infinity School abriu vagas para a Imersão Presencial Full Stack & AI Coding. Você vai aprender na prática como criar sites e sistemas usando Inteligência Artificial para codar 10x mais rápido.\n\n👨‍💻 O que rola nesse encontro:\n\nLógica de programação descomplicada.\n\n📍 Válido para: Salvador, Fortaleza, Recife, BH e SP.\n\n💸 O Investimento? R$ 9,00. É o valor simbólico para separar os curiosos dos futuros Devs de sucesso.\n\n⚠️ Atenção: Nossas turmas são reduzidas (máximo 15-20 alunos por laboratório) para garantir atenção total do professor.\n\nToque no botão e garanta sua cadeira antes que a turma lote.\n\n#Programação #FullStack #Dev #Python #JavaScript #InfinitySchool #CarreiraTech"
+              },
+              "cta_type": "WHATSAPP_MESSAGE",
+              "display_format": "IMAGE",
+              "link_description": null,
+              "link_url": "https://api.whatsapp.com/send",
+              "images": [
+                {
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/619784342_1092626049607338_6472085793140129313_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=QHvrrnBkOdIQ7kNvwHdX717&_nc_oc=AdqscpbzPzMFb4y0tYC7llQdiRpVgOtJwpmnbiDocax0HqC3-FRuARSwA98aFFpFHJc&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af11x6TXFCS9Ze_5XNKUTLyvJIOuBFNt6sQVUpL47rtg4Q&oe=69E69EB5",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/621179884_1404572194533956_6525130918288695169_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=gi6E1B4rrtYQ7kNvwEUU4VM&_nc_oc=AdrcwYEAjG79ywgtlpOaxaby2flpQGAl2-4tBMOlbo5S7wAhVzt4445OiDfYQ5OG1B0&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1OqlKsAn-1ba9bQ4Tc5mEPOOonysYc6WIFt0il4Gixjg&oe=69E6A5E9",
+                  "watermarked_resized_image_url": ""
+                }
+              ],
+              "page_categories": [
+                "School"
+              ],
+              "page_like_count": 624,
+              "title": "Chat with us",
+              "videos": [],
+              "is_reshared": false,
+              "extra_links": [],
+              "extra_texts": [],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "Infinity School",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": false,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776236400,
+            "publisher_platform": [
+              "FACEBOOK",
+              "INSTAGRAM",
+              "AUDIENCE_NETWORK",
+              "MESSENGER",
+              "THREADS"
+            ],
+            "start_date": 1769068800,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": false
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ],
+        [
+          {
+            "ad_archive_id": "1364698325433605",
+            "collation_count": 1,
+            "collation_id": "695582646712458",
+            "page_id": "333436446527815",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "333436446527815",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/61561523328020/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "Infinity School",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/616146695_765045709966629_2773334822941668463_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=107&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=6zidg630JOMQ7kNvwH9whAG&_nc_oc=AdquzotOfnr9sJZlmKP4UF2K0DdZK28Zqv4kjmlhX5FiyDT_exx0ZbhmBXfrQHPuwDk&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af0lc-FgkW5kwY_bIQ_EgXyH-57VMez649INxC9EhSZOxw&oe=69E69BF8",
+              "event": null,
+              "caption": null,
+              "cta_text": null,
+              "cards": [],
+              "body": {
+                "text": "🔥 SALVADOR, FORTALEZA, RECIFE, BH E SP: ATENÇÃO!\n\nVocê vai mesmo deixar a Inteligência Artificial roubar o seu lugar no mercado? Ou vai aprender a usá-la para lucrar 10x mais? 🤖💸\n\nA Infinity School liberou um lote exclusivo de vagas para o nosso Workshop Presencial de Marketing Digital com IA por um valor simbólico de apenas R$ 9,00. (Sim, é mais barato que um café na padaria).\n\nO que você vai aprender na prática: ✅ Criar campanhas que vendem sozinhas usando IA. ✅ Automatizar posts e legendas em segundos. ✅ Ferramentas de IA que as grandes agências usam (e escondem de você). ✅ Networking presencial com quem já está no mercado.\n\n📍 Onde? Nas unidades da Infinity School (Salvador, Fortaleza, Recife, BH e Av. Paulista). 🖥️ Estrutura: Um computador por aluno. Nada de só \"ouvir teoria\", aqui é mão na massa!\n\n⚠️ Por que R$ 9,00? Porque queremos que você conheça nossa metodologia premiada sem barreiras. Mas corra: as salas têm limite de alunos e as vagas voam.\n\n👇 Toque em \"Saiba Mais\" e garanta sua cadeira antes que o lote vire.\n\n#MarketingDigital #InteligenciaArtificial #InfinitySchool #Carreira #Marketing #Workshop"
+              },
+              "cta_type": null,
+              "display_format": "VIDEO",
+              "link_description": null,
+              "link_url": null,
+              "images": [],
+              "page_categories": [
+                "School"
+              ],
+              "page_like_count": 624,
+              "title": null,
+              "videos": [
+                {
+                  "video_hd_url": "https://video-bos5-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNSxJd45OI9_uylbZ4PIm_jsjX6At5N35jeAcBYvsQ20ZgagyjYGfS-qyJlbImJrw-dQz6KaaJh329x6ChtK0zt0qDnKl0i_uCrFSoWk88Qmw.mp4?_nc_cat=100&_nc_sid=5e9851&_nc_ht=video-bos5-1.xx.fbcdn.net&_nc_ohc=7REHSmh9zIUQ7kNvwFc7DX-&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuNzIwLmRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHAiLCJ4cHZfYXNzZXRfaWQiOjEyMzM5ODc1MjUyNDYyOTksImFzc2V0X2FnZV9kYXlzIjoxMjgsInZpX3VzZWNhc2VfaWQiOjEwNzk5LCJkdXJhdGlvbl9zIjo1LCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&vs=e80d36824dfa2542&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC8yNzRBQTU4MTI5MjZBODgyOTk4OTBGRDU0ODkxM0RBNF9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzQzNEQ2RTlCRUQ1QzZCQzM3NDEzMjg0QUUwM0FDNTlFX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACa29cvBw5OxBBUCKAJDMywXQBQhysCDEm8YGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUAZd6oAQA&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&_nc_zt=28&oh=00_Af15i9wu0wf_J0cq19Iux1_kxxy9MrxDgc9uAzv_jD6fYA&oe=69E6C094",
+                  "video_preview_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/615881207_1994149411169808_1647113020753020373_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=PeY2LZPOCqIQ7kNvwG1MLdM&_nc_oc=AdryKsKfiObNWm2ns4OaqA7zG8UBCxeL0-HVTRF6l9syNaDuMRHy7eilLpkTxfft2ZY&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af06h0QmxfrnXmuv32OErwoi9cJDrCG4VBMFJgbOgogb4A&oe=69E699EB",
+                  "video_sd_url": "https://video-bos5-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNUphdlMaC3ToSMUfpIvjGsqICWlXL-Wsntn1Kixi8sLNe-emMZ1ZMRZ65Z5F03nfhirmLsJV55G91kmwdeDSwdIJAWWljKA7B2BlCE4g.mp4?_nc_cat=102&_nc_sid=8bf8fe&_nc_ht=video-bos5-1.xx.fbcdn.net&_nc_ohc=7usGoc354sIQ7kNvwGrqT_V&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzYwLnN2ZV9zZCIsInhwdl9hc3NldF9pZCI6MTIzMzk4NzUyNTI0NjI5OSwiYXNzZXRfYWdlX2RheXMiOjEyOCwidmlfdXNlY2FzZV9pZCI6MTA3OTksImR1cmF0aW9uX3MiOjUsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&_nc_zt=28&oh=00_Af2H6kizy_U91spZPX7KPpEJGBRdtkvbCwni6qB6eNCAaQ&oe=69E6C9EC",
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null
+                }
+              ],
+              "is_reshared": false,
+              "extra_links": [],
+              "extra_texts": [],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "Infinity School",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": false,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776236400,
+            "publisher_platform": [
+              "FACEBOOK",
+              "INSTAGRAM",
+              "AUDIENCE_NETWORK",
+              "MESSENGER",
+              "THREADS"
+            ],
+            "start_date": 1768636800,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": false
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ],
+        [
+          {
+            "ad_archive_id": "1219765365963614",
+            "collation_count": 1,
+            "collation_id": "739292635315681",
+            "page_id": "108938148680593",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "108938148680593",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/famef.sp/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "Famef",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/506003246_1240736810735596_1386350852273694624_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=rkDfQxiCSGwQ7kNvwEML2kb&_nc_oc=Adpyzvqxp71QyN_VGLU7NYep1x999P1OISyQskT9p8sCItcdFmjH6tOOLsPgNnkHpl4&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3T-S6EAsVDNjYArXWYFfmgnq4AIFaeDYQF-RmBLsi1Vw&oe=69E6B3EC",
+              "event": null,
+              "caption": "fb.me",
+              "cta_text": "Learn more",
+              "cards": [
+                {
+                  "body": "Amplie suas possibilidades de atuação na Área de Gestão com o curso de MBA EAD em Marketing Digital da FAMEF a partir de R$49/mês.\n\n✅ Cursos 100% On-line \n✅Professores Mestres e Doutores\n✅ Encontro Mensais ao Vivo (com gravação disponível)\n✅ Estágio e TCC não obrigatório (conforme Resolução CNE n° 1, de 06 de abril de 2018).\n\nMas CORRA: são as últimas vagas com esse Super Desconto! \n\nCadastre-se gratuitamente e saiba mais",
+                  "cta_type": "LEARN_MORE",
+                  "caption": "",
+                  "link_description": " ",
+                  "link_url": "http://fb.me/",
+                  "title": "A partir de R$49/mês",
+                  "cta_text": "Learn More",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/506048890_980909160620736_440896232058374976_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=zwfdr9QMLxkQ7kNvwFgBS3i&_nc_oc=AdqTeSz_legLytvcmyJq6ZLKCCOZZrE13ag_svI2DjUXEFIw4DScoMa2Bc0FQCDlYUA&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3Y7Y8OpwS68vSKk7ImPOS4a-_cWjeB42awhCq6dX5dZA&oe=69E6AF22",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/505925103_691216423741450_6186878268017568574_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Ca4XXt1rWyUQ7kNvwGlBb57&_nc_oc=AdrlvHwiBRJ4B_rHTB5Xdg0DlJtPX9NLjIgYL4WSLXe7oW1RZns4ZtUzY-QIzf6Y2YQ&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2QdmtVUxg4YLv_zNETNie2YA5Dc9NKUNV3ZKe84ZvQCQ&oe=69E6B588",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": "Amplie suas possibilidades de atuação na Área de Gestão com o curso de MBA EAD em Marketing Digital da FAMEF a partir de R$49/mês.\n\n✅ Cursos 100% On-line \n✅Professores Mestres e Doutores\n✅ Encontro Mensais ao Vivo (com gravação disponível)\n✅ Estágio e TCC não obrigatório (conforme Resolução CNE n° 1, de 06 de abril de 2018).\n\nMas CORRA: são as últimas vagas com esse Super Desconto! \n\nCadastre-se gratuitamente e saiba mais",
+                  "cta_type": "LEARN_MORE",
+                  "caption": "",
+                  "link_description": " ",
+                  "link_url": "http://fb.me/",
+                  "title": "A partir de R$49/mês",
+                  "cta_text": "Learn More",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/505994765_1065599942144486_4711294746463710697_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=_T29UbKq-ZUQ7kNvwGRTT8a&_nc_oc=AdqzgLkLaan3aDZP0XxBTVWWU7d8x75MWcZmTsYLf-Rf_ay-kmWWM-jN3xydQT-Tbvc&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2JF71GLiKaFOtmvkwXWMGvOLZvcWIea78y-oeVWoJVMQ&oe=69E6B055",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/505990115_893674016255732_5805960582376802855_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=1D0BtChPVtgQ7kNvwHj8r_C&_nc_oc=AdoRwn2kxqvEdmnVBOffCtL51wWhZlM6IQD7sopT2QSbM6hFY5ZTUcLGvQjFonZ8c4I&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1GFgHvcv_11ODU4rs1jaTVzK29ph6zc9i2zs1d5PhOHg&oe=69E6AC98",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": "Amplie suas possibilidades de atuação na Área de Gestão com o curso de MBA EAD em Marketing Digital da FAMEF a partir de R$49/mês.\n\n✅ Cursos 100% On-line \n✅Professores Mestres e Doutores\n✅ Encontro Mensais ao Vivo (com gravação disponível)\n✅ Estágio e TCC não obrigatório (conforme Resolução CNE n° 1, de 06 de abril de 2018).\n\nMas CORRA: são as últimas vagas com esse Super Desconto! \n\nCadastre-se gratuitamente e saiba mais",
+                  "cta_type": "LEARN_MORE",
+                  "caption": "",
+                  "link_description": " ",
+                  "link_url": "http://fb.me/",
+                  "title": "A partir de R$49/mês",
+                  "cta_text": "Learn More",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/506054246_1779806316214030_3880289283557505282_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=R1qVFmqlTMQQ7kNvwGj7ihe&_nc_oc=AdqzeNYdrPN6ZFYvSwr6Lo6_tn85a-08xXtcrcbzDxtnq3VopimKVcgYZOzIRb3pQyc&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2Sf23ly5ASEK8WMN0dCjL3l2O8oZCt0Xw5GMgcHAulaw&oe=69E695AC",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/506048854_1042813657823663_138563004038466046_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=sWtrV8oasZkQ7kNvwGwAsKl&_nc_oc=Ado-MSpdxzUGzE1Keehps0KnNEHZ0nOfDB-XxHO8aQeYVnDohKC6CQQj87H3W1aOftM&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3aUs1sRyYU7SaR4LvYkzECvjOlcVB3vHVs0NjFNl-SDg&oe=69E69E21",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": "Amplie suas possibilidades de atuação na Área de Gestão com o curso de MBA EAD em Marketing Digital da FAMEF a partir de R$49/mês.\n\n✅ Cursos 100% On-line \n✅Professores Mestres e Doutores\n✅ Encontro Mensais ao Vivo (com gravação disponível)\n✅ Estágio e TCC não obrigatório (conforme Resolução CNE n° 1, de 06 de abril de 2018).\n\nMas CORRA: são as últimas vagas com esse Super Desconto! \n\nCadastre-se gratuitamente e saiba mais",
+                  "cta_type": "LEARN_MORE",
+                  "caption": "",
+                  "link_description": " ",
+                  "link_url": "http://fb.me/",
+                  "title": "A partir de R$49/mês",
+                  "cta_text": "Learn More",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/506054246_1779806316214030_3880289283557505282_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=R1qVFmqlTMQQ7kNvwGj7ihe&_nc_oc=AdqzeNYdrPN6ZFYvSwr6Lo6_tn85a-08xXtcrcbzDxtnq3VopimKVcgYZOzIRb3pQyc&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af2Sf23ly5ASEK8WMN0dCjL3l2O8oZCt0Xw5GMgcHAulaw&oe=69E695AC",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/506048854_1042813657823663_138563004038466046_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=sWtrV8oasZkQ7kNvwGwAsKl&_nc_oc=Ado-MSpdxzUGzE1Keehps0KnNEHZ0nOfDB-XxHO8aQeYVnDohKC6CQQj87H3W1aOftM&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3aUs1sRyYU7SaR4LvYkzECvjOlcVB3vHVs0NjFNl-SDg&oe=69E69E21",
+                  "watermarked_resized_image_url": ""
+                },
+                {
+                  "body": "Amplie suas possibilidades de atuação na Área de Gestão com o curso de MBA EAD em Marketing Digital da FAMEF a partir de R$49/mês.\n\n✅ Cursos 100% On-line \n✅Professores Mestres e Doutores\n✅ Encontro Mensais ao Vivo (com gravação disponível)\n✅ Estágio e TCC não obrigatório (conforme Resolução CNE n° 1, de 06 de abril de 2018).\n\nMas CORRA: são as últimas vagas com esse Super Desconto! \n\nCadastre-se gratuitamente e saiba mais",
+                  "cta_type": "LEARN_MORE",
+                  "caption": "",
+                  "link_description": " ",
+                  "link_url": "http://fb.me/",
+                  "title": "A partir de R$49/mês",
+                  "cta_text": "Learn More",
+                  "video_hd_url": null,
+                  "video_preview_image_url": null,
+                  "video_sd_url": null,
+                  "watermarked_video_hd_url": null,
+                  "watermarked_video_sd_url": null,
+                  "image_crops": [],
+                  "original_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/505865383_679294995022247_4667810204330644662_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=OfAZN6bEJzgQ7kNvwEpug0v&_nc_oc=AdqqHLZLSoMsLWTdWNhkVofUp2oxu-9DKpy_GLwokccp7tCsyVIiz1xmnFF2Kn5-_ks&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af1Akw04NOvbCX142tzVlGiMyW3ywucM9_0X-sdzIBX2Kw&oe=69E6C185",
+                  "resized_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/505978288_1250475749992197_7645104146146937284_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=SpvyYfz8n58Q7kNvwG61EO3&_nc_oc=AdoTKQWb5KUmIFBx7HBko5hiwRsNUturOxS0MUJOjHSygc8w3R0GqvCkODzPIeoYlZk&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3vgorudmlr-NdTSa6lqjszHZXhEh2xzFoTar85Zj9SHg&oe=69E697E0",
+                  "watermarked_resized_image_url": ""
+                }
+              ],
+              "body": {
+                "text": "{{product.brand}}"
+              },
+              "cta_type": "LEARN_MORE",
+              "display_format": "DCO",
+              "link_description": "{{product.description}}",
+              "link_url": "http://fb.me/",
+              "images": [],
+              "page_categories": [
+                "Education"
+              ],
+              "page_like_count": 5863,
+              "title": "{{product.name}}",
+              "videos": [],
+              "is_reshared": false,
+              "extra_links": [
+                "https://www.famef.edu.br/categorias-pos-ead/?utm_source=meta&utm_medium=cadastro&utm_campaign=campanha_gestao",
+                "https://www.famef.com.br/",
+                "https://www.famef.edu.br/categorias-pos-ead/?utm_source=meta&utm_medium=cadastro&utm_campaign=campanha_gestao"
+              ],
+              "extra_texts": [
+                {
+                  "text": "Cadastre-se e tenha mais informações. Por gentileza, não esqueça de colocar o DDD junto ao seu WhatsApp."
+                },
+                {
+                  "text": "Parabéns! Clique Premiado: Você Ganhou 1 Bolsa Desconto. Você Já Concluiu Sua Graduação?"
+                },
+                {
+                  "text": "Sim"
+                },
+                {
+                  "text": "Não"
+                },
+                {
+                  "text": "Full name"
+                },
+                {
+                  "text": "Phone number"
+                },
+                {
+                  "text": "Email"
+                },
+                {
+                  "text": "City"
+                },
+                {
+                  "text": "Terms and Conditions for Famef"
+                },
+                {
+                  "text": "FAMEF"
+                },
+                {
+                  "text": "Suas informações foram enviadas para FAMEF"
+                },
+                {
+                  "text": "Em breve nosso time entrará em contato com você."
+                }
+              ],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "Famef",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": false,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776236400,
+            "publisher_platform": [
+              "FACEBOOK",
+              "INSTAGRAM"
+            ],
+            "start_date": 1749538800,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": false
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ],
+        [
+          {
+            "ad_archive_id": "1244049577174684",
+            "collation_count": 1,
+            "collation_id": "765721892683958",
+            "page_id": "280561218810669",
+            "snapshot": {
+              "branded_content": null,
+              "page_id": "280561218810669",
+              "page_is_deleted": false,
+              "page_profile_uri": "https://www.facebook.com/agustinfernandezoficiall/",
+              "root_reshared_post": null,
+              "byline": null,
+              "disclaimer_label": null,
+              "page_name": "Agustin Fernandez",
+              "page_profile_picture_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/518719138_1479438473195702_124865044423683897_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=zqf4ncSAXuQQ7kNvwF95x3Z&_nc_oc=AdrSMXtCD1DGZdoej0DNk6TF4xM6fdW9clYWgpxhHBg_9CejZeockj5dXiN8FF7OlXI&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af09RiYLYhrTvXCjLudCrRF7v2b8UUmqKXTrrVLhf5br8g&oe=69E6975C",
+              "event": null,
+              "caption": "afbeauty.com",
+              "cta_text": "Learn more",
+              "cards": [],
+              "body": {
+                "text": "Kit Essencial Luxo que já conquistou o coração de milhares de clientes 😍\n\nClique agora e adquira 2 unidades por apenas R$ 99,90!"
+              },
+              "cta_type": "LEARN_MORE",
+              "display_format": "VIDEO",
+              "link_description": "Adquira no site oficial",
+              "link_url": "https://afbeauty.com/products/serum-12-em-1-boa-noite-carissima",
+              "images": [],
+              "page_categories": [
+                "Public figure"
+              ],
+              "page_like_count": 2228199,
+              "title": "Kit Best Seller apenas R$ 99,90 😱",
+              "videos": [
+                {
+                  "video_hd_url": "https://video-bos5-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQO4hJ_I5bcysyhepd_GyTtdYAC72glcb25K5gtOz-x86GUKuNb2vNhkArNyQoIyhAxCzCUfH432uD9RyBLObXKoqofV3cxVOgTNSXkBkdkJkg.mp4?_nc_cat=104&_nc_sid=5e9851&_nc_ht=video-bos5-1.xx.fbcdn.net&_nc_ohc=C7QlmduFSXoQ7kNvwH78F7r&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuNzIwLmRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHAiLCJ4cHZfYXNzZXRfaWQiOjEyMTE0MzQ2OTA3MzM1ODAsImFzc2V0X2FnZV9kYXlzIjoyNzMsInZpX3VzZWNhc2VfaWQiOjEwNzk5LCJkdXJhdGlvbl9zIjo1MywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=d43574e71dadc4c7&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC9GMDQ3NzI1NEM5MzY4NTE0RTdDMjNBN0NDQTg5RTJCQV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzY2NDA4RTZDNUYzRURDOUVDNzQyMDc3RTNGNUI3RjlFX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaYmMfm4_KmBBUCKAJDMywXQEqiDEm6XjUYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUAZd6oAQA&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&_nc_zt=28&oh=00_Af06V7BbTsXMO7n2kriG1TsrGg_VNZUDIAsdS0nBBsG_eg&oe=69E6B0FC",
+                  "video_preview_image_url": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.35426-6/518245413_635226615741000_754882545416769386_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=lF3xyBMwDKAQ7kNvwGL2Ij2&_nc_oc=AdoDpIf4wl-wGW3oMPGTBFan5dkRLrl2W6uNfBO3kNu4bpHNsx33ofiKzW99H_PiITM&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&oh=00_Af3FTUfjmnspbKmZ_udvJFIZacHI4wR5nDCTlRAzhr0vMA&oe=69E69BCB",
+                  "video_sd_url": "https://video-bos5-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQPUzRWPN3p1PUykfwfz8pqcZgFjZS4T-uXfxPBSAabV_ZsAWGAR0bPSz5KQCbuxtNe0w5naYOX_uV-2MzXFRow8pHBbOeQUCIRXWEfw9w.mp4?_nc_cat=106&_nc_sid=8bf8fe&_nc_ht=video-bos5-1.xx.fbcdn.net&_nc_ohc=YxtiSR_OZXgQ7kNvwHs1gqz&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzYwLnN2ZV9zZCIsInhwdl9hc3NldF9pZCI6MTIxMTQzNDY5MDczMzU4MCwiYXNzZXRfYWdlX2RheXMiOjI3MywidmlfdXNlY2FzZV9pZCI6MTA3OTksImR1cmF0aW9uX3MiOjUzLCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&_nc_gid=_i5F0YeaOlaw8Hiq3PoZdA&_nc_ss=7a389&_nc_zt=28&oh=00_Af21HtpwbifV5VrIOfjWqBbJN4JFJc2FgUC51iZb72fFzg&oe=69E6977C",
+                  "watermarked_video_hd_url": "",
+                  "watermarked_video_sd_url": ""
+                }
+              ],
+              "is_reshared": false,
+              "extra_links": [],
+              "extra_texts": [],
+              "extra_images": [],
+              "extra_videos": [],
+              "country_iso_code": null,
+              "brazil_tax_id": null,
+              "additional_info": null,
+              "ec_certificates": []
+            },
+            "is_active": true,
+            "has_user_reported": false,
+            "report_count": null,
+            "menu_items": [],
+            "state_media_run_label": null,
+            "page_is_deleted": false,
+            "page_name": "Agustin Fernandez",
+            "impressions_with_index": {
+              "impressions_text": null,
+              "impressions_index": -1
+            },
+            "gated_type": "ELIGIBLE",
+            "categories": [
+              "UNKNOWN"
+            ],
+            "is_aaa_eligible": false,
+            "contains_digital_created_media": false,
+            "reach_estimate": null,
+            "currency": "",
+            "spend": null,
+            "end_date": 1776322800,
+            "publisher_platform": [
+              "FACEBOOK",
+              "INSTAGRAM",
+              "AUDIENCE_NETWORK",
+              "MESSENGER",
+              "THREADS"
+            ],
+            "start_date": 1752649200,
+            "contains_sensitive_content": false,
+            "total_active_time": null,
+            "regional_regulation_data": {
+              "finserv": {
+                "is_deemed_finserv": false,
+                "is_limited_delivery": false
+              },
+              "tw_anti_scam": {
+                "is_limited_delivery": false
+              }
+            },
+            "hide_data_status": "NONE",
+            "fev_info": null,
+            "ad_id": null,
+            "targeted_or_reached_countries": []
+          }
+        ]
+      ]
+    }
+  }
+]

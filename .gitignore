@@ -1,0 +1,23 @@
+# Dependências
+node_modules/
+backend/node_modules/
+infografico-src/node_modules/
+
+# Build
+infografico-src/dist/
+infografico-src/.parcel-cache/
+
+# Env sensível
+.env
+backend/.env
+*.env
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
+
+# Claude local
+.claude/
+start-dev.sh
+_slides_tmp_*.html

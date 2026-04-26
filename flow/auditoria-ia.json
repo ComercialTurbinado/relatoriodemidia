@@ -1,0 +1,702 @@
+{
+  "version": "6.1",
+  "id": "auditoria-expressa-ia-v1",
+  "name": "Auditoria Expressa IA",
+  "icon": null,
+  "folderId": null,
+  "publicId": null,
+  "customDomain": null,
+  "isArchived": false,
+  "isClosed": false,
+  "settings": {
+    "typingEmulation": { "enabled": true, "speed": 300, "maxDelay": 3 },
+    "isBrandingEnabled": false,
+    "isInputPrefillEnabled": true,
+    "isHideQueryParamsEnabled": true
+  },
+  "theme": {
+    "chat": {
+      "hostAvatar": { "isEnabled": true },
+      "roundness": "medium",
+      "hostBubbles": { "backgroundColor": "#1a1a2e", "color": "#e0e0e0" },
+      "guestBubbles": { "backgroundColor": "#16213e", "color": "#ffffff" },
+      "buttons": { "backgroundColor": "#e94560", "color": "#ffffff" },
+      "inputs": { "backgroundColor": "#0f3460", "color": "#ffffff", "placeholderColor": "#888" },
+      "generalBackground": { "type": "Color", "content": "#0a0a0a" }
+    }
+  },
+  "variables": [
+    { "id": "v01", "name": "cliente_arroba" },
+    { "id": "v02", "name": "concorrentes" },
+    { "id": "v03", "name": "link_pagamento", "value": "https://pay.exemplo.com/auditoria-47" },
+    { "id": "v04", "name": "nicho" },
+    { "id": "v05", "name": "followers" },
+    { "id": "v06", "name": "taxa_engajamento_cliente" },
+    { "id": "v07", "name": "taxa_engajamento_concorrente" },
+    { "id": "v08", "name": "gap_principal" },
+    { "id": "v09", "name": "oportunidade_principal" },
+    { "id": "v10", "name": "erro_critico" },
+    { "id": "v11", "name": "msg_confirmacao_handle" },
+    { "id": "v12", "name": "msg_espera_1" },
+    { "id": "v13", "name": "msg_espera_2" },
+    { "id": "v14", "name": "msg_paywall_intro" },
+    { "id": "v15", "name": "prova_social" },
+    { "id": "v16", "name": "pdf_url" },
+    { "id": "v17", "name": "link_upsell", "value": "https://pay.exemplo.com/modo-implementacao-97" }
+  ],
+  "groups": [
+    {
+      "id": "g_start",
+      "title": "Start",
+      "graphCoordinates": { "x": 0, "y": 300 },
+      "blocks": [
+        {
+          "id": "b_start",
+          "type": "start",
+          "label": "Start",
+          "outgoingEdgeId": "e01"
+        }
+      ]
+    },
+    {
+      "id": "g_gancho",
+      "title": "Nó 1 — O Gancho",
+      "graphCoordinates": { "x": 280, "y": 300 },
+      "blocks": [
+        {
+          "id": "b_gancho_msg1",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [{ "text": "Excelente. Eu sou a IA de diagnóstico da [Sua Marca]." }]
+              },
+              {
+                "type": "p",
+                "children": [{ "text": "O que nós vamos fazer aqui é dissecar o seu perfil e descobrir exatamente por que você está deixando dinheiro na mesa." }]
+              }
+            ]
+          },
+          "outgoingEdgeId": "e02"
+        },
+        {
+          "id": "b_gancho_wait1",
+          "type": "Wait",
+          "options": { "secondsToWaitFor": 2 },
+          "outgoingEdgeId": "e03"
+        },
+        {
+          "id": "b_gancho_msg2",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [{ "text": "Para eu calibrar minha análise, me manda o link do seu Instagram ou o seu @ (ex: @meunegocio)." }]
+              }
+            ]
+          },
+          "outgoingEdgeId": "e04"
+        },
+        {
+          "id": "b_gancho_input",
+          "type": "text input",
+          "options": {
+            "variableId": "v01",
+            "labels": { "placeholder": "Ex: @meunegocio", "button": "Enviar" }
+          },
+          "outgoingEdgeId": "e05"
+        },
+        {
+          "id": "b_gancho_condition",
+          "type": "Condition",
+          "items": [
+            {
+              "id": "cond_valid_handle",
+              "content": {
+                "logicalOperator": "OR",
+                "comparisons": [
+                  { "id": "cmp01", "variableId": "v01", "comparisonOperator": "Contains", "value": "@" },
+                  { "id": "cmp02", "variableId": "v01", "comparisonOperator": "Contains", "value": "instagram.com" }
+                ]
+              },
+              "outgoingEdgeId": "e06"
+            }
+          ],
+          "outgoingEdgeId": "e07"
+        }
+      ]
+    },
+    {
+      "id": "g_correcao",
+      "title": "Nó 1.1 — Correção de Handle",
+      "graphCoordinates": { "x": 280, "y": 620 },
+      "blocks": [
+        {
+          "id": "b_correcao_msg",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Preciso do seu @ exato para puxar os dados. Digite novamente:" }] }
+            ]
+          },
+          "outgoingEdgeId": "e08"
+        },
+        {
+          "id": "b_correcao_input",
+          "type": "text input",
+          "options": {
+            "variableId": "v01",
+            "labels": { "placeholder": "Ex: @meunegocio", "button": "Enviar" }
+          },
+          "outgoingEdgeId": "e09"
+        }
+      ]
+    },
+    {
+      "id": "g_fetch_instagram",
+      "title": "🔌 MCP — Fetch Instagram",
+      "graphCoordinates": { "x": 620, "y": 300 },
+      "blocks": [
+        {
+          "id": "b_fetch_instagram",
+          "type": "Http request",
+          "options": {
+            "url": "{{BACKEND_URL}}/api/fetch-instagram",
+            "method": "POST",
+            "headers": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-api-key", "value": "{{API_SECRET}}" }
+            ],
+            "body": "{\n  \"handle\": \"{{cliente_arroba}}\"\n}",
+            "responseVariableMapping": [
+              { "bodyPath": "nicho",                 "variableId": "v04" },
+              { "bodyPath": "followers",             "variableId": "v05" },
+              { "bodyPath": "taxa_engajamento",      "variableId": "v06" }
+            ]
+          },
+          "outgoingEdgeId": "e10"
+        }
+      ]
+    },
+    {
+      "id": "g_inimigo",
+      "title": "Nó 2 — Inimigo em Comum",
+      "graphCoordinates": { "x": 960, "y": 300 },
+      "blocks": [
+        {
+          "id": "b_inimigo_gpt_handle",
+          "type": "Http request",
+          "options": {
+            "url": "{{BACKEND_URL}}/api/generate-message",
+            "method": "POST",
+            "headers": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": "{\n  \"template\": \"confirmacao_handle\",\n  \"handle\": \"{{cliente_arroba}}\",\n  \"nicho\": \"{{nicho}}\",\n  \"followers\": \"{{followers}}\"\n}",
+            "responseVariableMapping": [
+              { "bodyPath": "message", "variableId": "v11" }
+            ]
+          },
+          "outgoingEdgeId": "e11"
+        },
+        {
+          "id": "b_inimigo_msg_confirmacao",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "{{msg_confirmacao_handle}}" }] }
+            ]
+          },
+          "outgoingEdgeId": "e12"
+        },
+        {
+          "id": "b_inimigo_wait",
+          "type": "Wait",
+          "options": { "secondsToWaitFor": 3 },
+          "outgoingEdgeId": "e13"
+        },
+        {
+          "id": "b_inimigo_msg2",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Enquanto processo isso, preciso de um alvo." }] },
+              { "type": "p", "children": [{ "text": "Quem são os 2 concorrentes do seu nicho que mais te irritam? Aqueles que estão roubando os clientes que deveriam ser seus." }] },
+              { "type": "p", "children": [{ "text": "Manda o @ deles aqui." }] }
+            ]
+          },
+          "outgoingEdgeId": "e14"
+        },
+        {
+          "id": "b_inimigo_input",
+          "type": "text input",
+          "options": {
+            "variableId": "v02",
+            "labels": { "placeholder": "Ex: @concorrente1 @concorrente2", "button": "Enviar" }
+          },
+          "outgoingEdgeId": "e15"
+        },
+        {
+          "id": "b_inimigo_condition",
+          "type": "Condition",
+          "items": [
+            {
+              "id": "cond_sem_concorrente",
+              "content": {
+                "logicalOperator": "OR",
+                "comparisons": [
+                  { "id": "cmp03", "variableId": "v02", "comparisonOperator": "Contains", "value": "não sei" },
+                  { "id": "cmp04", "variableId": "v02", "comparisonOperator": "Contains", "value": "nao sei" },
+                  { "id": "cmp05", "variableId": "v02", "comparisonOperator": "Contains", "value": "não tenho" },
+                  { "id": "cmp06", "variableId": "v02", "comparisonOperator": "Contains", "value": "nao tenho" },
+                  { "id": "cmp07", "variableId": "v02", "comparisonOperator": "Contains", "value": "nenhum" }
+                ]
+              },
+              "outgoingEdgeId": "e16"
+            }
+          ],
+          "outgoingEdgeId": "e17"
+        }
+      ]
+    },
+    {
+      "id": "g_dor",
+      "title": "Nó 2.1 — Gatilho de Dor",
+      "graphCoordinates": { "x": 960, "y": 620 },
+      "blocks": [
+        {
+          "id": "b_dor_msg",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Tudo bem — é mais comum do que parece." }] },
+              { "type": "p", "children": [{ "text": "Me diz: qual o maior {{nicho}} da sua cidade ou região? Pode ser alguém que você admira ou que você sabe que está crescendo." }] },
+              { "type": "p", "children": [{ "text": "Manda o @ para eu conseguir trabalhar." }] }
+            ]
+          },
+          "outgoingEdgeId": "e18"
+        },
+        {
+          "id": "b_dor_input",
+          "type": "text input",
+          "options": {
+            "variableId": "v02",
+            "labels": { "placeholder": "Ex: @maior_do_nicho", "button": "Enviar" }
+          },
+          "outgoingEdgeId": "e19"
+        }
+      ]
+    },
+    {
+      "id": "g_deepseek",
+      "title": "🧠 DeepSeek R1 — Análise Competitiva",
+      "graphCoordinates": { "x": 1300, "y": 300 },
+      "blocks": [
+        {
+          "id": "b_deepseek_analise",
+          "type": "Http request",
+          "options": {
+            "url": "{{BACKEND_URL}}/api/analyze-deepseek",
+            "method": "POST",
+            "headers": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": "{\n  \"handle_cliente\": \"{{cliente_arroba}}\",\n  \"concorrentes\": \"{{concorrentes}}\",\n  \"nicho\": \"{{nicho}}\",\n  \"taxa_cliente\": \"{{taxa_engajamento_cliente}}\"\n}",
+            "responseVariableMapping": [
+              { "bodyPath": "taxa_concorrente",      "variableId": "v07" },
+              { "bodyPath": "gap_principal",         "variableId": "v08" },
+              { "bodyPath": "oportunidade_principal","variableId": "v09" },
+              { "bodyPath": "erro_critico",          "variableId": "v10" }
+            ]
+          },
+          "outgoingEdgeId": "e20"
+        }
+      ]
+    },
+    {
+      "id": "g_gpt_mensagens",
+      "title": "✍️ GPT-4o — Gerar Mensagens",
+      "graphCoordinates": { "x": 1640, "y": 300 },
+      "blocks": [
+        {
+          "id": "b_gpt_mensagens",
+          "type": "Http request",
+          "options": {
+            "url": "{{BACKEND_URL}}/api/generate-messages",
+            "method": "POST",
+            "headers": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": "{\n  \"nicho\": \"{{nicho}}\",\n  \"taxa_cliente\": \"{{taxa_engajamento_cliente}}\",\n  \"taxa_concorrente\": \"{{taxa_engajamento_concorrente}}\",\n  \"gap\": \"{{gap_principal}}\",\n  \"erro\": \"{{erro_critico}}\",\n  \"oportunidade\": \"{{oportunidade_principal}}\"\n}",
+            "responseVariableMapping": [
+              { "bodyPath": "msg_espera_1",      "variableId": "v12" },
+              { "bodyPath": "msg_espera_2",      "variableId": "v13" },
+              { "bodyPath": "msg_paywall_intro", "variableId": "v14" },
+              { "bodyPath": "prova_social",      "variableId": "v15" }
+            ]
+          },
+          "outgoingEdgeId": "e21"
+        }
+      ]
+    },
+    {
+      "id": "g_espera_ativa",
+      "title": "Nó 3 — Espera Ativa (Aquecimento)",
+      "graphCoordinates": { "x": 1980, "y": 300 },
+      "blocks": [
+        {
+          "id": "b_espera_msg1",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Perfeito. Na mira: {{concorrentes}}. 🎯" }] }
+            ]
+          },
+          "outgoingEdgeId": "e22"
+        },
+        {
+          "id": "b_espera_wait1",
+          "type": "Wait",
+          "options": { "secondsToWaitFor": 4 },
+          "outgoingEdgeId": "e23"
+        },
+        {
+          "id": "b_espera_msg2",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "{{msg_espera_1}}" }] }
+            ]
+          },
+          "outgoingEdgeId": "e24"
+        },
+        {
+          "id": "b_espera_wait2",
+          "type": "Wait",
+          "options": { "secondsToWaitFor": 6 },
+          "outgoingEdgeId": "e25"
+        },
+        {
+          "id": "b_espera_msg3",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "{{msg_espera_2}}" }] }
+            ]
+          },
+          "outgoingEdgeId": "e26"
+        }
+      ]
+    },
+    {
+      "id": "g_paywall",
+      "title": "Nó 4 — Paywall",
+      "graphCoordinates": { "x": 2320, "y": 300 },
+      "blocks": [
+        {
+          "id": "b_paywall_wait",
+          "type": "Wait",
+          "options": { "secondsToWaitFor": 3 },
+          "outgoingEdgeId": "e27"
+        },
+        {
+          "id": "b_paywall_prova",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "{{prova_social}}" }] }
+            ]
+          },
+          "outgoingEdgeId": "e28"
+        },
+        {
+          "id": "b_paywall_msg1",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "O relatório completo ficou pronto. Tem 3 seções:" }] },
+              { "type": "p", "children": [{ "text": "✅ {{erro_critico}} — o que está afastando seus seguidores qualificados" }] },
+              { "type": "p", "children": [{ "text": "✅ O que {{concorrentes}} fez diferente nos últimos 30 dias" }] },
+              { "type": "p", "children": [{ "text": "✅ {{oportunidade_principal}} — seu plano de ação para essa semana" }] }
+            ]
+          },
+          "outgoingEdgeId": "e29"
+        },
+        {
+          "id": "b_paywall_wait2",
+          "type": "Wait",
+          "options": { "secondsToWaitFor": 2 },
+          "outgoingEdgeId": "e30"
+        },
+        {
+          "id": "b_paywall_msg2",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Para eu te liberar o PDF agora e você já aplicar hoje, a taxa de emissão do sistema é de apenas R$ 47,00." }] }
+            ]
+          },
+          "outgoingEdgeId": "e31"
+        },
+        {
+          "id": "b_paywall_choice",
+          "type": "choice input",
+          "options": {
+            "isMultipleChoice": false,
+            "items": [
+              { "id": "btn_pix",  "content": "Sim, gerar PIX 💸" },
+              { "id": "btn_nao",  "content": "Agora não" }
+            ]
+          },
+          "items": [
+            {
+              "id": "btn_pix",
+              "content": "Sim, gerar PIX 💸",
+              "outgoingEdgeId": "e32"
+            },
+            {
+              "id": "btn_nao",
+              "content": "Agora não",
+              "outgoingEdgeId": "e33"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g_gerar_pix",
+      "title": "Nó 4.1 — Gerar Link PIX",
+      "graphCoordinates": { "x": 2320, "y": 80 },
+      "blocks": [
+        {
+          "id": "b_criar_pagamento",
+          "type": "Http request",
+          "options": {
+            "url": "{{BACKEND_URL}}/api/create-payment",
+            "method": "POST",
+            "headers": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": "{\n  \"handle\": \"{{cliente_arroba}}\",\n  \"produto\": \"auditoria-47\",\n  \"valor\": 4700\n}",
+            "responseVariableMapping": [
+              { "bodyPath": "checkout_url", "variableId": "v03" }
+            ]
+          },
+          "outgoingEdgeId": "e34"
+        },
+        {
+          "id": "b_pix_msg",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Perfeito! Aqui está o seu link:" }] },
+              { "type": "p", "children": [{ "text": "👉 {{link_pagamento}}" }] },
+              { "type": "p", "children": [{ "text": "Assim que confirmar, o relatório cai aqui na conversa automaticamente. 🚀" }] }
+            ]
+          },
+          "outgoingEdgeId": "e35"
+        },
+        {
+          "id": "b_pix_aguardando",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "⏳ Aguardando confirmação do pagamento..." }] }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "g_abandono",
+      "title": "Nó 4.2 — Abandono de Carrinho",
+      "graphCoordinates": { "x": 2320, "y": 540 },
+      "blocks": [
+        {
+          "id": "b_abandono_wait",
+          "type": "Wait",
+          "options": { "secondsToWaitFor": 3600 },
+          "outgoingEdgeId": "e36"
+        },
+        {
+          "id": "b_abandono_msg",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "A IA vai deletar sua análise em 30 minutos." }] },
+              { "type": "p", "children": [{ "text": "Vai deixar seus concorrentes continuarem nadando de braçada?" }] },
+              { "type": "p", "children": [{ "text": "Aqui está o link caso decida virar o jogo:\n👉 {{link_pagamento}}" }] }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "g_entrega",
+      "title": "Nó 5 — Entrega + Upsell",
+      "graphCoordinates": { "x": 2700, "y": 300 },
+      "blocks": [
+        {
+          "id": "b_gerar_pdf",
+          "type": "Http request",
+          "options": {
+            "url": "{{BACKEND_URL}}/api/generate-pdf",
+            "method": "POST",
+            "headers": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": "{\n  \"handle\": \"{{cliente_arroba}}\",\n  \"nicho\": \"{{nicho}}\",\n  \"concorrentes\": \"{{concorrentes}}\",\n  \"taxa_cliente\": \"{{taxa_engajamento_cliente}}\",\n  \"taxa_concorrente\": \"{{taxa_engajamento_concorrente}}\",\n  \"gap\": \"{{gap_principal}}\",\n  \"oportunidade\": \"{{oportunidade_principal}}\",\n  \"erro\": \"{{erro_critico}}\"\n}",
+            "responseVariableMapping": [
+              { "bodyPath": "pdf_url", "variableId": "v16" }
+            ]
+          },
+          "outgoingEdgeId": "e37"
+        },
+        {
+          "id": "b_entrega_msg1",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Pagamento confirmado! 🚀 O sistema já gerou o seu documento." }] }
+            ]
+          },
+          "outgoingEdgeId": "e38"
+        },
+        {
+          "id": "b_entrega_pdf_link",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "📄 Aqui está o seu relatório: {{pdf_url}}" }] }
+            ]
+          },
+          "outgoingEdgeId": "e39"
+        },
+        {
+          "id": "b_upsell_wait",
+          "type": "Wait",
+          "options": { "secondsToWaitFor": 5 },
+          "outgoingEdgeId": "e40"
+        },
+        {
+          "id": "b_upsell_msg1",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Antes de você ir: a maioria lê isso e não aplica nada por falta de tempo ou disciplina." }] }
+            ]
+          },
+          "outgoingEdgeId": "e41"
+        },
+        {
+          "id": "b_upsell_wait2",
+          "type": "Wait",
+          "options": { "secondsToWaitFor": 3 },
+          "outgoingEdgeId": "e42"
+        },
+        {
+          "id": "b_upsell_msg2",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Eu posso me plugar aqui no seu WhatsApp e te mandar 1 tarefa mastigada por dia durante 30 dias para executar esse plano, além de cobrar você se não fizer." }] },
+              { "type": "p", "children": [{ "text": "O 'Modo Implementação' custa só mais R$ 97." }] },
+              { "type": "p", "children": [{ "text": "Quer adicionar isso agora ou prefere tentar aplicar o PDF sozinho?" }] }
+            ]
+          },
+          "outgoingEdgeId": "e43"
+        },
+        {
+          "id": "b_upsell_choice",
+          "type": "choice input",
+          "options": { "isMultipleChoice": false },
+          "items": [
+            {
+              "id": "btn_upsell_sim",
+              "content": "Adicionar Modo Implementação 🔥",
+              "outgoingEdgeId": "e44"
+            },
+            {
+              "id": "btn_upsell_nao",
+              "content": "Vou aplicar sozinho",
+              "outgoingEdgeId": "e45"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g_upsell_aceito",
+      "title": "Upsell Aceito",
+      "graphCoordinates": { "x": 3080, "y": 100 },
+      "blocks": [
+        {
+          "id": "b_upsell_aceito_msg",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Excelente decisão! 🎯" }] },
+              { "type": "p", "children": [{ "text": "Aqui está o link para adicionar o Modo Implementação:\n👉 {{link_upsell}}" }] },
+              { "type": "p", "children": [{ "text": "Amanhã às 8h você já recebe sua primeira missão. Sem desculpa." }] }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "g_final",
+      "title": "Nó Final",
+      "graphCoordinates": { "x": 3080, "y": 500 },
+      "blocks": [
+        {
+          "id": "b_final_msg",
+          "type": "text",
+          "content": {
+            "richText": [
+              { "type": "p", "children": [{ "text": "Fechado. Boa sorte na execução! Se precisar de mim depois, é só chamar. 💪" }] }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "edges": [
+    { "id": "e01", "from": { "blockId": "b_start" },                                    "to": { "groupId": "g_gancho" } },
+    { "id": "e02", "from": { "blockId": "b_gancho_msg1" },                              "to": { "blockId": "b_gancho_wait1" } },
+    { "id": "e03", "from": { "blockId": "b_gancho_wait1" },                             "to": { "blockId": "b_gancho_msg2" } },
+    { "id": "e04", "from": { "blockId": "b_gancho_msg2" },                              "to": { "blockId": "b_gancho_input" } },
+    { "id": "e05", "from": { "blockId": "b_gancho_input" },                             "to": { "blockId": "b_gancho_condition" } },
+    { "id": "e06", "from": { "blockId": "b_gancho_condition", "itemId": "cond_valid_handle" }, "to": { "groupId": "g_fetch_instagram" } },
+    { "id": "e07", "from": { "blockId": "b_gancho_condition" },                         "to": { "groupId": "g_correcao" } },
+    { "id": "e08", "from": { "blockId": "b_correcao_msg" },                             "to": { "blockId": "b_correcao_input" } },
+    { "id": "e09", "from": { "blockId": "b_correcao_input" },                           "to": { "groupId": "g_fetch_instagram" } },
+    { "id": "e10", "from": { "blockId": "b_fetch_instagram" },                          "to": { "groupId": "g_inimigo" } },
+    { "id": "e11", "from": { "blockId": "b_inimigo_gpt_handle" },                       "to": { "blockId": "b_inimigo_msg_confirmacao" } },
+    { "id": "e12", "from": { "blockId": "b_inimigo_msg_confirmacao" },                  "to": { "blockId": "b_inimigo_wait" } },
+    { "id": "e13", "from": { "blockId": "b_inimigo_wait" },                             "to": { "blockId": "b_inimigo_msg2" } },
+    { "id": "e14", "from": { "blockId": "b_inimigo_msg2" },                             "to": { "blockId": "b_inimigo_input" } },
+    { "id": "e15", "from": { "blockId": "b_inimigo_input" },                            "to": { "blockId": "b_inimigo_condition" } },
+    { "id": "e16", "from": { "blockId": "b_inimigo_condition", "itemId": "cond_sem_concorrente" }, "to": { "groupId": "g_dor" } },
+    { "id": "e17", "from": { "blockId": "b_inimigo_condition" },                        "to": { "groupId": "g_deepseek" } },
+    { "id": "e18", "from": { "blockId": "b_dor_msg" },                                  "to": { "blockId": "b_dor_input" } },
+    { "id": "e19", "from": { "blockId": "b_dor_input" },                                "to": { "groupId": "g_deepseek" } },
+    { "id": "e20", "from": { "blockId": "b_deepseek_analise" },                         "to": { "groupId": "g_gpt_mensagens" } },
+    { "id": "e21", "from": { "blockId": "b_gpt_mensagens" },                            "to": { "groupId": "g_espera_ativa" } },
+    { "id": "e22", "from": { "blockId": "b_espera_msg1" },                              "to": { "blockId": "b_espera_wait1" } },
+    { "id": "e23", "from": { "blockId": "b_espera_wait1" },                             "to": { "blockId": "b_espera_msg2" } },
+    { "id": "e24", "from": { "blockId": "b_espera_msg2" },                              "to": { "blockId": "b_espera_wait2" } },
+    { "id": "e25", "from": { "blockId": "b_espera_wait2" },                             "to": { "blockId": "b_espera_msg3" } },
+    { "id": "e26", "from": { "blockId": "b_espera_msg3" },                              "to": { "groupId": "g_paywall" } },
+    { "id": "e27", "from": { "blockId": "b_paywall_wait" },                             "to": { "blockId": "b_paywall_prova" } },
+    { "id": "e28", "from": { "blockId": "b_paywall_prova" },                            "to": { "blockId": "b_paywall_msg1" } },
+    { "id": "e29", "from": { "blockId": "b_paywall_msg1" },                             "to": { "blockId": "b_paywall_wait2" } },
+    { "id": "e30", "from": { "blockId": "b_paywall_wait2" },                            "to": { "blockId": "b_paywall_msg2" } },
+    { "id": "e31", "from": { "blockId": "b_paywall_msg2" },                             "to": { "blockId": "b_paywall_choice" } },
+    { "id": "e32", "from": { "blockId": "b_paywall_choice", "itemId": "btn_pix" },      "to": { "groupId": "g_gerar_pix" } },
+    { "id": "e33", "from": { "blockId": "b_paywall_choice", "itemId": "btn_nao" },      "to": { "groupId": "g_abandono" } },
+    { "id": "e34", "from": { "blockId": "b_criar_pagamento" },                          "to": { "blockId": "b_pix_msg" } },
+    { "id": "e35", "from": { "blockId": "b_pix_msg" },                                  "to": { "blockId": "b_pix_aguardando" } },
+    { "id": "e36", "from": { "blockId": "b_abandono_wait" },                            "to": { "blockId": "b_abandono_msg" } },
+    { "id": "e37", "from": { "blockId": "b_gerar_pdf" },                                "to": { "blockId": "b_entrega_msg1" } },
+    { "id": "e38", "from": { "blockId": "b_entrega_msg1" },                             "to": { "blockId": "b_entrega_pdf_link" } },
+    { "id": "e39", "from": { "blockId": "b_entrega_pdf_link" },                         "to": { "blockId": "b_upsell_wait" } },
+    { "id": "e40", "from": { "blockId": "b_upsell_wait" },                              "to": { "blockId": "b_upsell_msg1" } },
+    { "id": "e41", "from": { "blockId": "b_upsell_msg1" },                              "to": { "blockId": "b_upsell_wait2" } },
+    { "id": "e42", "from": { "blockId": "b_upsell_wait2" },                             "to": { "blockId": "b_upsell_msg2" } },
+    { "id": "e43", "from": { "blockId": "b_upsell_msg2" },                              "to": { "blockId": "b_upsell_choice" } },
+    { "id": "e44", "from": { "blockId": "b_upsell_choice", "itemId": "btn_upsell_sim" },"to": { "groupId": "g_upsell_aceito" } },
+    { "id": "e45", "from": { "blockId": "b_upsell_choice", "itemId": "btn_upsell_nao" },"to": { "groupId": "g_final" } }
+  ]
+}
