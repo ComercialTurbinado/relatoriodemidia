@@ -6,7 +6,6 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node backend/server.js",
-    "install": "npm install --prefix backend"
+    "start": "node backend/server.js"
   }
 }
