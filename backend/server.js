@@ -27,14 +27,16 @@ const CHROME_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrom
 const app  = express();
 app.use(express.json());
 
-// ─── Clientes de IA ──────────────────────────────────────────────────────────
+// ─── Clientes de IA (lazy — evita crash se env vars ausentes) ────────────────
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-const deepseek = new OpenAI({
-  apiKey:  process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com/v1',
-});
+function getOpenAI() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
+function getDeepSeek() {
+  return new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com/v1' });
+}
+const openai   = { chat: { completions: { create: (...a) => getOpenAI().chat.completions.create(...a) } } };
+const deepseek = { chat: { completions: { create: (...a) => getDeepSeek().chat.completions.create(...a) } } };
 
 // ─── Auth simples ─────────────────────────────────────────────────────────────
 
