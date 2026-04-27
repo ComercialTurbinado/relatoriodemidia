@@ -384,6 +384,7 @@ app.post('/api/slides', (req, res) => {
   const html   = template.replace(anchor, injection + anchor);
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="relatorio-marketing.html"');
   res.setHeader('Cache-Control', 'no-store');
   res.send(html);
 });
