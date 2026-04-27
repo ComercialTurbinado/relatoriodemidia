@@ -3,7 +3,7 @@ FROM node:20-slim
 WORKDIR /app
 
 COPY backend/package*.json ./
-RUN npm install --production
+RUN npm ci --omit=dev
 
 COPY backend/ .
 COPY infografico-marketing.html ./infografico-marketing.html
