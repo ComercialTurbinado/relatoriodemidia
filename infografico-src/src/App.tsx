@@ -124,7 +124,7 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
             OVERVIEW<br />DO CLIENTE
           </div>
           <div style={{ marginTop: f(24), fontFamily: 'Roboto', fontSize: f(20), color: 'rgba(255,255,255,0.85)', maxWidth: 580, lineHeight: lh }}>
-            Diagnóstico completo, posicionamento competitivo e caminhos de crescimento para <strong>@saadamasco</strong>
+            Diagnóstico completo, posicionamento competitivo e caminhos de crescimento para <strong>{ov.diagnostico_identidade.match(/@[\w.]+/)?.[0] ?? 'seu perfil'}</strong>
           </div>
         </div>
         <div style={{ padding: `0 80px ${f(40)}px`, display: 'flex', alignItems: 'center', gap: f(16) }}>
@@ -168,35 +168,42 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
       </div>
     )});
 
-    all.push({ id: 'ov-posicionamento', section: 'overview_cliente', render: () => (
-      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: f(16), marginBottom: f(32) }}>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Posicionamento Competitivo</div>
-          <div style={{ width: f(32), height: f(4), borderRadius: 99, background: C.primary, flexShrink: 0 }} />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr 1fr' : '1fr 1fr 1fr', gap: f(20), flex: 1 }}>
-          {[
-            { handle: '@saadamasco',    eng: 343.45, seg: 733,    curtidas: 2489, color: C.primary, star: true },
-            { handle: '@conradoadolpho',eng: 0.04,   seg: 733000, curtidas: 251,  color: C.green,   star: false },
-            { handle: '@rodolfooviedo', eng: 0,      seg: 500,    curtidas: 0,    color: 'rgba(255,255,255,0.15)', star: false },
-          ].map((prof) => (
-            <div key={prof.handle} style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(12), position: 'relative', background: prof.star ? C.primary : 'rgba(255,255,255,0.04)', border: prof.star ? 'none' : '1px solid rgba(255,255,255,0.08)' }}>
-              {prof.star && <div style={{ position: 'absolute', top: f(16), right: f(16), fontSize: f(20) }}>⭐</div>}
-              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.white }}>{prof.handle}</div>
-              {[{ label: 'Taxa Engajamento', val: prof.eng.toLocaleString('pt-BR') }, { label: 'Seguidores', val: prof.seg.toLocaleString('pt-BR') }, { label: 'Curtidas médias', val: prof.curtidas.toLocaleString('pt-BR') }].map((m) => (
-                <div key={m.label}>
-                  <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: prof.star ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)' }}>{m.label}</div>
-                  <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(26), color: prof.star ? C.yellow : C.white }}>{m.val}</div>
-                </div>
-              ))}
+    all.push({ id: 'ov-posicionamento', section: 'overview_cliente', render: () => {
+      const handle = ov.diagnostico_identidade.match(/@[\w.]+/)?.[0] ?? 'Seu perfil';
+      return (
+        <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: f(16), marginBottom: f(28) }}>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Posicionamento Competitivo</div>
+            <div style={{ width: f(32), height: f(4), borderRadius: 99, background: C.primary, flexShrink: 0 }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr' : `1fr ${ov.comparativo_concorrentes.length > 1 ? '1fr 1fr' : '1fr'}`, gap: f(20), flex: 1 }}>
+            {/* Card do cliente */}
+            <div style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(14), position: 'relative', background: C.primary }}>
+              <div style={{ position: 'absolute', top: f(16), right: f(16), fontSize: f(20) }}>⭐</div>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.white }}>{handle}</div>
+              <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: 2 }}>Seu perfil</div>
+              <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.9)', lineHeight: 1 }}>
+                {ov.posicionamento_atual.split('.')[0]}.
+              </div>
             </div>
-          ))}
+            {/* Cards dos concorrentes */}
+            {ov.comparativo_concorrentes.map((c, i) => (
+              <div key={i} style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(14), background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.green }}>{c.handle}</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2 }}>Concorrente</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', lineHeight: 1 }}>{c.estrategia_que_funciona}</div>
+                <div style={{ marginTop: 'auto', padding: f(10), borderRadius: 10, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.25)' }}>
+                  <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(16), color: C.green }}>{c.ganho_esperado_vendas}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: f(16), padding: f(14), borderRadius: 12, background: 'rgba(0,179,126,0.08)', border: '1px solid rgba(0,179,126,0.25)' }}>
+            <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: C.green, margin: 0 }}>📊 {ov.posicionamento_atual}</p>
+          </div>
         </div>
-        <div style={{ marginTop: f(20), padding: f(14), borderRadius: 12, background: 'rgba(0,179,126,0.08)', border: '1px solid rgba(0,179,126,0.25)' }}>
-          <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: C.green, margin: 0 }}>📊 {ov.posicionamento_atual}</p>
-        </div>
-      </div>
-    )});
+      );
+    }});
 
     all.push({ id: 'ov-swot', section: 'overview_cliente', render: () => (
       <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
@@ -251,12 +258,9 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
                 <p style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{c.como_voce_aplica}</p>
               </div>
             </div>
-            <BarChart f={f} bars={[
-              { label: '@saadamasco — Engajamento',    value: 343,  max: 344,  color: C.primary },
-              { label: '@conradoadolpho — Engajamento', value: 1,    max: 344,  color: C.green },
-              { label: '@saadamasco — Curtidas médias', value: 2489, max: 2500, color: C.yellow },
-              { label: '@conradoadolpho — Curtidas',    value: 251,  max: 2500, color: 'rgba(255,255,255,0.25)' },
-            ]} />
+            <div style={{ padding: f(16), borderRadius: 12, background: 'rgba(255,102,0,0.06)', border: '1px solid rgba(255,102,0,0.2)' }}>
+              <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.8)', lineHeight: 1, margin: 0 }}>📈 {ov.posicionamento_atual}</p>
+            </div>
             {isP && (
               <div style={{ padding: f(14), borderRadius: 12, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.35)' }}>
                 <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(20), color: C.green }}>{c.ganho_esperado_vendas}</div>
