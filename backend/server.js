@@ -22,7 +22,7 @@ const fs          = require('fs');
 const path        = require('path');
 const crypto      = require('crypto');
 
-const CHROME_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME_PATH = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const app  = express();
 app.use(express.json());
