@@ -108,6 +108,21 @@ function Tag({ text, color = C.primary, f }: { text: string; color?: string; f: 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const { overview_cliente: ov, diretrizes_tecnicas: dt } = marketingData;
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function extractMetrics(posicionamento: string) {
+  const results: Array<{ label: string; val: string; color: string }> = [];
+  const seg = posicionamento.match(/(\d[\d.]{2,})\s*seguidores|seguidores[^(]*\((\d[\d.]+)/i);
+  if (seg) results.push({ label: 'Seguidores', val: (seg[1] || seg[2]).replace(/\./g, '.'), color: '#FFFFFF' });
+  const curt = posicionamento.match(/curtidas\s+médias\s+\((\d[\d.]+)\)|média\s+de\s+(\d[\d.]+)\s+curtidas|(\d[\d.]+)\s+curtidas/i);
+  if (curt) results.push({ label: 'Curtidas médias', val: curt[1] || curt[2] || curt[3], color: '#00B37E' });
+  const eng = posicionamento.match(/taxa\s+de\s+[\w\s,]*?(\d+[,.]?\d+)\)|taxa\s+de\s+(\d+[,.]?\d+)|engajamento[^)]*\((\d+[,.]?\d+)\s+vs\s+(\d+[,.]?\d+)\)/i);
+  if (eng) {
+    const val = eng[1] || eng[2] || eng[4] || eng[3];
+    if (val) results.push({ label: 'Engajamento', val, color: '#FFD600' });
+  }
+  return results.slice(0, 3);
+}
+
 // ─── Slides ───────────────────────────────────────────────────────────────────
 function buildSlides(section: Section, f: Fscale, isP: boolean) {
   const lh = 1;
@@ -134,72 +149,84 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
       </div>
     )});
 
-    all.push({ id: 'ov-diagnostico', section: 'overview_cliente', render: () => (
-      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row' }}>
-        <div style={{ width: isP ? '100%' : '33%', background: C.primary, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: isP ? `${f(20)}px 40px` : 48 }}>
-          <div>
-            <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)', letterSpacing: 3, textTransform: 'uppercase' }}>Slide 01</div>
-            <div style={{ marginTop: f(8), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 38, color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>DIAGNÓSTICO DE IDENTIDADE</div>
+    all.push({ id: 'ov-diagnostico', section: 'overview_cliente', render: () => {
+      const handle = ov.diagnostico_identidade.match(/@[\w.]+/)?.[0] ?? '';
+      const paragraphs = ov.diagnostico_identidade.split('\n\n').filter(Boolean);
+      const metrics = extractMetrics(ov.posicionamento_atual);
+      const keywords = dt.seo_instagram.palavras_chave_principais.slice(0, 3);
+      return (
+        <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row' }}>
+          <div style={{ width: isP ? '100%' : '33%', background: C.primary, display: 'flex', flexDirection: 'column', gap: f(16), padding: isP ? `${f(20)}px 40px` : 48 }}>
+            <div>
+              <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)', letterSpacing: 3, textTransform: 'uppercase' }}>Slide 01</div>
+              <div style={{ marginTop: f(8), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 38, color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>DIAGNÓSTICO DE IDENTIDADE</div>
+              {handle && (
+                <div style={{ marginTop: f(12), fontFamily: 'Roboto', fontSize: f(16), color: 'rgba(255,255,255,0.9)' }}>{handle}</div>
+              )}
+            </div>
+            {metrics.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: f(8) }}>
+                {metrics.map((m, i) => (
+                  <div key={i} style={{ borderRadius: 10, padding: `${f(10)}px ${f(14)}px`, background: 'rgba(0,0,0,0.2)' }}>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>{m.label}</div>
+                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(22), color: m.color }}>{m.val}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {keywords.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+                {keywords.map((k) => <Tag key={k} text={k} color="rgba(255,255,255,0.9)" f={f} />)}
+              </div>
+            )}
+            <div style={{ marginTop: 'auto', padding: f(14), borderRadius: 12, background: 'rgba(0,0,0,0.2)' }}>
+              <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>
+                {paragraphs[paragraphs.length - 1]}
+              </div>
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(12), marginTop: isP ? f(12) : 0 }}>
-            {[{ label: 'Engajamento', val: '343,45', color: C.yellow }, { label: 'Seguidores', val: '733', color: C.white }, { label: 'Top Post', val: '29.037', color: C.green }].map((m) => (
-              <div key={m.label} style={{ borderRadius: 12, padding: f(12), background: 'rgba(0,0,0,0.2)', flex: isP ? 1 : undefined }}>
-                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)' }}>{m.label}</div>
-                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(28), color: m.color }}>{m.val}</div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: `${f(40)}px ${f(48)}px`, gap: f(20), overflow: 'hidden' }}>
+            {paragraphs.slice(0, -1).map((p, i) => (
+              <div key={i} style={{ padding: i === 0 ? 0 : f(16), borderRadius: i === 0 ? 0 : 12, background: i === 0 ? 'transparent' : 'rgba(255,102,0,0.08)', border: i === 0 ? 'none' : '1px solid rgba(255,102,0,0.25)' }}>
+                {i > 0 && <span style={{ fontSize: f(16) }}>⚠️ </span>}
+                <span style={{ fontFamily: 'Roboto, sans-serif', fontSize: f(14), color: i === 0 ? 'rgba(255,255,255,0.85)' : C.primary, lineHeight: lh }}>{p}</span>
               </div>
             ))}
           </div>
         </div>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: `${f(40)}px ${f(48)}px` }}>
-          <div style={{ display: 'flex', gap: f(8), marginBottom: f(16), flexWrap: 'wrap' }}>
-            <Tag text="Perfil Pessoal" color={C.primary} f={f} />
-            <Tag text="Fitness Lifestyle" color={C.green} f={f} />
-            <Tag text="Autenticidade" color={C.yellow} f={f} />
-          </div>
-          <p style={{ fontFamily: 'Roboto, sans-serif', fontSize: f(15), color: 'rgba(255,255,255,0.8)', lineHeight: lh, margin: 0, marginBottom: f(16) }}>
-            {ov.diagnostico_identidade.split('\n\n')[0]}
-          </p>
-          <div style={{ padding: f(16), borderRadius: 12, background: 'rgba(255,102,0,0.1)', border: '1px solid rgba(255,102,0,0.3)' }}>
-            <div style={{ fontFamily: 'Roboto', fontSize: f(14), color: C.primary, lineHeight: lh }}>
-              ⚠️ {ov.diagnostico_identidade.split('\n\n')[1]}
-            </div>
-          </div>
-        </div>
-      </div>
-    )});
+      );
+    }});
 
     all.push({ id: 'ov-posicionamento', section: 'overview_cliente', render: () => {
       const handle = ov.diagnostico_identidade.match(/@[\w.]+/)?.[0] ?? 'Seu perfil';
+      const cols = isP ? '1fr' : `1fr ${ov.comparativo_concorrentes.map(() => '1fr').join(' ')}`;
       return (
         <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: f(16), marginBottom: f(28) }}>
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Posicionamento Competitivo</div>
             <div style={{ width: f(32), height: f(4), borderRadius: 99, background: C.primary, flexShrink: 0 }} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr' : `1fr ${ov.comparativo_concorrentes.length > 1 ? '1fr 1fr' : '1fr'}`, gap: f(20), flex: 1 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: cols, gap: f(20), flex: 1, overflow: 'hidden' }}>
             {/* Card do cliente */}
-            <div style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(14), position: 'relative', background: C.primary }}>
+            <div style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(10), position: 'relative', background: C.primary, overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: f(16), right: f(16), fontSize: f(20) }}>⭐</div>
               <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.white }}>{handle}</div>
               <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: 2 }}>Seu perfil</div>
-              <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.9)', lineHeight: 1 }}>
-                {ov.posicionamento_atual.split('.')[0]}.
+              <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.9)', lineHeight: 1, overflow: 'hidden' }}>
+                {ov.posicionamento_atual.split('\n\n')[0]}
               </div>
             </div>
             {/* Cards dos concorrentes */}
             {ov.comparativo_concorrentes.map((c, i) => (
-              <div key={i} style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(14), background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div key={i} style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(10), background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                 <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.green }}>{c.handle}</div>
                 <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2 }}>Concorrente</div>
-                <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', lineHeight: 1 }}>{c.estrategia_que_funciona}</div>
-                <div style={{ marginTop: 'auto', padding: f(10), borderRadius: 10, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.25)' }}>
-                  <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(16), color: C.green }}>{c.ganho_esperado_vendas}</div>
+                <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', lineHeight: 1, overflow: 'hidden' }}>{c.estrategia_que_funciona}</div>
+                <div style={{ flexShrink: 0, padding: f(10), borderRadius: 10, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.25)' }}>
+                  <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: C.green }}>{c.ganho_esperado_vendas}</div>
                 </div>
               </div>
             ))}
-          </div>
-          <div style={{ marginTop: f(16), padding: f(14), borderRadius: 12, background: 'rgba(0,179,126,0.08)', border: '1px solid rgba(0,179,126,0.25)' }}>
-            <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: C.green, margin: 0 }}>📊 {ov.posicionamento_atual}</p>
           </div>
         </div>
       );
@@ -231,42 +258,55 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
     )});
 
     all.push({ id: 'ov-concorrentes', section: 'overview_cliente', render: () => {
-      const c = ov.comparativo_concorrentes[0];
+      const concorrentes = ov.comparativo_concorrentes;
+      const accentColors = [C.primary, C.green, C.yellow];
       return (
         <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row' }}>
-          <div style={{ width: isP ? '100%' : '42%', display: 'flex', flexDirection: 'column', padding: isP ? '32px 40px 24px' : 48, background: '#111' }}>
+          {/* Painel esquerdo — título */}
+          <div style={{ width: isP ? '100%' : '30%', flexShrink: 0, display: 'flex', flexDirection: 'column', padding: isP ? '28px 40px 20px' : 48, background: '#111' }}>
             <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', letterSpacing: 3, textTransform: 'uppercase' }}>Análise Competitiva</div>
-            <div style={{ marginTop: f(8), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 34, color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>O QUE SEU<br />CONCORRENTE<br />FAZ BEM</div>
-            <div style={{ marginTop: f(20), borderRadius: 20, padding: f(20), background: C.primary }}>
-              <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white }}>{c.handle}</div>
-              <div style={{ marginTop: f(6), fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh }}>{c.estrategia_que_funciona}</div>
+            <div style={{ marginTop: f(8), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 34, color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>O QUE SEUS<br />CONCORRENTES<br />FAZEM BEM</div>
+            <div style={{ marginTop: f(20), fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>
+              {concorrentes.length} concorrente{concorrentes.length > 1 ? 's' : ''} analisado{concorrentes.length > 1 ? 's' : ''}
             </div>
-            {!isP && (
-              <div style={{ marginTop: 'auto', padding: f(16), borderRadius: 12, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.35)' }}>
-                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(22), color: C.green }}>{c.ganho_esperado_vendas}</div>
-                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.4)' }}>Ganho esperado em vendas</div>
-              </div>
-            )}
+            {/* badges de handles */}
+            <div style={{ marginTop: f(16), display: 'flex', flexDirection: 'column', gap: f(8) }}>
+              {concorrentes.map((c, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: f(10), padding: `${f(8)}px ${f(12)}px`, borderRadius: 10, background: `${accentColors[i]}18`, border: `1px solid ${accentColors[i]}44` }}>
+                  <div style={{ width: f(10), height: f(10), borderRadius: '50%', background: accentColors[i], flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: accentColors[i] }}>{c.handle}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: isP ? '24px 40px' : 48, gap: f(24) }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: f(8), marginBottom: f(10) }}>
-                <span style={{ fontSize: f(22) }}>🎯</span>
-                <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(16), color: C.yellow, textTransform: 'uppercase' }}>Como você aplica</span>
-              </div>
-              <div style={{ padding: f(18), borderRadius: 12, background: 'rgba(255,214,0,0.06)', border: '1px solid rgba(255,214,0,0.2)' }}>
-                <p style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{c.como_voce_aplica}</p>
-              </div>
-            </div>
-            <div style={{ padding: f(16), borderRadius: 12, background: 'rgba(255,102,0,0.06)', border: '1px solid rgba(255,102,0,0.2)' }}>
-              <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.8)', lineHeight: 1, margin: 0 }}>📈 {ov.posicionamento_atual}</p>
-            </div>
-            {isP && (
-              <div style={{ padding: f(14), borderRadius: 12, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.35)' }}>
-                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(20), color: C.green }}>{c.ganho_esperado_vendas}</div>
-                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.4)' }}>Ganho esperado em vendas</div>
-              </div>
-            )}
+          {/* Painel direito — cards de cada concorrente */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isP ? '16px 40px 28px' : 48, gap: f(20), overflow: 'hidden' }}>
+            {concorrentes.map((c, i) => {
+              const col = accentColors[i];
+              return (
+                <div key={i} style={{ flex: 1, borderRadius: 20, padding: f(22), display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(16), background: `${col}0a`, border: `1px solid ${col}33`, overflow: 'hidden' }}>
+                  {/* estratégia */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(8) }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: f(8) }}>
+                      <div style={{ width: f(28), height: f(28), borderRadius: '50%', background: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: f(14), flexShrink: 0 }}>🔍</div>
+                      <div>
+                        <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(16), color: col }}>{c.handle}</div>
+                        <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1 }}>O que faz bem</div>
+                      </div>
+                    </div>
+                    <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', lineHeight: 1.4, margin: 0 }}>{c.estrategia_que_funciona}</p>
+                  </div>
+                  {/* como aplicar + ganho */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(8) }}>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, textTransform: 'uppercase', letterSpacing: 1 }}>🎯 Como você aplica</div>
+                    <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.85)', lineHeight: 1.4, margin: 0, flex: 1 }}>{c.como_voce_aplica}</p>
+                    <div style={{ padding: `${f(8)}px ${f(12)}px`, borderRadius: 10, background: `${col}18`, border: `1px solid ${col}33` }}>
+                      <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: col }}>{c.ganho_esperado_vendas}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       );
