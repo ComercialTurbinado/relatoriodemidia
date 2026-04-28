@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { marketingData as demoData } from './data';
 
 declare global {
@@ -838,14 +838,18 @@ export default function App() {
   const injectedSection = window.__SECTION__ as Section;
   const initialSection: Section = validSections.includes(injectedSection) ? injectedSection : 'all';
 
-  const [section,     setSection]     = useState<Section>(initialSection);
-  const [orientation, setOrientation] = useState<Orientation>('landscape');
-  const [current,     setCurrent]     = useState(0);
+  const [section,      setSection]      = useState<Section>(initialSection);
+  const [orientation,  setOrientation]  = useState<Orientation>('landscape');
+  const [current,      setCurrent]      = useState(0);
+  const [densityScale, setDensityScale] = useState(1);
+  const contentWrapRef  = useRef<HTMLDivElement>(null);
+  const measuredSlideId = useRef('');
 
   const isLandscape = orientation === 'landscape';
   const isPortrait  = !isLandscape;
   // both orientations double body fonts; titles stay raw (never go through f)
-  const f: Fscale   = (n) => Math.round(n * 2);
+  // densityScale shrinks fonts/padding when overflow is detected (default 1 = no change)
+  const f: Fscale = (n) => Math.round(n * 2 * densityScale);
 
   const W = isLandscape ? 1920 : 1080;
   const H = isLandscape ? 1080 : 1920;
@@ -859,6 +863,31 @@ export default function App() {
 
   useEffect(() => { setCurrent(0); }, [section]);
   useEffect(() => { setCurrent(0); }, [orientation]);
+
+  // Reset density whenever slide/section/orientation changes
+  useEffect(() => {
+    measuredSlideId.current = '';
+    setDensityScale(1);
+  }, [current, section, orientation]);
+
+  // After each render: detect overflow and shrink f() (fonts + padding) if needed.
+  // Only runs once per slide (guarded by measuredSlideId).
+  useEffect(() => {
+    const id = slide?.id ?? '';
+    if (measuredSlideId.current === id) return;
+    measuredSlideId.current = id;
+    const el = contentWrapRef.current;
+    if (!el) return;
+    let minRatio = 1;
+    const walk = (node: HTMLElement, depth: number) => {
+      if (depth > 0 && node.clientHeight > 60 && node.scrollHeight > node.clientHeight + 12) {
+        minRatio = Math.min(minRatio, node.clientHeight / node.scrollHeight);
+      }
+      if (depth < 7) Array.from(node.children).forEach(c => walk(c as HTMLElement, depth + 1));
+    };
+    walk(el, 0);
+    if (minRatio < 0.97) setDensityScale(prev => Math.max(0.55, prev * minRatio));
+  });
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -945,7 +974,9 @@ export default function App() {
           <div style={{ paddingTop: `${(H / W) * 100}%`, position: 'relative' }}>
             <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12, boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
               <div id="slide-inner" style={{ width: W, height: H }}>
-                {slide?.render()}
+                <div ref={contentWrapRef} style={{ width: '100%', height: '100%' }}>
+                  {slide?.render()}
+                </div>
               </div>
             </div>
           </div>
