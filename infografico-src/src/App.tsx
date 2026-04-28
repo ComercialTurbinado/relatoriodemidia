@@ -560,51 +560,59 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
       );
     }});
 
+    // Slide: Ganchos Modelo + CTAs Recomendados
     all.push({ id: 'dt-ganchos', section: 'diretrizes_tecnicas', render: () => (
       <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row', overflow: 'hidden' }}>
-        <div style={{ flex: isP ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column', padding: isP ? '28px 40px 16px' : 48, borderRight: isP ? 'none' : '1px solid rgba(255,255,255,0.06)', borderBottom: isP ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-          <div style={{ marginBottom: f(18), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>🪝 Ganchos Modelo</div>
-          <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(12), flex: isP ? undefined : 1 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isP ? '40px 48px 24px' : 64, borderRight: isP ? 'none' : '1px solid rgba(255,255,255,0.06)', borderBottom: isP ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+          <div style={{ marginBottom: f(20), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>🪝 Ganchos Modelo</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: f(14), flex: 1 }}>
             {dt.ganchos_modelo.map((g, i) => (
-              <div key={i} style={{ flex: isP ? 1 : undefined, marginBottom: isP ? 0 : f(4), borderRadius: 14, padding: f(16), position: 'relative', overflow: 'hidden', background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.25)' }}>
+              <div key={i} style={{ borderRadius: 14, padding: f(18), position: 'relative', overflow: 'hidden', background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.25)' }}>
                 <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: C.primary }} />
-                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: C.white, marginBottom: f(6), lineHeight: lh }}>"{g.gancho}"</div>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(15), color: C.white, marginBottom: f(8), lineHeight: lh }}>"{g.gancho}"</div>
                 <Tag text={`Inspirado em ${g.inspirado_em}`} color={C.primary} f={f} />
               </div>
             ))}
           </div>
-          <div style={{ marginTop: f(16) }}>
-            <div style={{ marginBottom: f(12), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(18), color: C.white, textTransform: 'uppercase' }}>💬 CTAs Recomendados</div>
-            <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(10) }}>
-              {dt.ctas_recomendados.map((c, i) => {
-                const icons = ['💬', '📩', '🔗'];
-                const cols  = [C.green, C.primary, C.yellow];
-                return (
-                  <div key={i} style={{ flex: isP ? 1 : undefined, borderRadius: 12, padding: f(14), background: `${cols[i]}0e`, border: `1px solid ${cols[i]}2a` }}>
-                    <div style={{ display: 'flex', gap: f(8), alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: f(18), flexShrink: 0 }}>{icons[i]}</span>
-                      <div>
-                        <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: cols[i], marginBottom: f(4), lineHeight: lh }}>"{c.cta}"</div>
-                        <Tag text={c.quando_usar} color={cols[i]} f={f} />
-                      </div>
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isP ? '24px 48px 40px' : 64 }}>
+          <div style={{ marginBottom: f(16), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>💬 CTAs Recomendados</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: f(12), flex: 1 }}>
+            {dt.ctas_recomendados.map((c, i) => {
+              const icons = ['💬', '📩', '🔗', '📣', '✉️'];
+              const cols  = [C.green, C.primary, C.yellow, C.green, C.primary];
+              const col   = cols[i % cols.length];
+              return (
+                <div key={i} style={{ flex: 1, borderRadius: 14, padding: f(16), background: `${col}0e`, border: `1px solid ${col}2a` }}>
+                  <div style={{ display: 'flex', gap: f(10), alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: f(20), flexShrink: 0 }}>{icons[i % icons.length]}</span>
+                    <div>
+                      <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: col, marginBottom: f(6), lineHeight: lh }}>"{c.cta}"</div>
+                      <Tag text={c.quando_usar} color={col} f={f} />
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-        <div style={{ flex: isP ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column', padding: isP ? '16px 40px 28px' : 48 }}>
-          <div style={{ marginBottom: f(18), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>💬 Ideias de Títulos</div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(10) }}>
+      </div>
+    )});
+
+    // Slide: Ideias de Títulos + Stories Recorrentes
+    all.push({ id: 'dt-titulos', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row', overflow: 'hidden' }}>
+        <div style={{ flex: isP ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column', padding: isP ? '40px 48px 24px' : 64, borderRight: isP ? 'none' : '1px solid rgba(255,255,255,0.06)', borderBottom: isP ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+          <div style={{ marginBottom: f(20), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>💬 Ideias de Títulos</div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(12) }}>
             {dt.ideias_de_titulos.map((t, i) => {
-              const pCols: Record<string, string> = { 'Transformação': C.primary, 'Storytelling Pessoal': C.green, 'Dicas Práticas': C.yellow, 'Oferta e CTA': 'rgba(200,200,255,0.8)' };
+              const pCols: Record<string, string> = { 'Transformação': C.primary, 'Storytelling Pessoal': C.green, 'Dicas Práticas': C.yellow, 'Oferta e CTA': 'rgba(200,200,255,0.8)', 'Storytelling Real': C.green, 'Educação & Dica Prática': C.yellow, 'Alerta & Oportunidade': C.primary, 'Bastidor & Prova Social': C.green };
               const col = pCols[t.pilar] || C.white;
               return (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: f(10) }}>
-                  <div style={{ width: f(24), height: f(24), borderRadius: '50%', background: C.yellow, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(11), color: C.secondary, flexShrink: 0, marginTop: 2 }}>{i + 1}</div>
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: f(12) }}>
+                  <div style={{ width: f(28), height: f(28), borderRadius: '50%', background: C.yellow, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(13), color: C.secondary, flexShrink: 0, marginTop: 2 }}>{i + 1}</div>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.9)' }}>{t.titulo} </span>
+                    <span style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.9)' }}>{t.titulo} </span>
                     <Tag text={t.formato_sugerido} color={C.yellow} f={f} />
                     {' '}<Tag text={t.pilar} color={col} f={f} />
                   </div>
@@ -612,19 +620,22 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
               );
             })}
           </div>
-          <div style={{ marginTop: f(16) }}>
-            <div style={{ marginBottom: f(10), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(18), color: C.white, textTransform: 'uppercase' }}>📱 Stories Recorrentes</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: f(8) }}>
-              {dt.stories_recorrentes.map((s, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: f(10) }}>
-                  <span style={{ fontSize: f(18) }}>{'📊📹📬✅'[i]}</span>
+        </div>
+        <div style={{ flex: isP ? '0 0 auto' : '0 0 460px', display: 'flex', flexDirection: 'column', padding: isP ? '24px 48px 40px' : 56 }}>
+          <div style={{ marginBottom: f(16), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>📱 Stories Recorrentes</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: f(8), flex: 1 }}>
+            {dt.stories_recorrentes.map((s, i) => {
+              const storyIcons = ['📊', '📹', '📬', '✅', '💡', '🎯'];
+              return (
+                <div key={i} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: f(10), borderRadius: 10, padding: `${f(9)}px ${f(12)}px`, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <span style={{ fontSize: f(16), flexShrink: 0 }}>{storyIcons[i % storyIcons.length]}</span>
                   <div>
-                    <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.85)' }}>{s.ideia} </span>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.85)', marginBottom: f(4) }}>{s.ideia}</div>
                     <Tag text={s.objetivo} color={C.green} f={f} />
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -632,7 +643,7 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
 
     all.push({ id: 'dt-hashtags', section: 'diretrizes_tecnicas', render: () => (
       <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
-        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}># Hashtags Estratégicas</div>
+        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}># Palavras Estratégicas para SEO</div>
         <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr 1fr' : '1fr 1fr 1fr', gap: f(20), flex: 1 }}>
           <div style={{ borderRadius: 20, padding: f(22), background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.28)' }}>
             <div style={{ marginBottom: f(14), display: 'flex', alignItems: 'center', gap: f(8) }}>
