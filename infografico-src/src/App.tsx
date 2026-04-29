@@ -111,21 +111,62 @@ const { overview_cliente: ov, diretrizes_tecnicas: dt } = marketingData;
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function extractMetrics(posicionamento: string) {
   const results: Array<{ label: string; val: string; color: string }> = [];
-  const seg = posicionamento.match(/(\d[\d.]{2,})\s*seguidores|seguidores[^(]*\((\d[\d.]+)/i);
-  if (seg) results.push({ label: 'Seguidores', val: (seg[1] || seg[2]).replace(/\./g, '.'), color: '#FFFFFF' });
-  const curt = posicionamento.match(/curtidas\s+médias\s+\((\d[\d.]+)\)|média\s+de\s+(\d[\d.]+)\s+curtidas|(\d[\d.]+)\s+curtidas/i);
-  if (curt) results.push({ label: 'Curtidas médias', val: curt[1] || curt[2] || curt[3], color: '#00B37E' });
-  const eng = posicionamento.match(/taxa\s+de\s+[\w\s,]*?(\d+[,.]?\d+)\)|taxa\s+de\s+(\d+[,.]?\d+)|engajamento[^)]*\((\d+[,.]?\d+)\s+vs\s+(\d+[,.]?\d+)\)/i);
+
+  // Seguidores — multiple patterns
+  const seg = posicionamento.match(
+    /volume\s+de\s+seguidores\s*\((\d[\d.,]+)|(\d[\d.]{2,})\s*seguidores|seguidores[^(]{0,30}\((\d[\d.,]+)/i
+  );
+  if (seg) results.push({ label: 'Seguidores', val: seg[1] || seg[2] || seg[3], color: '#FFFFFF' });
+
+  // Curtidas médias — multiple patterns
+  const curt = posicionamento.match(
+    /curtidas\s+médias?\s*\((\d[\d.,]+)|média\s+de\s+(\d[\d.,]+)\s+curtidas|(\d[\d.,]+)\s+curtidas\s+médias?|(\d[\d.,]+)\s+curtidas/i
+  );
+  if (curt) results.push({ label: 'Curtidas médias', val: curt[1] || curt[2] || curt[3] || curt[4], color: '#00B37E' });
+
+  // Engajamento — "vs CLIENT" patterns first (most reliable), then fallbacks
+  const eng = posicionamento.match(
+    /taxa\s+de\s+engajamento[^(]{0,60}\([\d,\.]+\s+vs\s+([\d,\.]+)\)|engajamento[^(]{0,60}\([\d,\.]+\s+vs\s+([\d,\.]+)\)|taxa\s+de\s+([\d,\.]+)\b(?!\s*%?\s*\w)/i
+  );
   if (eng) {
-    const val = eng[1] || eng[2] || eng[4] || eng[3];
+    const val = eng[1] || eng[2] || eng[3];
     if (val) results.push({ label: 'Engajamento', val, color: '#FFD600' });
   }
   return results.slice(0, 3);
 }
 
+function extractCompetitorMetrics(posicionamento: string, handle: string) {
+  const name = handle.replace('@', '').split('.')[0].toLowerCase();
+  const ltext = posicionamento.toLowerCase();
+  const idx = ltext.indexOf(name);
+  if (idx === -1) return [] as Array<{ label: string; val: string; color: string }>;
+  const segment = posicionamento.slice(idx, Math.min(idx + 600, posicionamento.length));
+
+  const res: Array<{ label: string; val: string; color: string }> = [];
+
+  // Seguidores: "base de seguidores word (NUMBER)" or "vs NUMBER[3+ digits]"
+  const seg = segment.match(
+    /base\s+de\s+seguidores[^(]{0,30}\((\d[\d.,]+)|vs\s+(\d{3}[\d.,]*)\D|seguidores[^(]{0,30}\([\d.,]+\s+vs\s+(\d[\d.,]+)/i
+  );
+  if (seg) {
+    const val = seg[1] || seg[2] || seg[3];
+    if (val) res.push({ label: 'Seguidores', val, color: '#FFFFFF' });
+  }
+
+  // Curtidas: "concorrente tem NUMBER curtidas" or "NUMBER curtidas médias"
+  const curt = segment.match(/concorrente[^.]{0,80}?(\d[\d.,]+)\s+curtidas|(\d[\d.,]+)\s+curtidas\s+médias/i);
+  if (curt) res.push({ label: 'Curtidas médias', val: curt[1] || curt[2], color: '#00B37E' });
+
+  // Engajamento: "taxa de engajamento ... (NUMBER"
+  const eng = segment.match(/taxa\s+de\s+engajamento[^(]{0,60}\(([\d,\.]+)|taxa\s+de\s+([\d,\.]+)\b/i);
+  if (eng) res.push({ label: 'Engajamento', val: eng[1] || eng[2], color: '#FFD600' });
+
+  return res.slice(0, 3);
+}
+
 // ─── Slides ───────────────────────────────────────────────────────────────────
 function buildSlides(section: Section, f: Fscale, isP: boolean) {
-  const lh = 1;
+  const lh = 1.2;
   const all: { id: string; section: 'overview_cliente' | 'diretrizes_tecnicas'; render: () => JSX.Element }[] = [];
 
   // ── OVERVIEW ────────────────────────────────────────────────────────────────
@@ -135,7 +176,7 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
       <div style={{ width: '100%', height: '100%', background: C.primary, display: 'flex', flexDirection: 'column' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 80px' }}>
           <div style={{ fontFamily: 'Roboto', fontSize: f(15), color: 'rgba(255,255,255,0.7)', letterSpacing: 5, textTransform: 'uppercase' }}>Análise de Perfil Instagram</div>
-          <div style={{ marginTop: f(16), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 76, color: C.white, lineHeight: 1, textTransform: 'uppercase', letterSpacing: 2 }}>
+          <div style={{ marginTop: f(16), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 76, color: C.white, lineHeight: 1.2, textTransform: 'uppercase', letterSpacing: 2 }}>
             OVERVIEW<br />DO CLIENTE
           </div>
           <div style={{ marginTop: f(24), fontFamily: 'Roboto', fontSize: f(20), color: 'rgba(255,255,255,0.85)', maxWidth: 580, lineHeight: lh }}>
@@ -199,6 +240,7 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
 
     all.push({ id: 'ov-posicionamento', section: 'overview_cliente', render: () => {
       const handle = ov.diagnostico_identidade.match(/@[\w.]+/)?.[0] ?? 'Seu perfil';
+      const clientMetrics = extractMetrics(ov.posicionamento_atual);
       const cols = isP ? '1fr' : `1fr ${ov.comparativo_concorrentes.map(() => '1fr').join(' ')}`;
       return (
         <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
@@ -212,21 +254,43 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
               <div style={{ position: 'absolute', top: f(16), right: f(16), fontSize: f(20) }}>⭐</div>
               <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.white }}>{handle}</div>
               <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: 2 }}>Seu perfil</div>
-              <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.9)', lineHeight: 1, overflow: 'hidden' }}>
+              {clientMetrics.length > 0 && (
+                <div style={{ display: 'flex', gap: f(8), flexWrap: 'wrap' }}>
+                  {clientMetrics.map((m, i) => (
+                    <div key={i} style={{ borderRadius: 8, padding: `${f(5)}px ${f(10)}px`, background: 'rgba(0,0,0,0.2)' }}>
+                      <div style={{ fontFamily: 'Roboto', fontSize: f(9), color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: 1 }}>{m.label}</div>
+                      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(14), color: C.white }}>{m.val}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.9)', lineHeight: 1.2, overflow: 'hidden' }}>
                 {ov.posicionamento_atual.split('\n\n')[0]}
               </div>
             </div>
             {/* Cards dos concorrentes */}
-            {ov.comparativo_concorrentes.map((c, i) => (
-              <div key={i} style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(10), background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.green }}>{c.handle}</div>
-                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2 }}>Concorrente</div>
-                <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', lineHeight: 1, overflow: 'hidden' }}>{c.estrategia_que_funciona}</div>
-                <div style={{ flexShrink: 0, padding: f(10), borderRadius: 10, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.25)' }}>
-                  <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: C.green }}>{c.ganho_esperado_vendas}</div>
+            {ov.comparativo_concorrentes.map((c, i) => {
+              const compMetrics = extractCompetitorMetrics(ov.posicionamento_atual, c.handle);
+              const segMetric = compMetrics.find(m => m.label === 'Seguidores');
+              return (
+                <div key={i} style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(10), background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                  <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.green }}>{c.handle}</div>
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2 }}>Concorrente</div>
+                  {segMetric && (
+                    <div style={{ display: 'flex', gap: f(8) }}>
+                      <div style={{ borderRadius: 8, padding: `${f(5)}px ${f(10)}px`, background: 'rgba(0,179,126,0.1)', border: '1px solid rgba(0,179,126,0.2)' }}>
+                        <div style={{ fontFamily: 'Roboto', fontSize: f(9), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 1 }}>Seguidores</div>
+                        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(14), color: C.green }}>{segMetric.val}</div>
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', lineHeight: 1.2, overflow: 'hidden' }}>{c.estrategia_que_funciona}</div>
+                  <div style={{ flexShrink: 0, padding: f(10), borderRadius: 10, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.25)' }}>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: C.green }}>{c.ganho_esperado_vendas}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       );
@@ -332,6 +396,11 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
                   </div>
                 </div>
                 <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.75)', lineHeight: lh, margin: 0 }}>{cam.movimento}</p>
+                {cam.porque_funciona && (
+                  <div style={{ padding: `${f(8)}px ${f(12)}px`, borderRadius: 8, background: `${col}10`, border: `1px solid ${col}22` }}>
+                    <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: col }}>💡 {cam.porque_funciona}</span>
+                  </div>
+                )}
                 <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: f(6) }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)' }}>⏱ {cam.tempo_para_resultado}</span>
@@ -411,7 +480,7 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
       <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 80px' }}>
           <div style={{ fontFamily: 'Roboto', fontSize: f(15), color: 'rgba(255,255,255,0.35)', letterSpacing: 5, textTransform: 'uppercase' }}>Manual Estratégico</div>
-          <div style={{ marginTop: f(16), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 76, color: C.white, lineHeight: 1, textTransform: 'uppercase', letterSpacing: 2 }}>
+          <div style={{ marginTop: f(16), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 76, color: C.white, lineHeight: 1.2, textTransform: 'uppercase', letterSpacing: 2 }}>
             DIRETRIZES<br /><span style={{ color: C.green }}>TÉCNICAS</span>
           </div>
           <div style={{ marginTop: f(24), fontFamily: 'Roboto', fontSize: f(20), color: 'rgba(255,255,255,0.6)', maxWidth: 580, lineHeight: lh }}>
@@ -641,6 +710,51 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
       </div>
     )});
 
+    all.push({ id: 'dt-seo', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>🔍 SEO Instagram</div>
+        <div style={{ display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(24), flex: 1 }}>
+          {/* Palavras-chave */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(16) }}>
+            <div style={{ borderRadius: 16, padding: f(20), background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.25)' }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.primary, textTransform: 'uppercase', marginBottom: f(10) }}>📌 Palavras-chave Principais</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+                {dt.seo_instagram.palavras_chave_principais.map((k) => <Tag key={k} text={k} color={C.primary} f={f} />)}
+              </div>
+            </div>
+            <div style={{ borderRadius: 16, padding: f(20), background: 'rgba(0,179,126,0.08)', border: '1px solid rgba(0,179,126,0.25)' }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.green, textTransform: 'uppercase', marginBottom: f(10) }}>🔄 Palavras-chave Secundárias</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+                {dt.seo_instagram.palavras_chave_secundarias.map((k) => <Tag key={k} text={k} color={C.green} f={f} />)}
+              </div>
+            </div>
+          </div>
+          {/* Usos e instruções */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(14) }}>
+            <div style={{ borderRadius: 16, padding: f(18), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, textTransform: 'uppercase', marginBottom: f(8) }}>📝 Uso na Bio</div>
+              <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{dt.seo_instagram.uso_em_bio}</p>
+            </div>
+            <div style={{ borderRadius: 16, padding: f(18), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, textTransform: 'uppercase', marginBottom: f(8) }}>✍️ Uso na Legenda</div>
+              <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{dt.seo_instagram.uso_em_legenda}</p>
+            </div>
+            <div style={{ borderRadius: 16, padding: f(18), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, textTransform: 'uppercase', marginBottom: f(8) }}>🖼️ Uso no Alt Text</div>
+              <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{dt.seo_instagram.uso_em_alt_text}</p>
+            </div>
+            <div style={{ padding: `${f(10)}px ${f(16)}px`, borderRadius: 12, background: `${C.primary}15`, border: `1px solid ${C.primary}33`, display: 'flex', alignItems: 'center', gap: f(10) }}>
+              <span style={{ fontSize: f(16) }}>📍</span>
+              <div>
+                <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase' }}>Categoria recomendada: </span>
+                <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.white }}>{dt.seo_instagram.categoria_perfil_recomendada}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )});
+
     all.push({ id: 'dt-hashtags', section: 'diretrizes_tecnicas', render: () => (
       <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
         <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}># Palavras Estratégicas para SEO</div>
@@ -713,35 +827,46 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(18) }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(12) }}>
               <div style={{ borderRadius: 12, padding: f(14), background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.22)' }}>
-                <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(20), color: C.white }}>MONTSERRAT</div>
-                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)' }}>Títulos / Display</div>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(16), color: C.white }}>Display</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.65)', marginTop: f(4) }}>{dt.identidade_visual.tipografia.display}</div>
               </div>
               <div style={{ borderRadius: 12, padding: f(14), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontFamily: 'Roboto', fontSize: f(20), color: C.white }}>Roboto Regular</div>
-                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)' }}>Corpo de texto</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(16), color: C.white }}>Texto</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.65)', marginTop: f(4) }}>{dt.identidade_visual.tipografia.texto}</div>
               </div>
             </div>
+            {dt.identidade_visual.tipografia.regras_uso && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+                {dt.identidade_visual.tipografia.regras_uso.map((r: string, i: number) => (
+                  <span key={i} style={{ padding: `${f(3)}px ${f(8)}px`, borderRadius: 4, fontSize: f(10), fontFamily: 'Roboto', color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>▸ {r}</span>
+                ))}
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(12) }}>
               <div style={{ borderRadius: 12, padding: f(14), background: 'rgba(0,179,126,0.06)', border: '1px solid rgba(0,179,126,0.18)' }}>
                 <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.green, marginBottom: f(6) }}>📷 Estilo Fotográfico</div>
-                <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: lh, margin: 0 }}>{dt.identidade_visual.estilo_fotografico}</p>
+                <p style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.7)', lineHeight: lh, margin: 0 }}>{dt.identidade_visual.estilo_fotografico}</p>
               </div>
               <div style={{ borderRadius: 12, padding: f(14), background: 'rgba(255,214,0,0.06)', border: '1px solid rgba(255,214,0,0.18)' }}>
                 <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, marginBottom: f(6) }}>🎨 Estilo Gráfico</div>
-                <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: lh, margin: 0 }}>{dt.identidade_visual.estilo_grafico}</p>
+                <p style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.7)', lineHeight: lh, margin: 0 }}>{dt.identidade_visual.estilo_grafico}</p>
               </div>
             </div>
-            <div>
-              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: f(8) }}>Mood Visual</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6), marginBottom: f(10) }}>
+            <div style={{ borderRadius: 12, padding: f(14), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginBottom: f(6) }}>👔 Vestimenta / Aparições</div>
+              <p style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.75)', lineHeight: lh, margin: `0 0 ${f(8)}px` }}>{dt.identidade_visual.vestimenta_aparicoes.diretrizes}</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(5), marginBottom: f(6) }}>
                 {dt.identidade_visual.vestimenta_aparicoes.mood_referencias.map((m) => <Tag key={m} text={m} color={C.green} f={f} />)}
               </div>
-              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: f(8) }}>Evitar</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(5) }}>
                 {dt.identidade_visual.vestimenta_aparicoes.evitar.map((e) => (
-                  <span key={e} style={{ padding: `${f(3)}px ${f(8)}px`, borderRadius: 4, fontSize: f(11), background: 'rgba(255,60,60,0.08)', color: '#ff5555', border: '1px solid rgba(255,60,60,0.18)', textDecoration: 'line-through', fontFamily: 'Roboto' }}>{e}</span>
+                  <span key={e} style={{ padding: `${f(3)}px ${f(8)}px`, borderRadius: 4, fontSize: f(10), background: 'rgba(255,60,60,0.08)', color: '#ff5555', border: '1px solid rgba(255,60,60,0.18)', textDecoration: 'line-through', fontFamily: 'Roboto' }}>{e}</span>
                 ))}
               </div>
+            </div>
+            <div style={{ padding: f(12), borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginBottom: f(6) }}>🏷️ Logo & Marca d'água</div>
+              <p style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.75)', lineHeight: lh, margin: 0 }}>{dt.identidade_visual.logos_e_marca_dagua}</p>
             </div>
           </div>
         </div>
@@ -801,6 +926,51 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
         </div>
       </div>
     )});
+
+    const perPage = isP ? 2 : 3;
+    const calItems: Record<string, unknown>[] = dt.calendario_30_dias;
+    const calPages = Math.max(1, Math.ceil(calItems.length / perPage));
+    for (let pg = 0; pg < calPages; pg++) {
+      const pageItems = calItems.slice(pg * perPage, (pg + 1) * perPage);
+      const pageLabel = calPages > 1 ? ` (${pg + 1}/${calPages})` : '';
+      all.push({ id: `dt-calendario-${pg}`, section: 'diretrizes_tecnicas', render: () => (
+        <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56, overflow: 'hidden' }}>
+          <div style={{ marginBottom: f(20), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>📅 Calendário 30 Dias{pageLabel}</div>
+          <div style={{ display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(20), flex: 1, overflow: 'hidden' }}>
+            {pageItems.map((item, i) => {
+              const globalIdx = pg * perPage + i;
+              const cols = [C.primary, C.green, C.yellow];
+              const col  = cols[globalIdx % cols.length];
+              return (
+                <div key={i} style={{ flex: 1, borderRadius: 20, padding: f(22), display: 'flex', flexDirection: 'column', gap: f(10), background: `${col}0c`, border: `1px solid ${col}33`, overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: f(10) }}>
+                    <div style={{ borderRadius: 10, padding: `${f(6)}px ${f(12)}px`, background: col, fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(16), color: C.secondary }}>Dia {String(item.dia)}</div>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.5)' }}>{String(item.dia_semana)}</div>
+                    <Tag text={String(item.formato)} color={col} f={f} />
+                  </div>
+                  <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(15), color: C.white, lineHeight: lh }}>{String(item.tema)}</div>
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: col, lineHeight: lh }}>🎣 {String(item.gancho_3s)}</div>
+                  <p style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.65)', lineHeight: lh, margin: 0, flex: 1 }}>{String(item.estrutura_resumida)}</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: f(6) }}>
+                    <div style={{ padding: `${f(6)}px ${f(10)}px`, borderRadius: 8, background: 'rgba(0,0,0,0.2)' }}>
+                      <span style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.4)' }}>CTA: </span>
+                      <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: C.white }}>{String(item.cta)}</span>
+                    </div>
+                    <Tag text={String(item.pilar)} color={col} f={f} />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(4) }}>
+                      {(Array.isArray(item.hashtags) ? item.hashtags as string[] : String(item.hashtags || '').split(' ')).filter(Boolean).map((h: string) => (
+                        <span key={h} style={{ fontFamily: 'Roboto', fontSize: f(9), color: 'rgba(255,255,255,0.35)' }}>{h}</span>
+                      ))}
+                    </div>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 1 }}>🎯 {String(item.objetivo)}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )});
+    }
 
     all.push({ id: 'dt-assuntos', section: 'diretrizes_tecnicas', render: () => (
       <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
