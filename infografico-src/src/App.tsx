@@ -1,14 +1,46 @@
 import { useState, useEffect, useCallback } from 'react';
 import { marketingData as demoData } from './data';
 
+interface AuditPost {
+  link_post: string; tipo_conteudo: string; formato_midia: string;
+  link_midia: string; thumb: string | null; legenda: string;
+  curtidas: number; comentarios: number; views: number;
+  engajamento_total: number; publicado_em: string;
+}
+interface AuditData {
+  nome_cliente: string; handle_cliente: string;
+  cliente: {
+    handle: string;
+    perfil: { metricas: { seguidores: number; seguindo: number; qtd_posts: number; ratio_seguidor_seguindo: number }; biografia: string; foto_perfil?: string; foto_perfil_hd?: string };
+    posts: AuditPost[];
+  };
+  concorrentes: Array<{
+    handle: string; encontrado: boolean;
+    perfil: { metricas: { seguidores: number; qtd_posts: number } };
+    posts: AuditPost[];
+    metricas_posts: { taxa_engajamento: string; media_curtidas: number; media_comentarios: number; media_views: number; mix_formatos: { reels_pct: number; carrossel_pct: number; foto_pct: number }; top_posts?: AuditPost[] };
+  }>;
+  analise_conteudo: {
+    cliente: { ganchos_top: Array<{ shortcode: string; primeira_linha: string; tipo_conteudo: string; engajamento: number; curtidas: number; comentarios: number }> };
+  };
+}
+
 declare global {
   interface Window {
     __MARKETING_DATA__?: typeof demoData;
     __SECTION__?: string;
+    __AUDIT_DATA__?: AuditData;
   }
 }
 
 const marketingData = (window.__MARKETING_DATA__ as typeof demoData) ?? demoData;
+const auditData: AuditData | undefined = window.__AUDIT_DATA__;
+
+function fmtNum(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace('.', ',') + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace('.', ',') + 'K';
+  return String(n);
+}
 
 const C = {
   primary:   '#FF6600',
@@ -193,26 +225,47 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
     all.push({ id: 'ov-diagnostico', section: 'overview_cliente', render: () => {
       const handle = ov.diagnostico_identidade.match(/@[\w.]+/)?.[0] ?? '';
       const paragraphs = ov.diagnostico_identidade.split('\n\n').filter(Boolean);
-      const metrics = extractMetrics(ov.posicionamento_atual);
       const keywords = dt.seo_instagram.palavras_chave_principais.slice(0, 3);
+      const diagCliente = auditData?.cliente;
+      const diagMet = diagCliente?.perfil?.metricas;
+      const diagPosts = diagCliente?.posts ?? [];
+      const diagAvgCurt = diagPosts.length ? Math.round(diagPosts.reduce((s, p) => s + (p.curtidas || 0), 0) / diagPosts.length) : null;
+      const diagAvgComt = diagPosts.length ? Math.round(diagPosts.reduce((s, p) => s + (p.comentarios || 0), 0) / diagPosts.length) : null;
+      const diagTotalEng = diagPosts.reduce((s, p) => s + (p.engajamento_total || 0), 0);
+      const diagEngRate = (diagMet && diagPosts.length && diagMet.seguidores > 0) ? ((diagTotalEng / diagPosts.length) / diagMet.seguidores * 100).toFixed(2) : null;
+      const diagFoto = diagCliente?.perfil?.foto_perfil_hd ?? diagCliente?.perfil?.foto_perfil ?? null;
+      const diagBio  = diagCliente?.perfil?.biografia ?? null;
+      const auditMetrics = diagMet ? [
+        { label: 'Seguidores',    val: fmtNum(diagMet.seguidores),  color: C.white },
+        { label: 'Posts',         val: fmtNum(diagMet.qtd_posts),   color: C.white },
+        ...(diagAvgCurt  !== null ? [{ label: 'Méd. curtidas', val: fmtNum(diagAvgCurt),  color: C.yellow }] : []),
+        ...(diagAvgComt  !== null ? [{ label: 'Méd. coment.',  val: fmtNum(diagAvgComt),  color: C.yellow }] : []),
+        ...(diagEngRate  !== null ? [{ label: 'Engajamento',   val: `${diagEngRate}%`,     color: C.green  }] : []),
+      ] : extractMetrics(ov.posicionamento_atual);
       return (
         <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row' }}>
-          <div style={{ width: isP ? '100%' : '33%', background: C.primary, display: 'flex', flexDirection: 'column', gap: f(16), padding: isP ? `${f(20)}px 40px` : 48 }}>
-            <div>
-              <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)', letterSpacing: 3, textTransform: 'uppercase' }}>Slide 01</div>
-              <div style={{ marginTop: f(8), fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 38, color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>DIAGNÓSTICO DE IDENTIDADE</div>
-              {handle && (
-                <div style={{ marginTop: f(12), fontFamily: 'Roboto', fontSize: f(16), color: 'rgba(255,255,255,0.9)' }}>{handle}</div>
-              )}
+          <div style={{ width: isP ? '100%' : '33%', background: C.primary, display: 'flex', flexDirection: 'column', gap: f(14), padding: isP ? `${f(20)}px 40px` : 48 }}>
+            {/* Handle */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: f(14) }}>
+              <div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.6)', letterSpacing: 3, textTransform: 'uppercase' }}>Slide 01</div>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(20), color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>DIAGNÓSTICO DE IDENTIDADE</div>
+                {handle && <div style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)' }}>{handle}</div>}
+              </div>
             </div>
-            {metrics.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: f(8) }}>
-                {metrics.map((m, i) => (
-                  <div key={i} style={{ borderRadius: 10, padding: `${f(10)}px ${f(14)}px`, background: 'rgba(0,0,0,0.2)' }}>
-                    <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>{m.label}</div>
-                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(22), color: m.color }}>{m.val}</div>
-                  </div>
-                ))}
+            {/* Métricas reais */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: f(6) }}>
+              {auditMetrics.map((m, i) => (
+                <div key={i} style={{ borderRadius: 10, padding: `${f(8)}px ${f(12)}px`, background: 'rgba(0,0,0,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(9), color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: 1 }}>{m.label}</div>
+                  <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(18), color: m.color }}>{m.val}</div>
+                </div>
+              ))}
+            </div>
+            {/* Bio */}
+            {diagBio && (
+              <div style={{ padding: `${f(8)}px ${f(10)}px`, borderRadius: 10, background: 'rgba(0,0,0,0.15)', fontFamily: 'Roboto', fontSize: f(9), color: 'rgba(255,255,255,0.75)', lineHeight: 1.4, fontStyle: 'italic' }}>
+                "{diagBio}"
               </div>
             )}
             {keywords.length > 0 && (
@@ -220,14 +273,9 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
                 {keywords.map((k) => <Tag key={k} text={k} color="rgba(255,255,255,0.9)" f={f} />)}
               </div>
             )}
-            <div style={{ marginTop: 'auto', padding: f(14), borderRadius: 12, background: 'rgba(0,0,0,0.2)' }}>
-              <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>
-                {paragraphs[paragraphs.length - 1]}
-              </div>
-            </div>
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: `${f(40)}px ${f(48)}px`, gap: f(20), overflow: 'hidden' }}>
-            {paragraphs.slice(0, -1).map((p, i) => (
+            {paragraphs.map((p, i) => (
               <div key={i} style={{ padding: i === 0 ? 0 : f(16), borderRadius: i === 0 ? 0 : 12, background: i === 0 ? 'transparent' : 'rgba(255,102,0,0.08)', border: i === 0 ? 'none' : '1px solid rgba(255,102,0,0.25)' }}>
                 {i > 0 && <span style={{ fontSize: f(16) }}>⚠️ </span>}
                 <span style={{ fontFamily: 'Roboto, sans-serif', fontSize: f(14), color: i === 0 ? 'rgba(255,255,255,0.85)' : C.primary, lineHeight: lh }}>{p}</span>
@@ -240,8 +288,23 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
 
     all.push({ id: 'ov-posicionamento', section: 'overview_cliente', render: () => {
       const handle = ov.diagnostico_identidade.match(/@[\w.]+/)?.[0] ?? 'Seu perfil';
-      const clientMetrics = extractMetrics(ov.posicionamento_atual);
+      const clientMetricsFallback = extractMetrics(ov.posicionamento_atual);
+      const auditCliente = auditData?.cliente;
+      const auditMet = auditCliente?.perfil?.metricas;
+      const auditPosts = auditCliente?.posts ?? [];
+      const avgCurtidas = auditPosts.length ? Math.round(auditPosts.reduce((s, p) => s + (p.curtidas || 0), 0) / auditPosts.length) : null;
+      const avgComentarios = auditPosts.length ? Math.round(auditPosts.reduce((s, p) => s + (p.comentarios || 0), 0) / auditPosts.length) : null;
+      const totalEngaj = auditPosts.length ? auditPosts.reduce((s, p) => s + (p.engajamento_total || 0), 0) : 0;
+      const clientEngRate = (auditMet && auditPosts.length && auditMet.seguidores > 0) ? ((totalEngaj / auditPosts.length) / auditMet.seguidores * 100).toFixed(2) : null;
+      const reelsCt = auditPosts.filter(p => p.tipo_conteudo === 'video').length;
+      const fotoCt = auditPosts.filter(p => p.tipo_conteudo === 'image' || p.tipo_conteudo === 'foto').length;
+      const carrCt = auditPosts.length - reelsCt - fotoCt;
+      const clientMix = auditPosts.length ? `${Math.round(reelsCt / auditPosts.length * 100)}% / ${Math.round(Math.max(0, carrCt) / auditPosts.length * 100)}% / ${Math.round(fotoCt / auditPosts.length * 100)}%` : null;
       const cols = isP ? '1fr' : `1fr ${ov.comparativo_concorrentes.map(() => '1fr').join(' ')}`;
+      // shared small-box style for competitor metrics
+      const compBox = (bg: string, border: string) => ({ borderRadius: 6, padding: `${f(2)}px ${f(5)}px`, background: bg, border: `1px solid ${border}` });
+      const compLbl = { fontFamily: 'Roboto', fontSize: f(7), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase' as const };
+      const compVal = (color: string) => ({ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(10), color });
       return (
         <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: f(16), marginBottom: f(28) }}>
@@ -254,36 +317,88 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
               <div style={{ position: 'absolute', top: f(16), right: f(16), fontSize: f(20) }}>⭐</div>
               <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.white }}>{handle}</div>
               <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: 2 }}>Seu perfil</div>
-              {clientMetrics.length > 0 && (
-                <div style={{ display: 'flex', gap: f(8), flexWrap: 'wrap' }}>
-                  {clientMetrics.map((m, i) => (
-                    <div key={i} style={{ borderRadius: 8, padding: `${f(5)}px ${f(10)}px`, background: 'rgba(0,0,0,0.2)' }}>
-                      <div style={{ fontFamily: 'Roboto', fontSize: f(9), color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: 1 }}>{m.label}</div>
-                      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(14), color: C.white }}>{m.val}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.9)', lineHeight: 1.2, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', gap: f(6), flexWrap: 'wrap' }}>
+                {auditMet ? (
+                  <>
+                    {[
+                      { label: 'Seguidores',   val: fmtNum(auditMet.seguidores) },
+                      { label: 'Posts',         val: fmtNum(auditMet.qtd_posts) },
+                      ...(avgCurtidas    !== null ? [{ label: 'Média curtidas', val: fmtNum(avgCurtidas) }]    : []),
+                      ...(avgComentarios !== null ? [{ label: 'Média coment.',  val: fmtNum(avgComentarios) }] : []),
+                      ...(clientEngRate  !== null ? [{ label: 'Engajamento',    val: `${clientEngRate}%` }]    : []),
+                    ].map((m, i) => (
+                      <div key={i} style={{ borderRadius: 6, padding: `${f(2)}px ${f(5)}px`, background: 'rgba(0,0,0,0.2)' }}>
+                        <div style={{ fontFamily: 'Roboto', fontSize: f(7), color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: 1 }}>{m.label}</div>
+                        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(10), color: C.white }}>{m.val}</div>
+                      </div>
+                    ))}
+                    {clientMix && (
+                      <div style={{ borderRadius: 6, padding: `${f(2)}px ${f(5)}px`, background: 'rgba(0,0,0,0.15)' }}>
+                        <div style={{ fontFamily: 'Roboto', fontSize: f(7), color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: 1 }}>Reels/Carr./Foto</div>
+                        <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(9), color: 'rgba(255,255,255,0.85)' }}>{clientMix}</div>
+                      </div>
+                    )}
+                  </>
+                ) : clientMetricsFallback.map((m, i) => (
+                  <div key={i} style={{ borderRadius: 6, padding: `${f(2)}px ${f(5)}px`, background: 'rgba(0,0,0,0.2)' }}>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(7), color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: 1 }}>{m.label}</div>
+                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(10), color: C.white }}>{m.val}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.75)', lineHeight: 1.3, overflow: 'hidden' }}>
                 {ov.posicionamento_atual.split('\n\n')[0]}
               </div>
             </div>
             {/* Cards dos concorrentes */}
             {ov.comparativo_concorrentes.map((c, i) => {
-              const compMetrics = extractCompetitorMetrics(ov.posicionamento_atual, c.handle);
-              const segMetric = compMetrics.find(m => m.label === 'Seguidores');
+              const auditComp = auditData?.concorrentes?.find(x => x.handle === c.handle.replace('@', ''));
+              const compMp = auditComp?.metricas_posts;
+              const compSeg = auditComp?.perfil?.metricas?.seguidores;
+              const compQtd = auditComp?.perfil?.metricas?.qtd_posts;
+              const compMetricsFallback = extractCompetitorMetrics(ov.posicionamento_atual, c.handle);
+              const segFallback = compMetricsFallback.find(m => m.label === 'Seguidores');
               return (
                 <div key={i} style={{ borderRadius: 20, padding: f(24), display: 'flex', flexDirection: 'column', gap: f(10), background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                   <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: f(18), color: C.green }}>{c.handle}</div>
                   <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2 }}>Concorrente</div>
-                  {segMetric && (
-                    <div style={{ display: 'flex', gap: f(8) }}>
-                      <div style={{ borderRadius: 8, padding: `${f(5)}px ${f(10)}px`, background: 'rgba(0,179,126,0.1)', border: '1px solid rgba(0,179,126,0.2)' }}>
-                        <div style={{ fontFamily: 'Roboto', fontSize: f(9), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 1 }}>Seguidores</div>
-                        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: f(14), color: C.green }}>{segMetric.val}</div>
+                  <div style={{ display: 'flex', gap: f(4), flexWrap: 'wrap' }}>
+                    {compSeg !== undefined ? (
+                      <>
+                        <div style={compBox('rgba(0,179,126,0.1)', 'rgba(0,179,126,0.2)')}>
+                          <div style={compLbl}>Seguidores</div>
+                          <div style={compVal(C.green)}>{fmtNum(compSeg)}</div>
+                        </div>
+                        {compQtd !== undefined && (
+                          <div style={compBox('rgba(0,179,126,0.1)', 'rgba(0,179,126,0.2)')}>
+                            <div style={compLbl}>Posts</div>
+                            <div style={compVal(C.green)}>{fmtNum(compQtd)}</div>
+                          </div>
+                        )}
+                        {compMp && <>
+                          <div style={compBox('rgba(0,179,126,0.1)', 'rgba(0,179,126,0.2)')}>
+                            <div style={compLbl}>Média curtidas</div>
+                            <div style={compVal(C.green)}>{fmtNum(compMp.media_curtidas)}</div>
+                          </div>
+                          <div style={compBox('rgba(0,179,126,0.1)', 'rgba(0,179,126,0.2)')}>
+                            <div style={compLbl}>Engajamento</div>
+                            <div style={compVal(C.green)}>{compMp.taxa_engajamento}%</div>
+                          </div>
+                        </>}
+                      </>
+                    ) : segFallback ? (
+                      <div style={compBox('rgba(0,179,126,0.1)', 'rgba(0,179,126,0.2)')}>
+                        <div style={compLbl}>Seguidores</div>
+                        <div style={compVal(C.green)}>{segFallback.val}</div>
                       </div>
-                    </div>
-                  )}
+                    ) : null}
+                    {compMp && (
+                      <div style={compBox('rgba(255,255,255,0.04)', 'rgba(255,255,255,0.1)')}>
+                        <div style={compLbl}>Reels/Carrossel/Foto</div>
+                        <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(9), color: 'rgba(255,255,255,0.7)' }}>{compMp.mix_formatos.reels_pct}% / {compMp.mix_formatos.carrossel_pct}% / {compMp.mix_formatos.foto_pct}%</div>
+                      </div>
+                    )}
+                  </div>
                   <div style={{ flex: 1, fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', lineHeight: 1.2, overflow: 'hidden' }}>{c.estrategia_que_funciona}</div>
                   <div style={{ flexShrink: 0, padding: f(10), borderRadius: 10, background: 'rgba(0,179,126,0.12)', border: '1px solid rgba(0,179,126,0.25)' }}>
                     <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: C.green }}>{c.ganho_esperado_vendas}</div>
@@ -295,6 +410,118 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
         </div>
       );
     }});
+
+    // ── Top Posts (apenas os 3 primeiros) ────────────────────────────────────
+    if (auditData) {
+      const topPosts = (auditData.analise_conteudo?.cliente?.ganchos_top ?? []).slice(0, 3);
+      const allPosts = auditData.cliente?.posts ?? [];
+      const tpPerPage = isP ? 2 : 3;
+      const tpPages = 1;
+      for (let pg = 0; pg < tpPages; pg++) {
+        const pageItems = topPosts.slice(pg * tpPerPage, (pg + 1) * tpPerPage);
+        const pageLabel = '';
+        all.push({ id: `ov-top-posts-${pg}`, section: 'overview_cliente', render: () => (
+          <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56, overflow: 'hidden' }}>
+            <div style={{ marginBottom: f(20), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>🏆 Top Posts{pageLabel}</div>
+            <div style={{ display: 'flex', gap: f(20), flex: 1, overflow: 'hidden' }}>
+              {pageItems.map((tp, i) => {
+                const full = allPosts.find(p => p.link_post?.includes(tp.shortcode));
+                const imgUrl = full?.thumb || full?.link_midia || null;
+                const isVideo = tp.tipo_conteudo === 'video' || full?.tipo_conteudo === 'video';
+                const cols2 = [C.primary, C.green, C.yellow];
+                const col = cols2[(pg * tpPerPage + i) % 3];
+                return (
+                  <div key={i} style={{ flex: 1, borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.04)', border: `1px solid ${col}33` }}>
+                    {/* Imagem / thumb */}
+                    <div style={{ width: '100%', aspectRatio: '1', background: '#111', position: 'relative', flexShrink: 0, overflow: 'hidden' }}>
+                      {imgUrl ? (
+                        <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      ) : null}
+                      {isVideo && (
+                        <div style={{ position: 'absolute', top: f(8), left: f(8), background: 'rgba(0,0,0,0.7)', borderRadius: 4, padding: `${f(2)}px ${f(6)}px`, fontFamily: 'Roboto', fontSize: f(9), color: C.white }}>▶ Reel</div>
+                      )}
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent,rgba(0,0,0,0.8))', padding: `${f(8)}px ${f(10)}px ${f(6)}px` }}>
+                        <div style={{ display: 'flex', gap: f(10) }}>
+                          {[['❤️', tp.curtidas], ['💬', tp.comentarios], ['⚡', tp.engajamento]].map(([icon, val]) => (
+                            <span key={String(icon)} style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(12), color: C.white }}>{icon} {fmtNum(Number(val))}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    {/* Texto */}
+                    <div style={{ flex: 1, padding: f(16), display: 'flex', flexDirection: 'column', gap: f(8), overflow: 'hidden' }}>
+                      <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: col, lineHeight: lh }}>{tp.primeira_linha}</div>
+                      {full?.legenda && (
+                        <p style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)', lineHeight: lh, margin: 0, overflow: 'hidden', flex: 1 }}>
+                          {full.legenda.slice(0, 200)}{full.legenda.length > 200 ? '…' : ''}
+                        </p>
+                      )}
+                      <a href={full?.link_post ?? `https://www.instagram.com/p/${tp.shortcode}/`}
+                        style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.3)', wordBreak: 'break-all' }}>
+                        instagram.com/p/{tp.shortcode}
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )});
+      }
+
+      // ── Top Posts dos Concorrentes (paginado, 3 por slide por concorrente) ──
+      for (const comp of auditData.concorrentes ?? []) {
+        const compTopPosts: AuditPost[] = (comp.metricas_posts?.top_posts ?? []).slice(0, 3);
+        if (compTopPosts.length === 0) continue;
+        const ctpPages = 1;
+        for (let pg = 0; pg < ctpPages; pg++) {
+          const pageItems = compTopPosts;
+          const pageLabel = '';
+          const compHandle = comp.handle;
+          all.push({ id: `ov-comp-posts-${compHandle}-${pg}`, section: 'overview_cliente', render: () => (
+            <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56, overflow: 'hidden' }}>
+              <div style={{ marginBottom: f(20), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>
+                🔍 Top Posts — <span style={{ color: C.green }}>@{compHandle}</span>{pageLabel}
+              </div>
+              <div style={{ display: 'flex', gap: f(20), flex: 1, overflow: 'hidden' }}>
+                {pageItems.map((p, i) => {
+                  const imgUrl = p.thumb || p.link_midia || null;
+                  const isVideo = p.tipo_conteudo === 'video';
+                  const cols2 = [C.green, C.primary, C.yellow];
+                  const col = cols2[i % 3];
+                  return (
+                    <div key={i} style={{ flex: 1, borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.04)', border: `1px solid ${col}33` }}>
+                      <div style={{ width: '100%', aspectRatio: '1', background: '#111', position: 'relative', flexShrink: 0, overflow: 'hidden' }}>
+                        {imgUrl && <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
+                        {isVideo && <div style={{ position: 'absolute', top: f(8), left: f(8), background: 'rgba(0,0,0,0.7)', borderRadius: 4, padding: `${f(2)}px ${f(6)}px`, fontFamily: 'Roboto', fontSize: f(9), color: C.white }}>▶ Reel</div>}
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent,rgba(0,0,0,0.8))', padding: `${f(8)}px ${f(10)}px ${f(6)}px` }}>
+                          <div style={{ display: 'flex', gap: f(10) }}>
+                            {[['❤️', p.curtidas], ['💬', p.comentarios], ...(p.views > 0 ? [['👁', p.views]] : [])].map(([icon, val]) => (
+                              <span key={String(icon)} style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(12), color: C.white }}>{icon} {fmtNum(Number(val))}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ flex: 1, padding: f(16), display: 'flex', flexDirection: 'column', gap: f(8), overflow: 'hidden' }}>
+                        <p style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.75)', lineHeight: lh, margin: 0, overflow: 'hidden', flex: 1 }}>
+                          {p.legenda?.slice(0, 220)}{(p.legenda?.length ?? 0) > 220 ? '…' : ''}
+                        </p>
+                        <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.3)' }}>
+                          {new Date(p.publicado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: '2-digit' })}
+                          {' · '}{p.tipo_conteudo}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )});
+        }
+      }
+    }
 
     all.push({ id: 'ov-swot', section: 'overview_cliente', render: () => (
       <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
@@ -347,15 +574,33 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isP ? '16px 40px 28px' : 48, gap: f(20), overflow: 'hidden' }}>
             {concorrentes.map((c, i) => {
               const col = accentColors[i];
+              const auditComp = auditData?.concorrentes?.find(x => x.handle === c.handle.replace('@', ''));
+              const compSeg = auditComp?.perfil?.metricas?.seguidores;
+              const compQtd = auditComp?.perfil?.metricas?.qtd_posts;
               return (
                 <div key={i} style={{ flex: 1, borderRadius: 20, padding: f(22), display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(16), background: `${col}0a`, border: `1px solid ${col}33`, overflow: 'hidden' }}>
                   {/* estratégia */}
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(8) }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: f(8) }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: f(8), flexWrap: 'wrap' }}>
                       <div style={{ width: f(28), height: f(28), borderRadius: '50%', background: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: f(14), flexShrink: 0 }}>🔍</div>
-                      <div>
+                      <div style={{ flex: 1 }}>
                         <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(16), color: col }}>{c.handle}</div>
                         <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1 }}>O que faz bem</div>
+                      </div>
+                      {/* metric chips */}
+                      <div style={{ display: 'flex', gap: f(4), flexWrap: 'wrap' }}>
+                        {compSeg !== undefined && (
+                          <div style={{ borderRadius: 5, padding: `${f(2)}px ${f(5)}px`, background: `${col}18`, border: `1px solid ${col}33` }}>
+                            <div style={{ fontFamily: 'Roboto', fontSize: f(7), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Seguidores</div>
+                            <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(10), color: col }}>{fmtNum(compSeg)}</div>
+                          </div>
+                        )}
+                        {compQtd !== undefined && (
+                          <div style={{ borderRadius: 5, padding: `${f(2)}px ${f(5)}px`, background: `${col}18`, border: `1px solid ${col}33` }}>
+                            <div style={{ fontFamily: 'Roboto', fontSize: f(7), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Posts</div>
+                            <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(10), color: col }}>{fmtNum(compQtd)}</div>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', lineHeight: 1.4, margin: 0 }}>{c.estrategia_que_funciona}</p>
