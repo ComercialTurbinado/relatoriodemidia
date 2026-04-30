@@ -356,89 +356,50 @@ app.use('/pdfs', express.static(path.join(__dirname, 'pdfs')));
 
 const SLIDES_TEMPLATE = path.join(__dirname, '..', 'infografico-marketing.html');
 
+function parseSlideBody(body) {
+  const mapPost = (p) => ({
+    link_post: p.link_post, tipo_conteudo: p.tipo, formato_midia: p.tipo,
+    link_midia: null, thumb: null, legenda: p.legenda,
+    curtidas: p.curtidas, comentarios: p.comentarios, views: p.views || 0,
+    engajamento_total: p.engajamento_total, publicado_em: '',
+  });
+  if (Array.isArray(body) && body[0]?.plano_diretor) {
+    return { data: body[0].plano_diretor, auditData: body[0] };
+  }
+  if (Array.isArray(body) && body[0]?.overview_cliente) {
+    const raw = body[0];
+    const data = { overview_cliente: raw.overview_cliente, diretrizes_tecnicas: raw.diretrizes_tecnicas };
+    const dm = raw.dados_metricas_perfis;
+    const auditData = dm ? {
+      nome_cliente: dm.cliente?.handle ?? '', handle_cliente: dm.cliente?.handle ?? '',
+      cliente: {
+        handle: dm.cliente?.handle ?? '',
+        perfil: {
+          metricas: { seguidores: dm.cliente?.metricas_perfil?.seguidores ?? 0, seguindo: dm.cliente?.metricas_perfil?.seguindo ?? 0, qtd_posts: dm.cliente?.metricas_perfil?.qtd_posts ?? 0, ratio_seguidor_seguindo: dm.cliente?.metricas_perfil?.ratio_seguidor_seguindo ?? 0 },
+          biografia: '',
+        },
+        posts: (dm.cliente?.top_3_melhores_posts ?? []).map(mapPost),
+      },
+      concorrentes: (dm.concorrentes ?? []).map((c) => ({
+        handle: c.handle, encontrado: true,
+        perfil: { metricas: { seguidores: c.metricas_perfil?.seguidores ?? 0, qtd_posts: c.metricas_perfil?.qtd_posts ?? 0 } },
+        posts: [],
+        metricas_posts: { taxa_engajamento: c.metricas_posts?.taxa_engajamento ?? '0', media_curtidas: c.metricas_posts?.media_curtidas ?? 0, media_comentarios: c.metricas_posts?.media_comentarios ?? 0, media_views: c.metricas_posts?.media_views ?? 0, mix_formatos: c.metricas_posts?.mix_formatos ?? { reels_pct: 0, carrossel_pct: 0, foto_pct: 0 }, top_posts: (c.top_3_melhores_posts ?? []).map(mapPost) },
+      })),
+      analise_conteudo: { cliente: { ganchos_top: (dm.cliente?.top_3_melhores_posts ?? []).map((p) => ({ shortcode: (p.link_post || '').match(/\/p\/([^/]+)/)?.[1] ?? '', primeira_linha: (p.legenda || '').split('\n')[0], tipo_conteudo: p.tipo, engajamento: p.engajamento_total, curtidas: p.curtidas, comentarios: p.comentarios })) } },
+    } : null;
+    return { data, auditData };
+  }
+  return { data: body, auditData: null };
+}
+
 app.post('/api/slides', (req, res) => {
   const body    = req.body;
   const section = ['overview_cliente', 'diretrizes_tecnicas'].includes(req.query.section)
     ? req.query.section
     : 'all';
 
-  // Aceita três formatos:
-  // 1. Array antigo: [{plano_diretor:{overview_cliente,...}, cliente, concorrentes, ...}]
-  // 2. Array novo:   [{overview_cliente,..., diretrizes_tecnicas,..., dados_metricas_perfis:{cliente,concorrentes}}]
-  // 3. Objeto direto: {overview_cliente, diretrizes_tecnicas}
-  let data, auditData;
-  if (Array.isArray(body) && body[0]?.plano_diretor) {
-    // formato 1
-    auditData = body[0];
-    data = body[0].plano_diretor;
-  } else if (Array.isArray(body) && body[0]?.overview_cliente) {
-    // formato 2 — normaliza dados_metricas_perfis para a estrutura que o frontend espera
-    const raw = body[0];
-    data = { overview_cliente: raw.overview_cliente, diretrizes_tecnicas: raw.diretrizes_tecnicas };
-    const dm = raw.dados_metricas_perfis;
-    if (dm) {
-      const mapPost = (p) => ({
-        link_post: p.link_post, tipo_conteudo: p.tipo, formato_midia: p.tipo,
-        link_midia: null, thumb: null, legenda: p.legenda,
-        curtidas: p.curtidas, comentarios: p.comentarios, views: p.views || 0,
-        engajamento_total: p.engajamento_total, publicado_em: '',
-      });
-      auditData = {
-        nome_cliente: dm.cliente?.handle ?? '',
-        handle_cliente: dm.cliente?.handle ?? '',
-        cliente: {
-          handle: dm.cliente?.handle ?? '',
-          perfil: {
-            metricas: {
-              seguidores: dm.cliente?.metricas_perfil?.seguidores ?? 0,
-              seguindo: dm.cliente?.metricas_perfil?.seguindo ?? 0,
-              qtd_posts: dm.cliente?.metricas_perfil?.qtd_posts ?? 0,
-              ratio_seguidor_seguindo: dm.cliente?.metricas_perfil?.ratio_seguidor_seguindo ?? 0,
-            },
-            biografia: '',
-          },
-          posts: (dm.cliente?.top_3_melhores_posts ?? []).map(mapPost),
-        },
-        concorrentes: (dm.concorrentes ?? []).map((c) => ({
-          handle: c.handle,
-          encontrado: true,
-          perfil: {
-            metricas: {
-              seguidores: c.metricas_perfil?.seguidores ?? 0,
-              qtd_posts: c.metricas_perfil?.qtd_posts ?? 0,
-            },
-          },
-          posts: [],
-          metricas_posts: {
-            taxa_engajamento: c.metricas_posts?.taxa_engajamento ?? '0',
-            media_curtidas: c.metricas_posts?.media_curtidas ?? 0,
-            media_comentarios: c.metricas_posts?.media_comentarios ?? 0,
-            media_views: c.metricas_posts?.media_views ?? 0,
-            mix_formatos: c.metricas_posts?.mix_formatos ?? { reels_pct: 0, carrossel_pct: 0, foto_pct: 0 },
-            top_posts: (c.top_3_melhores_posts ?? []).map(mapPost),
-          },
-        })),
-        analise_conteudo: {
-          cliente: {
-            ganchos_top: (dm.cliente?.top_3_melhores_posts ?? []).map((p) => ({
-              shortcode: (p.link_post || '').match(/\/p\/([^/]+)/)?.[1] ?? '',
-              primeira_linha: (p.legenda || '').split('\n')[0],
-              tipo_conteudo: p.tipo,
-              engajamento: p.engajamento_total,
-              curtidas: p.curtidas,
-              comentarios: p.comentarios,
-            })),
-          },
-        },
-      };
-    } else {
-      auditData = null;
-    }
-  } else {
-    // formato 3
-    data = body;
-    auditData = null;
-  }
+  const { data, auditData } = parseSlideBody(body);
 
   if (!data || (!data.overview_cliente && !data.diretrizes_tecnicas)) {
     return res.status(400).json({
@@ -476,7 +437,7 @@ app.post('/api/slides', (req, res) => {
 // ═════════════════════════════════════════════════════════════════════════════
 
 app.post('/api/slides/pdf', async (req, res) => {
-  const data        = req.body;
+  const { data, auditData } = parseSlideBody(req.body);
   const section     = ['overview_cliente', 'diretrizes_tecnicas'].includes(req.query.section)
     ? req.query.section : 'all';
   const orientation = req.query.orientation === 'portrait' ? 'portrait' : 'landscape';
@@ -493,7 +454,9 @@ app.post('/api/slides/pdf', async (req, res) => {
     return res.status(500).json({ error: 'Template de slides não encontrado no servidor.' });
   }
 
-  const injection = `<script>window.__MARKETING_DATA__=${JSON.stringify(data)};window.__SECTION__=${JSON.stringify(section)};</script>`;
+  const injection = auditData
+    ? `<script>window.__MARKETING_DATA__=${JSON.stringify(data)};window.__AUDIT_DATA__=${JSON.stringify(auditData)};window.__SECTION__=${JSON.stringify(section)};</script>`
+    : `<script>window.__MARKETING_DATA__=${JSON.stringify(data)};window.__SECTION__=${JSON.stringify(section)};</script>`;
   const anchor    = template.includes('</head>') ? '</head>' : '<style>';
   const html      = template.replace(anchor, injection + anchor);
 
