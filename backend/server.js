@@ -591,7 +591,7 @@ app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }),
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="documento.pdf"');
-    res.send(pdfBuf);
+    res.end(Buffer.from(pdfBuf));
   } catch (err) {
     if (browser) await browser.close().catch(() => {});
     console.error('[html-to-pdf]', err.message);
