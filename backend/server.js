@@ -25,7 +25,7 @@ const crypto      = require('crypto');
 const CHROME_PATH = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const app  = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // ─── Clientes de IA ──────────────────────────────────────────────────────────
 
