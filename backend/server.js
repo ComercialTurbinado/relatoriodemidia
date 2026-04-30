@@ -362,14 +362,80 @@ app.post('/api/slides', (req, res) => {
     ? req.query.section
     : 'all';
 
-  // Aceita dois formatos:
-  // 1. Array de auditoria: [{plano_diretor:{overview_cliente,diretrizes_tecnicas}, cliente, concorrentes, ...}]
-  // 2. Objeto direto: {overview_cliente, diretrizes_tecnicas}
+  // Aceita três formatos:
+  // 1. Array antigo: [{plano_diretor:{overview_cliente,...}, cliente, concorrentes, ...}]
+  // 2. Array novo:   [{overview_cliente,..., diretrizes_tecnicas,..., dados_metricas_perfis:{cliente,concorrentes}}]
+  // 3. Objeto direto: {overview_cliente, diretrizes_tecnicas}
   let data, auditData;
   if (Array.isArray(body) && body[0]?.plano_diretor) {
+    // formato 1
     auditData = body[0];
     data = body[0].plano_diretor;
+  } else if (Array.isArray(body) && body[0]?.overview_cliente) {
+    // formato 2 — normaliza dados_metricas_perfis para a estrutura que o frontend espera
+    const raw = body[0];
+    data = { overview_cliente: raw.overview_cliente, diretrizes_tecnicas: raw.diretrizes_tecnicas };
+    const dm = raw.dados_metricas_perfis;
+    if (dm) {
+      const mapPost = (p) => ({
+        link_post: p.link_post, tipo_conteudo: p.tipo, formato_midia: p.tipo,
+        link_midia: null, thumb: null, legenda: p.legenda,
+        curtidas: p.curtidas, comentarios: p.comentarios, views: p.views || 0,
+        engajamento_total: p.engajamento_total, publicado_em: '',
+      });
+      auditData = {
+        nome_cliente: dm.cliente?.handle ?? '',
+        handle_cliente: dm.cliente?.handle ?? '',
+        cliente: {
+          handle: dm.cliente?.handle ?? '',
+          perfil: {
+            metricas: {
+              seguidores: dm.cliente?.metricas_perfil?.seguidores ?? 0,
+              seguindo: dm.cliente?.metricas_perfil?.seguindo ?? 0,
+              qtd_posts: dm.cliente?.metricas_perfil?.qtd_posts ?? 0,
+              ratio_seguidor_seguindo: dm.cliente?.metricas_perfil?.ratio_seguidor_seguindo ?? 0,
+            },
+            biografia: '',
+          },
+          posts: (dm.cliente?.top_3_melhores_posts ?? []).map(mapPost),
+        },
+        concorrentes: (dm.concorrentes ?? []).map((c) => ({
+          handle: c.handle,
+          encontrado: true,
+          perfil: {
+            metricas: {
+              seguidores: c.metricas_perfil?.seguidores ?? 0,
+              qtd_posts: c.metricas_perfil?.qtd_posts ?? 0,
+            },
+          },
+          posts: [],
+          metricas_posts: {
+            taxa_engajamento: c.metricas_posts?.taxa_engajamento ?? '0',
+            media_curtidas: c.metricas_posts?.media_curtidas ?? 0,
+            media_comentarios: c.metricas_posts?.media_comentarios ?? 0,
+            media_views: c.metricas_posts?.media_views ?? 0,
+            mix_formatos: c.metricas_posts?.mix_formatos ?? { reels_pct: 0, carrossel_pct: 0, foto_pct: 0 },
+            top_posts: (c.top_3_melhores_posts ?? []).map(mapPost),
+          },
+        })),
+        analise_conteudo: {
+          cliente: {
+            ganchos_top: (dm.cliente?.top_3_melhores_posts ?? []).map((p) => ({
+              shortcode: (p.link_post || '').match(/\/p\/([^/]+)/)?.[1] ?? '',
+              primeira_linha: (p.legenda || '').split('\n')[0],
+              tipo_conteudo: p.tipo,
+              engajamento: p.engajamento_total,
+              curtidas: p.curtidas,
+              comentarios: p.comentarios,
+            })),
+          },
+        },
+      };
+    } else {
+      auditData = null;
+    }
   } else {
+    // formato 3
     data = body;
     auditData = null;
   }
