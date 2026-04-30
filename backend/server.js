@@ -357,10 +357,22 @@ app.use('/pdfs', express.static(path.join(__dirname, 'pdfs')));
 const SLIDES_TEMPLATE = path.join(__dirname, '..', 'infografico-marketing.html');
 
 app.post('/api/slides', (req, res) => {
-  const data    = req.body;
+  const body    = req.body;
   const section = ['overview_cliente', 'diretrizes_tecnicas'].includes(req.query.section)
     ? req.query.section
     : 'all';
+
+  // Aceita dois formatos:
+  // 1. Array de auditoria: [{plano_diretor:{overview_cliente,diretrizes_tecnicas}, cliente, concorrentes, ...}]
+  // 2. Objeto direto: {overview_cliente, diretrizes_tecnicas}
+  let data, auditData;
+  if (Array.isArray(body) && body[0]?.plano_diretor) {
+    auditData = body[0];
+    data = body[0].plano_diretor;
+  } else {
+    data = body;
+    auditData = null;
+  }
 
   if (!data || (!data.overview_cliente && !data.diretrizes_tecnicas)) {
     return res.status(400).json({
@@ -375,11 +387,10 @@ app.post('/api/slides', (req, res) => {
     return res.status(500).json({ error: 'Template de slides não encontrado no servidor.' });
   }
 
-  // Injeta os dados como variáveis globais antes de qualquer script do bundle.
-  // O html-inline remove <head>, então buscamos o primeiro <style> como âncora.
-  const injection = `<script>window.__MARKETING_DATA__=${JSON.stringify(data)};window.__SECTION__=${JSON.stringify(section)};</script>`;
+  const injection = auditData
+    ? `<script>window.__MARKETING_DATA__=${JSON.stringify(data)};window.__AUDIT_DATA__=${JSON.stringify(auditData)};window.__SECTION__=${JSON.stringify(section)};</script>`
+    : `<script>window.__MARKETING_DATA__=${JSON.stringify(data)};window.__SECTION__=${JSON.stringify(section)};</script>`;
 
-  // Tenta </head> primeiro; cai em <style> (bundle sem head) como fallback
   const anchor = template.includes('</head>') ? '</head>' : '<style>';
   const html   = template.replace(anchor, injection + anchor);
 
