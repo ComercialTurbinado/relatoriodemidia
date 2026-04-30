@@ -580,40 +580,14 @@ app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }),
     await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
 
-    const slideCount = await page.evaluate(() => {
-      const el = document.querySelector('[data-slide-count]');
-      return el ? parseInt(el.getAttribute('data-slide-count'), 10) : null;
+    const pdfBuf = await page.pdf({
+      width: `${W}px`,
+      height: `${H}px`,
+      printBackground: true,
+      margin: { top: 0, bottom: 0, left: 0, right: 0 },
     });
 
-    const total = slideCount ?? 1;
-    const screenshots = [];
-    for (let i = 0; i < total; i++) {
-      await page.evaluate((idx) => {
-        const btns = document.querySelectorAll('[data-slide-index]');
-        if (btns[idx]) btns[idx].click();
-        else {
-          const ev = new CustomEvent('goto-slide', { detail: idx });
-          window.dispatchEvent(ev);
-        }
-      }, i);
-      await new Promise(r => setTimeout(r, 300));
-      screenshots.push(await page.screenshot({ type: 'png' }));
-    }
     await browser.close(); browser = null;
-
-    const PDFDocument = require('pdfkit');
-    const pdfBuf = await new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ autoFirstPage: false });
-      const chunks = [];
-      doc.on('data', c => chunks.push(c));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
-      for (const img of screenshots) {
-        doc.addPage({ size: [W, H], margin: 0 });
-        doc.image(img, 0, 0, { width: W, height: H });
-      }
-      doc.end();
-    });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="documento.pdf"');
