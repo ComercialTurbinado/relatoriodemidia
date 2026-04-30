@@ -548,6 +548,84 @@ app.post('/api/slides/pdf', async (req, res) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
+// 8c. HTML → PDF
+//
+//  POST /api/html-to-pdf?orientation=landscape
+//  Content-Type: text/html  (body = HTML raw)
+//  x-api-key: <API_SECRET>
+//  Retorna application/pdf
+// ═════════════════════════════════════════════════════════════════════════════
+
+app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }), async (req, res) => {
+  if (req.headers['x-api-key'] !== process.env.API_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const html = req.body;
+  if (!html || html.trim().length === 0) {
+    return res.status(400).json({ error: 'Body vazio. Envie o HTML no corpo da requisição com Content-Type: text/html.' });
+  }
+  const orientation = req.query.orientation === 'portrait' ? 'portrait' : 'landscape';
+  const isLandscape = orientation === 'landscape';
+  const W = isLandscape ? 1920 : 1080;
+  const H = isLandscape ? 1080 : 1920;
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      executablePath: CHROME_PATH,
+      headless: 'shell',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+    const page = await browser.newPage();
+    await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
+    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+
+    const slideCount = await page.evaluate(() => {
+      const el = document.querySelector('[data-slide-count]');
+      return el ? parseInt(el.getAttribute('data-slide-count'), 10) : null;
+    });
+
+    const total = slideCount ?? 1;
+    const screenshots = [];
+    for (let i = 0; i < total; i++) {
+      await page.evaluate((idx) => {
+        const btns = document.querySelectorAll('[data-slide-index]');
+        if (btns[idx]) btns[idx].click();
+        else {
+          const ev = new CustomEvent('goto-slide', { detail: idx });
+          window.dispatchEvent(ev);
+        }
+      }, i);
+      await new Promise(r => setTimeout(r, 300));
+      screenshots.push(await page.screenshot({ type: 'png' }));
+    }
+    await browser.close(); browser = null;
+
+    const PDFDocument = require('pdfkit');
+    const pdfBuf = await new Promise((resolve, reject) => {
+      const doc = new PDFDocument({ autoFirstPage: false });
+      const chunks = [];
+      doc.on('data', c => chunks.push(c));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+      for (const img of screenshots) {
+        doc.addPage({ size: [W, H], margin: 0 });
+        doc.image(img, 0, 0, { width: W, height: H });
+      }
+      doc.end();
+    });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="documento.pdf"');
+    res.send(pdfBuf);
+  } catch (err) {
+    if (browser) await browser.close().catch(() => {});
+    console.error('[html-to-pdf]', err.message);
+    res.status(500).json({ error: 'Falha ao gerar PDF', detail: err.message });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
 // 7. WEBHOOK — CONFIRMAÇÃO DE PAGAMENTO (Stripe/Kiwify)
 // ═════════════════════════════════════════════════════════════════════════════
 
