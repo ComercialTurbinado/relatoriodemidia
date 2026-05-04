@@ -357,39 +357,99 @@ app.use('/pdfs', express.static(path.join(__dirname, 'pdfs')));
 const SLIDES_TEMPLATE = path.join(__dirname, '..', 'infografico-marketing.html');
 
 function parseSlideBody(body) {
-  const mapPost = (p) => ({
-    link_post: p.link_post, tipo_conteudo: p.tipo, formato_midia: p.tipo,
-    link_midia: null, thumb: null, legenda: p.legenda,
-    curtidas: p.curtidas, comentarios: p.comentarios, views: p.views || 0,
-    engajamento_total: p.engajamento_total, publicado_em: '',
-  });
+  const mapPost = (p) => {
+    const tipo = p.tipo_conteudo || p.tipo || '';
+    const isVideo = tipo === 'video';
+    return {
+      link_post:         p.link_post         || '',
+      tipo_conteudo:     tipo,
+      formato_midia:     p.formato_midia     || tipo,
+      thumb:             p.thumb             || null,
+      link_midia:        p.link_midia        || null,
+      midia_url:         isVideo ? (p.thumb || p.link_midia || null) : (p.link_midia || p.thumb || null),
+      legenda:           p.legenda           || '',
+      curtidas:          p.curtidas          ?? 0,
+      comentarios:       p.comentarios       ?? 0,
+      views:             p.views             ?? 0,
+      engajamento_total: p.engajamento_total ?? 0,
+      publicado_em:      p.publicado_em      || '',
+    };
+  };
+
   if (Array.isArray(body) && body[0]?.plano_diretor) {
     return { data: body[0].plano_diretor, auditData: body[0] };
   }
+
   if (Array.isArray(body) && body[0]?.overview_cliente) {
     const raw = body[0];
     const data = { overview_cliente: raw.overview_cliente, diretrizes_tecnicas: raw.diretrizes_tecnicas };
     const dm = raw.dados_metricas_perfis;
     const auditData = dm ? {
-      nome_cliente: dm.cliente?.handle ?? '', handle_cliente: dm.cliente?.handle ?? '',
+      nome_cliente:    dm.cliente?.handle ?? '',
+      handle_cliente:  dm.cliente?.handle ?? '',
       cliente: {
         handle: dm.cliente?.handle ?? '',
         perfil: {
-          metricas: { seguidores: dm.cliente?.metricas_perfil?.seguidores ?? 0, seguindo: dm.cliente?.metricas_perfil?.seguindo ?? 0, qtd_posts: dm.cliente?.metricas_perfil?.qtd_posts ?? 0, ratio_seguidor_seguindo: dm.cliente?.metricas_perfil?.ratio_seguidor_seguindo ?? 0 },
-          biografia: '',
+          metricas: {
+            seguidores:              dm.cliente?.metricas_perfil?.seguidores              ?? 0,
+            seguindo:                dm.cliente?.metricas_perfil?.seguindo                ?? 0,
+            qtd_posts:               dm.cliente?.metricas_perfil?.qtd_posts               ?? 0,
+            ratio_seguidor_seguindo: dm.cliente?.metricas_perfil?.ratio_seguidor_seguindo ?? 0,
+          },
+          biografia:      dm.cliente?.metricas_perfil?.biografia || '',
+          foto_perfil:    dm.cliente?.foto_perfil    || null,
+          foto_perfil_hd: dm.cliente?.foto_perfil_hd || null,
         },
-        posts: (dm.cliente?.top_3_melhores_posts ?? []).map(mapPost),
+        // todos os posts com mídia (para cruzar shortcode no slide)
+        posts: (dm.cliente?.posts ?? dm.cliente?.top_3_melhores_posts ?? []).map(mapPost),
       },
       concorrentes: (dm.concorrentes ?? []).map((c) => ({
-        handle: c.handle, encontrado: true,
-        perfil: { metricas: { seguidores: c.metricas_perfil?.seguidores ?? 0, qtd_posts: c.metricas_perfil?.qtd_posts ?? 0 } },
+        handle:     c.handle,
+        encontrado: true,
+        perfil: {
+          metricas: {
+            seguidores: c.metricas_perfil?.seguidores ?? c.perfil?.metricas?.seguidores ?? 0,
+            qtd_posts:  c.metricas_perfil?.qtd_posts  ?? c.perfil?.metricas?.qtd_posts  ?? 0,
+          },
+          foto_perfil:    c.foto_perfil    || null,
+          foto_perfil_hd: c.foto_perfil_hd || null,
+        },
         posts: [],
-        metricas_posts: { taxa_engajamento: c.metricas_posts?.taxa_engajamento ?? '0', media_curtidas: c.metricas_posts?.media_curtidas ?? 0, media_comentarios: c.metricas_posts?.media_comentarios ?? 0, media_views: c.metricas_posts?.media_views ?? 0, mix_formatos: c.metricas_posts?.mix_formatos ?? { reels_pct: 0, carrossel_pct: 0, foto_pct: 0 }, top_posts: (c.top_3_melhores_posts ?? []).map(mapPost) },
+        metricas_posts: {
+          taxa_engajamento:  c.metricas_posts?.taxa_engajamento  ?? '0',
+          media_curtidas:    c.metricas_posts?.media_curtidas    ?? 0,
+          media_comentarios: c.metricas_posts?.media_comentarios ?? 0,
+          media_views:       c.metricas_posts?.media_views       ?? 0,
+          mix_formatos:      c.metricas_posts?.mix_formatos      ?? { reels_pct: 0, carrossel_pct: 0, foto_pct: 0 },
+          top_posts: (c.top_posts ?? c.top_3_melhores_posts ?? []).map(mapPost),
+        },
       })),
-      analise_conteudo: { cliente: { ganchos_top: (dm.cliente?.top_3_melhores_posts ?? []).map((p) => ({ shortcode: (p.link_post || '').match(/\/p\/([^/]+)/)?.[1] ?? '', primeira_linha: (p.legenda || '').split('\n')[0], tipo_conteudo: p.tipo, engajamento: p.engajamento_total, curtidas: p.curtidas, comentarios: p.comentarios })) } },
+      analise_conteudo: {
+        cliente: {
+          // usa ganchos_top do dm se disponível (com shortcode), senão deriva dos top posts
+          ganchos_top: dm.cliente?.ganchos_top?.length
+            ? dm.cliente.ganchos_top.map((g) => ({
+                shortcode:      g.shortcode      || (g.link_post || '').match(/\/p\/([^/]+)/)?.[1] || '',
+                primeira_linha: g.primeira_linha || '',
+                tipo_conteudo:  g.tipo_conteudo  || '',
+                engajamento:    g.engajamento    ?? 0,
+                curtidas:       g.curtidas       ?? 0,
+                comentarios:    g.comentarios    ?? 0,
+              }))
+            : (dm.cliente?.top_3_melhores_posts ?? []).map((p) => ({
+                shortcode:      (p.link_post || '').match(/\/p\/([^/]+)/)?.[1] ?? '',
+                primeira_linha: (p.legenda   || '').split('\n')[0],
+                tipo_conteudo:  p.tipo_conteudo || p.tipo || '',
+                engajamento:    p.engajamento_total ?? 0,
+                curtidas:       p.curtidas          ?? 0,
+                comentarios:    p.comentarios       ?? 0,
+              })),
+        },
+      },
     } : null;
     return { data, auditData };
   }
+
   return { data: body, auditData: null };
 }
 
