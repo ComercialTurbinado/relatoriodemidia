@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firemode Signal — Pare de Postar no Achismo</title>
+  <meta name="description" content="O único diagnóstico visual e estratégico que entra no motor dos seus concorrentes. Análise de anúncios, roteiros e edição profissional via WhatsApp." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:     #07070F;
+      --bg-card:     #0F0F1C;
+      --bg-card-2:   #141426;
+      --accent:      #F05A1A;
+      --accent-2:    #F5A623;
+      --cyan:        #00C2FF;
+      --text:        #EAEAF5;
+      --text-muted:  #7A7A9D;
+      --border:      rgba(255,255,255,0.07);
+      --grad:        linear-gradient(135deg, #F05A1A, #F5A623);
+      --grad-rev:    linear-gradient(135deg, #F5A623, #F05A1A);
+      --radius:      16px;
+      --radius-sm:   10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE TEXTURE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── UTILS ── */
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+    .section    { padding: 100px 0; position: relative; }
+    .section-sm { padding: 70px 0; }
+
+    .tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(240,90,26,0.12); border: 1px solid rgba(240,90,26,0.3);
+      color: var(--accent); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 100px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800; line-height: 1.2;
+      margin-bottom: 20px;
+    }
+
+    .section-sub {
+      font-size: clamp(16px, 2vw, 18px);
+      color: var(--text-muted); max-width: 640px;
+    }
+
+    .highlight { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    strong, b { color: #fff; font-weight: 700; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      font-family: 'Inter', sans-serif; font-weight: 800; font-size: 16px;
+      cursor: pointer; text-decoration: none; border: none; outline: none;
+      border-radius: 12px; transition: all .25s;
+    }
+    .btn-primary {
+      background: var(--grad); color: #fff;
+      padding: 18px 36px; font-size: 17px;
+      box-shadow: 0 0 40px rgba(240,90,26,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(240,90,26,0.5); }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1.5px solid var(--border); padding: 14px 28px;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-wpp {
+      background: #25D366; color: #fff; padding: 18px 36px; font-size: 17px;
+      box-shadow: 0 0 40px rgba(37,211,102,0.3);
+    }
+    .btn-wpp:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(37,211,102,0.45); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 18px 0;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(7,7,15,0.85);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .inner {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 20px; font-weight: 900; letter-spacing: -0.03em;
+      background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .nav-logo span { color: var(--text); -webkit-text-fill-color: var(--text); }
+    nav .btn { padding: 12px 24px; font-size: 14px; }
+
+    /* ── HERO ── */
+    #hero {
+      padding: 140px 0 90px;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(240,90,26,0.18) 0%, transparent 70%);
+      overflow: hidden;
+    }
+
+    /* Light beam that expands on reveal */
+    #hero::after {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(circle at 36% 44%,
+        rgba(240,90,26,0.2) 0%,
+        rgba(245,166,35,0.07) 38%,
+        transparent 65%
+      );
+      clip-path: circle(0% at 36% 44%);
+      transition: clip-path 3.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #hero.revealed::after { clip-path: circle(150% at 36% 44%); }
+
+    /* ── DARK INITIAL STATE ── */
+    /* título fica visível em branco — cor muda para escuro junto com o tema light */
+    #hero:not(.revealed) .hero-tagline,
+    #hero:not(.revealed) .hero-sub,
+    #hero:not(.revealed) .hero-cta-group,
+    #hero:not(.revealed) .hero-video-wrap { opacity: 0; transform: translateY(14px); }
+
+    /* ── REVEALED STATE ── */
+    #hero.revealed .hero-tagline {
+      opacity: 1; transform: translateY(0);
+      transition: opacity 1.2s ease 0.7s, transform 1.2s ease 0.7s;
+    }
+    #hero.revealed .hero-sub {
+      opacity: 1; transform: translateY(0);
+      transition: opacity 1.2s ease 1.1s, transform 1.2s ease 1.1s;
+    }
+    #hero.revealed .hero-cta-group {
+      opacity: 1; transform: translateY(0);
+      transition: opacity 1.2s ease 1.7s, transform 1.2s ease 1.7s;
+    }
+    #hero.revealed .hero-video-wrap {
+      opacity: 1; transform: translateY(0);
+      transition: opacity 1.4s ease 2.1s, transform 1.4s ease 2.1s;
+    }
+
+    /* Reduced motion: skip animation, just show */
+    @media (prefers-reduced-motion: reduce) {
+      #hero::after { transition: none; }
+      #hero:not(.revealed) .hero-sub,
+      #hero:not(.revealed) .hero-cta-group,
+      #hero:not(.revealed) .hero-video-wrap { opacity: 1; transform: none; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      position: relative; z-index: 1;
+    }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    }
+
+    .hero-title {
+      font-size: clamp(28px, 3.8vw, 50px);
+      font-weight: 900; line-height: 1.1; letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+
+    /* "Pare de postar no escuro." — visível desde o início, cor muda com o tema */
+    .title-main {
+      display: block;
+      color: #EAEAF5;
+      transition: color 2s ease;
+    }
+    body.light .title-main { color: #0D0D18; }
+
+    /* "Espione os líderes..." — começa invisível, revela após o trigger */
+    .title-reveal {
+      display: block;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    #hero.revealed .title-reveal {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 1.2s ease 0.6s, transform 1.2s ease 0.6s;
+    }
+
+    .hero-tagline {
+      font-size: clamp(17px, 1.9vw, 21px); font-weight: 700;
+      color: var(--accent); letter-spacing: -0.01em;
+      margin-bottom: 16px; line-height: 1.3;
+    }
+    .hero-sub {
+      font-size: clamp(15px, 1.6vw, 17px); color: var(--text-muted);
+      margin-bottom: 40px; line-height: 1.7;
+    }
+
+    .hero-cta-group { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+    .hero-stats {
+      display: flex; gap: 36px; margin-top: 56px;
+      padding-top: 40px; border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .stat-item {}
+    .stat-num { font-size: 30px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── HERO VIDEO ── */
+    .hero-video-wrap {
+      position: relative; border-radius: 20px; overflow: hidden;
+      background: var(--bg-card); border: 1px solid var(--border);
+      aspect-ratio: 9/16; max-height: 540px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 80px rgba(240,90,26,0.12);
+    }
+    .hero-video-wrap video {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .hero-video-wrap iframe {
+      width: 100%; height: 100%; border: none; display: block;
+    }
+    .hero-video-placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; padding: 40px; text-align: center;
+    }
+    .hero-video-placeholder .play-btn {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--grad); display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 40px rgba(240,90,26,0.4);
+    }
+    .hero-video-placeholder p { font-size: 14px; color: var(--text-muted); }
+
+    /* ── PROBLEM ── */
+    #problem { background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-card) 100%); }
+
+    .pain-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px; margin-top: 48px;
+    }
+    .pain-card {
+      background: var(--bg-base); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px;
+      transition: border-color .3s;
+    }
+    .pain-card:hover { border-color: rgba(240,90,26,0.4); }
+    .pain-icon { font-size: 28px; margin-bottom: 16px; }
+    .pain-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .pain-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── SOLUTION ── */
+    #solution {
+      background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(0,194,255,0.06) 0%, transparent 70%);
+    }
+
+    .solution-features {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 28px; margin-top: 56px;
+    }
+    @media (max-width: 768px) { .solution-features { grid-template-columns: 1fr; } }
+    .feat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 36px;
+      position: relative; overflow: hidden;
+    }
+    .feat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--grad);
+    }
+    .feat-num {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 16px;
+    }
+    .feat-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+    .feat-card p { color: var(--text-muted); font-size: 15px; line-height: 1.65; }
+
+    /* ── DELIVERABLES ── */
+    #deliverables { background: var(--bg-card); }
+
+    .deliver-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 20px; margin-top: 48px;
+    }
+    @media (max-width: 768px) { .deliver-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .deliver-grid { grid-template-columns: 1fr; } }
+
+    .deliver-item {
+      background: var(--bg-base); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 28px 24px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: border-color .3s;
+    }
+    .deliver-item:hover { border-color: rgba(240,90,26,0.35); }
+    .deliver-item .icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: rgba(240,90,26,0.12); display: flex; align-items: center; justify-content: center;
+      color: var(--accent); flex-shrink: 0;
+    }
+    .deliver-item .icon svg { width: 22px; height: 22px; stroke: var(--accent); }
+    .deliver-item h4 { font-size: 15px; font-weight: 700; }
+    .deliver-item p  { font-size: 13px; color: var(--text-muted); }
+
+    /* ── CONTENT NOTE ── */
+    .content-note {
+      display: flex; align-items: flex-start; gap: 20px;
+      margin-top: 48px; padding: 28px 32px;
+      background: rgba(240,90,26,0.06); border: 1px solid rgba(240,90,26,0.2);
+      border-radius: var(--radius);
+    }
+    .content-note-icon {
+      width: 44px; height: 44px; flex-shrink: 0; border-radius: 10px;
+      background: rgba(240,90,26,0.12); display: flex; align-items: center; justify-content: center;
+    }
+    .content-note-icon svg { width: 22px; height: 22px; stroke: var(--accent); }
+    .content-note-body p { font-size: 15px; color: var(--text-muted); line-height: 1.75; }
+    .content-note-body strong { color: var(--text); }
+
+    /* ── GUARANTEE BANNER ── */
+    .guarantee-banner {
+      margin-top: 56px; padding-top: 48px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; gap: 28px;
+      flex-wrap: wrap; text-align: center;
+    }
+    .guarantee-icon {
+      width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(37,211,102,0.1); border: 2px solid rgba(37,211,102,0.3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .guarantee-icon svg { width: 36px; height: 36px; stroke: #25D366; }
+    .guarantee-text {}
+    .guarantee-text .g-label { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #25D366; margin-bottom: 6px; }
+    .guarantee-text .g-title { font-size: clamp(18px, 2.5vw, 24px); font-weight: 900; line-height: 1.3; }
+    .guarantee-text .g-sub { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+
+    /* ── PRICING ── */
+    #pricing {
+      background: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(240,90,26,0.08) 0%, transparent 60%);
+    }
+
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px; margin-top: 56px; align-items: start;
+    }
+
+    .plan-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 40px 36px;
+      position: relative; transition: transform .3s, box-shadow .3s;
+    }
+    .plan-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+
+    .plan-card.featured {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 0 60px rgba(240,90,26,0.15);
+    }
+
+    .plan-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--grad); color: #fff; font-size: 11px; font-weight: 800;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 100px; white-space: nowrap;
+    }
+
+    .plan-name { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .plan-tagline { font-size: 16px; font-weight: 700; margin-bottom: 28px; }
+
+    .plan-price {
+      margin-bottom: 32px; padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .plan-price .label { font-size: 13px; color: var(--text-muted); }
+    .plan-price .amount {
+      font-size: 48px; font-weight: 900; letter-spacing: -0.04em;
+      background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1.1;
+    }
+    .plan-price .recurrence { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 36px; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-muted); }
+    .plan-features li .check { color: #25D366; flex-shrink: 0; margin-top: 2px; }
+    .plan-features li strong { color: var(--text); }
+
+    .plan-profile {
+      margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);
+      font-size: 13px; color: var(--text-muted); font-style: italic;
+    }
+
+    .plan-card .btn { width: 100%; }
+
+    /* ── METHODOLOGY ── */
+    #methodology { background: var(--bg-card); }
+
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0; margin-top: 56px; position: relative;
+    }
+    .steps::before {
+      content: ''; position: absolute; top: 36px; left: 60px; right: 60px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+    @media (max-width: 768px) { .steps::before { display: none; } }
+
+    .step {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: 0 24px;
+    }
+    .step-num {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--bg-base); border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 900; color: var(--accent);
+      margin-bottom: 20px; position: relative; z-index: 1;
+    }
+    .step h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .step p   { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    .deadlines {
+      display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+      margin-top: 56px; padding-top: 48px; border-top: 1px solid var(--border);
+    }
+    .deadline-item {
+      background: var(--bg-base); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 20px 28px;
+      text-align: center;
+    }
+    .deadline-item .plan-n { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .deadline-item .days { font-size: 28px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .deadline-item .unit { font-size: 13px; color: var(--text-muted); }
+
+    /* ── FAQ ── */
+    #faq { background: var(--bg-base); }
+
+    .faq-list { max-width: 800px; margin: 48px auto 0; }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-q {
+      width: 100%; background: none; border: none; outline: none;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 24px 0; cursor: pointer; text-align: left;
+      font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--text);
+      transition: color .2s;
+    }
+    .faq-q:hover { color: var(--accent); }
+
+    .faq-icon {
+      width: 28px; height: 28px; border-radius: 50%; background: rgba(240,90,26,0.12);
+      border: 1px solid rgba(240,90,26,0.3); display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: transform .3s, background .3s;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); background: var(--accent); }
+    .faq-icon svg { width: 14px; height: 14px; stroke: var(--accent); }
+    .faq-item.open .faq-icon svg { stroke: #fff; }
+
+    .faq-a {
+      max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s;
+      padding: 0 0 0; color: var(--text-muted); font-size: 15px; line-height: 1.75;
+    }
+    .faq-item.open .faq-a { max-height: 400px; padding-bottom: 24px; }
+
+    /* ── CTA FINAL ── */
+    #cta-final {
+      padding: 120px 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(240,90,26,0.15) 0%, transparent 70%);
+      text-align: center;
+    }
+    #cta-final .section-title { max-width: 700px; margin: 16px auto 24px; }
+    #cta-final .section-sub   { margin: 0 auto 48px; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg-card); border-top: 1px solid var(--border);
+      padding: 48px 0; text-align: center;
+    }
+    footer .footer-logo { font-size: 18px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 16px; }
+    footer p { font-size: 13px; color: var(--text-muted); }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+
+    /* ── PLAN GUARANTEE MINI ── */
+    .plan-guarantee {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 14px; font-size: 12px; color: #25D366; font-weight: 600;
+      justify-content: center;
+    }
+    .plan-guarantee svg { width: 14px; height: 14px; stroke: #25D366; flex-shrink: 0; }
+
+    /* ── PLAN ROI ── */
+    .plan-roi {
+      margin-bottom: 28px; padding: 12px 16px;
+      background: rgba(240,90,26,0.08); border-radius: 8px;
+      font-size: 13px; color: var(--text-muted); line-height: 1.5;
+      border-left: 3px solid var(--accent);
+    }
+    body.light .plan-roi { background: rgba(240,90,26,0.06); color: #6A6A82; }
+
+    /* ── TESTIMONIALS ── */
+    #testimonials { background: var(--bg-base); }
+    body.light #testimonials { background: #F5F4EF; }
+
+    .testimonial-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px; margin-top: 48px;
+    }
+    @media (max-width: 768px) { .testimonial-grid { grid-template-columns: 1fr; } }
+
+    .testimonial-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 32px 28px;
+      display: flex; flex-direction: column; gap: 20px;
+      transition: background-color 2s ease, border-color 2s ease;
+    }
+    body.light .testimonial-card { background: #FFFFFF; border-color: rgba(0,0,0,0.08); }
+
+    .testimonial-result {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.25);
+      color: #25D366; font-size: 12px; font-weight: 800; letter-spacing: 0.06em;
+      padding: 5px 12px; border-radius: 100px; align-self: flex-start;
+    }
+    .testimonial-quote {
+      font-size: 15px; color: var(--text-muted); line-height: 1.7;
+      font-style: italic;
+      transition: color 2s ease;
+    }
+    body.light .testimonial-quote { color: #6A6A82; }
+    .testimonial-stars { color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+
+    .testimonial-author {
+      display: flex; align-items: center; gap: 12px;
+      padding-top: 16px; border-top: 1px solid var(--border);
+    }
+    body.light .testimonial-author { border-top-color: rgba(0,0,0,0.08); }
+    .author-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .author-name { font-size: 14px; font-weight: 700; }
+    .author-role { font-size: 12px; color: var(--text-muted); }
+    body.light .author-role { color: #6A6A82; }
+
+    /* ── FOUNDER ── */
+    .founder-block {
+      display: flex; align-items: center; gap: 20px; justify-content: center;
+      flex-wrap: wrap; margin-top: 16px;
+    }
+    .founder-avatar {
+      width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 900; color: #fff;
+      box-shadow: 0 0 0 3px rgba(240,90,26,0.25);
+    }
+    .founder-text { text-align: left; }
+    .founder-text .founder-name { font-size: 15px; font-weight: 800; }
+    .founder-text .founder-role { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .founder-text .founder-quote { font-size: 14px; color: var(--text-muted); font-style: italic; margin-top: 6px; max-width: 400px; }
+    body.light .founder-text .founder-role,
+    body.light .founder-text .founder-quote { color: #6A6A82; }
+
+    /* ── THEME TRANSITION (elementos estruturais) ── */
+    body, nav, section, footer,
+    .pain-card, .feat-card, .deliver-item, .plan-card,
+    .step-num, .content-note, .guarantee-banner, .guarantee-icon,
+    .hero-video-wrap, .faq-item, .faq-q, .faq-a, .deadline-item,
+    .hero-title, .hero-sub, .section-title, .section-sub,
+    .plan-tagline, .plan-profile, .stat-label, .step h3, .step p,
+    .pain-card p, .feat-card p, .deliver-item p, .deliver-item h4,
+    .plan-features li, .pain-card h3, .feat-card h3,
+    .feat-num, .plan-name, .plan-price .label, .plan-price .recurrence,
+    .footer-logo, .guarantee-text .g-sub, .guarantee-text .g-title,
+    .content-note-body p {
+      transition:
+        background-color 2s ease,
+        background 2s ease,
+        color 2s ease,
+        border-color 2s ease,
+        box-shadow 2s ease;
+    }
+
+    /* ── LIGHT THEME ── */
+    body.light {
+      --bg-base:    #F5F4EF;
+      --bg-card:    #FFFFFF;
+      --text:       #0D0D18;
+      --text-muted: #6A6A82;
+      --border:     rgba(0,0,0,0.1);
+      background:   #F5F4EF;
+      color: #0D0D18;
+    }
+
+    body.light strong, body.light b { color: #0D0D18; }
+
+    body.light nav {
+      background: rgba(245,244,239,0.93) !important;
+      border-bottom-color: rgba(0,0,0,0.08);
+    }
+    body.light .nav-logo span { color: #0D0D18; -webkit-text-fill-color: #0D0D18; }
+
+    body.light #hero {
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(240,90,26,0.09) 0%, transparent 70%);
+    }
+    body.light #hero::after {
+      background: radial-gradient(circle at 36% 44%,
+        rgba(240,90,26,0.13) 0%, rgba(245,166,35,0.04) 38%, transparent 65%);
+    }
+    body.light #problem  { background: linear-gradient(180deg, #F5F4EF 0%, #FFFFFF 100%); }
+    body.light #solution { background: transparent; }
+    body.light #deliverables { background: #FFFFFF; }
+    body.light #methodology  { background: #FFFFFF; }
+    body.light #faq          { background: #F5F4EF; }
+    body.light #cta-final    {
+      background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(240,90,26,0.07) 0%, transparent 70%);
+    }
+    body.light footer {
+      background: #FFFFFF;
+      border-top-color: rgba(0,0,0,0.08);
+    }
+
+    body.light .pain-card    { background: #FFFFFF; border-color: rgba(0,0,0,0.08); }
+    body.light .feat-card    { background: #FFFFFF; border-color: rgba(0,0,0,0.08); }
+    body.light .deliver-item { background: #FFFFFF; border-color: rgba(0,0,0,0.08); }
+    body.light .plan-card    { background: #FFFFFF; border-color: rgba(0,0,0,0.09); }
+    body.light .plan-card.featured {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 0 40px rgba(240,90,26,0.08);
+    }
+    body.light .plan-price   { border-bottom-color: rgba(0,0,0,0.1); }
+    body.light .plan-profile { border-top-color: rgba(0,0,0,0.1); }
+    body.light .step-num     { background: #FFFFFF; }
+    body.light .steps::before { background: linear-gradient(90deg, transparent, rgba(240,90,26,0.3), transparent); }
+    body.light .hero-video-wrap { background: #FFFFFF; border-color: rgba(0,0,0,0.1); box-shadow: 0 0 40px rgba(0,0,0,0.07); }
+
+    body.light .content-note {
+      background: rgba(240,90,26,0.04);
+      border-color: rgba(240,90,26,0.15);
+    }
+    body.light .guarantee-banner { border-top-color: rgba(0,0,0,0.08); }
+    body.light .guarantee-icon   { background: rgba(37,211,102,0.07); border-color: rgba(37,211,102,0.2); }
+
+    body.light .divider { background: linear-gradient(90deg, transparent, rgba(0,0,0,0.08), transparent); }
+
+    body.light .faq-item  { border-bottom-color: rgba(0,0,0,0.1); }
+    body.light .faq-q     { color: #0D0D18; }
+    body.light .faq-a     { color: #6A6A82; }
+    body.light .faq-icon  { background: rgba(240,90,26,0.08); border-color: rgba(240,90,26,0.25); }
+
+    body.light .hero-sub, body.light .section-sub { color: #6A6A82; }
+    body.light .pain-card p, body.light .feat-card p,
+    body.light .deliver-item p, body.light .step p,
+    body.light .plan-features li, body.light .plan-profile,
+    body.light .plan-price .label, body.light .plan-price .recurrence,
+    body.light .content-note-body p, body.light .guarantee-text .g-sub,
+    body.light .stat-label { color: #6A6A82; }
+
+    body.light .pain-card h3, body.light .feat-card h3,
+    body.light .deliver-item h4, body.light .step h3,
+    body.light .plan-name, body.light .plan-tagline,
+    body.light .guarantee-text .g-title,
+    body.light .hero-sub strong, body.light .content-note-body strong { color: #0D0D18; }
+
+    body.light .btn-outline { color: #0D0D18; border-color: rgba(0,0,0,0.2); }
+    body.light .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    body.light footer p { color: #6A6A82; }
+    body.light footer .footer-logo { /* gradient stays the same */ }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .hero-cta-group { flex-direction: column; width: 100%; }
+      .hero-cta-group .btn { width: 100%; }
+      .hero-stats { gap: 28px; }
+      .steps { gap: 32px; }
+      nav .btn-primary { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container inner">
+    <span class="nav-logo">FIREMODE <span>SIGNAL</span></span>
+    <a href="#pricing" class="btn btn-primary">Ver Planos</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+
+      <!-- COLUNA ESQUERDA: COPY -->
+      <div>
+        <h1 class="hero-title">
+          <span class="title-main">Pare de postar<br>no <span class="highlight">escuro.</span></span>
+          <span class="title-reveal">Espione os líderes,<br>disseque os virais.</span>
+        </h1>
+
+        <p class="hero-tagline">Nós lemos o mercado. Você só publica.</p>
+
+        <p class="hero-sub">
+          Espionamos os anúncios e virais dos seus concorrentes, transformamos esses dados em roteiros prontos e ainda editamos seus vídeos. Tudo entregue no seu <strong>WhatsApp</strong> — sem dashboards, sem senhas, sem esforço.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="#pricing" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            QUERO MEU SIGNAL AGORA
+          </a>
+        </div>
+
+      </div>
+
+      <!-- COLUNA DIREITA: VÍDEO -->
+      <div class="hero-video-wrap">
+        <!-- Substitua o src abaixo pelo link do seu vídeo -->
+        <div class="hero-video-placeholder">
+          <div class="play-btn">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+          <p>Insira aqui o vídeo de apresentação do Firemode Signal</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem" class="section">
+  <div class="container">
+    <div class="tag">O Problema</div>
+    <h2 class="section-title" style="margin-top:20px;">
+      Seu Instagram pode estar<br>trabalhando <span class="highlight">contra você</span> — e o prejuízo é silencioso.
+    </h2>
+    <p class="section-sub">
+      Postar sem diagnóstico é como dirigir no escuro. Você grava Reels, segue tendências e gasta horas editando, mas o resultado não aparece. O problema não é falta de esforço — e nem falta de dados. As plataformas entregam números de sobra. O que falta é saber o que eles significam e o que seus concorrentes estão fazendo que você não consegue ver.
+    </p>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Você grava. Eles vendem.</h3>
+        <p>Você postou 3 Reels esse mês. Nenhum passou de 500 views. Seu concorrente usou a mesma pauta e viralizou. A diferença não é talento — <strong>é saber ler o que o mercado já está sinalizando.</strong></p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
+        </div>
+        <h3>Curtidas não pagam contas</h3>
+        <p>Engajamento bonito no dashboard, caixa vazio no banco. Seus posts atraem seguidores, mas <strong>não convertem em DMs, propostas ou vendas.</strong></p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="18" y1="11" x2="23" y2="11"/></svg>
+        </div>
+        <h3>Invisível para quem compra</h3>
+        <p>Quem visita seu perfil não entende o que você vende em 3 segundos — e vai embora. <strong>Sua bio está repelindo clientes</strong> sem que você perceba.</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </div>
+        <h3>Produção no achismo</h3>
+        <p>Horas perdidas tentando adivinhar o que vai funcionar. <strong>Enquanto você busca inspiração</strong>, seus concorrentes já estão publicando o que o mercado validou.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SOLUTION -->
+<section id="solution" class="section">
+  <div class="container">
+    <div class="tag">A Solução</div>
+    <h2 class="section-title" style="margin-top:20px;">
+      O Signal transforma a <span class="highlight">espionagem industrial</span><br>em um plano prático de 22 dias.
+    </h2>
+    <p class="section-sub">
+      Enquanto você tenta adivinhar o que vai funcionar, os líderes do seu nicho já têm um mapa. O Signal coloca esse mapa na sua mão — com execução inclusa.
+    </p>
+
+    <div class="solution-features">
+      <div class="feat-card">
+        <div class="feat-num">01 — Espionagem</div>
+        <h3>Inteligência Competitiva 360º</h3>
+        <p>Não apenas olhamos posts; nós dissecamos a engenharia por trás deles. Analisamos cada pixel do seu perfil e o dos seus concorrentes — da bio aos <strong>anúncios pagos no Meta e LinkedIn</strong> — para identificar exatamente onde o dinheiro está sendo colocado e o que está sendo ignorado.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">02 — Engenharia Reversa</div>
+        <h3>Decodificação de Virais</h3>
+        <p>Usamos tecnologia para transcrever e analisar os vídeos de maior retenção do seu nicho. Identificamos os <strong>ganchos, o tom de voz e os padrões</strong> que já foram validados pelo público para que você não precise inventar a roda.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">03 — Diagnóstico</div>
+        <h3>Diagnóstico de Performance e Gap</h3>
+        <p>Você recebe um <strong>relatório estratégico</strong> que aponta os gargalos que matam suas vendas e as necessidades reais da sua audiência.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">04 — Execução</div>
+        <h3>Done-For-You — Feito para Você</h3>
+        <p>Nós criamos tudo. Do roteiro baseado em dados até a edição final. Você apenas grava o bruto, nos envia e recebe de volta o vídeo com <strong>cortes de retenção, legendas dinâmicas e capas</strong>, mais um carrossel baseado no conteúdo — prontos para postar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DELIVERABLES -->
+<section id="deliverables" class="section-sm">
+  <div class="container">
+    <div class="tag">O Que Você Recebe</div>
+    <h2 class="section-title" style="margin-top:20px;">A entrega de <span class="highlight">elite</span></h2>
+
+    <div class="deliver-grid">
+      <div class="deliver-item">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+        </div>
+        <h4>Diagnóstico de Posicionamento</h4>
+        <p>Análise de Bio, promessa e clareza comercial.</p>
+      </div>
+      <div class="deliver-item">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h4>Benchmark Competitivo</h4>
+        <p>Comparação visual com perfis reais para identificar onde você pode se diferenciar.</p>
+      </div>
+      <div class="deliver-item">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <h4>Top Posts Dissecados</h4>
+        <p>Leitura técnica dos conteúdos de maior performance seus e dos concorrentes.</p>
+      </div>
+      <div class="deliver-item">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <h4>Plano de Guerra de 22 Dias</h4>
+        <p>Sprint dividido em posts de Atração, Autoridade e Conversão.</p>
+      </div>
+      <div class="deliver-item">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <h4>Roteiros Prontos</h4>
+        <p>Scripts baseados em dados para gravar sem depender de inspiração.</p>
+      </div>
+      <div class="deliver-item">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+        </div>
+        <h4>Edição Automática</h4>
+        <p>Cortes de respiro, legendas dinâmicas e capa de alto impacto inclusos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="section-sm">
+  <div class="container">
+    <div class="tag" style="display:block;width:fit-content;margin:0 auto;">Resultados Reais</div>
+    <h2 class="section-title" style="margin-top:20px; text-align:center;">Quem já usou o <span class="highlight">Signal</span></h2>
+    <p class="section-sub" style="text-align:center;margin:0 auto;">Substitua pelos depoimentos reais dos seus primeiros clientes.</p>
+
+    <div class="testimonial-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-result">+340% de alcance em 22 dias</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Eu travava toda semana sem saber o que postar. Com o plano de guerra do Signal eu simplesmente executei. Na terceira semana meu Reel principal passou de 80 mil views."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">M</div>
+          <div>
+            <div class="author-name">Mariana C.</div>
+            <div class="author-role">Mentora de Finanças Pessoais</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-result">3 novos clientes no 1º mês</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"O diagnóstico me mostrou que minha bio estava afastando exatamente quem eu queria atrair. Corrigi em um dia. Em duas semanas já tinha fechado 3 contratos direto pelo Instagram."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">R</div>
+          <div>
+            <div class="author-name">Rafael S.</div>
+            <div class="author-role">Consultor de Negócios</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-result">De 2% para 11% de engajamento</div>
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Tentei de tudo — cursos, agências, freelancers. O Signal foi o único serviço que chegou com dados reais do meu mercado e não com teorias genéricas."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">A</div>
+          <div>
+            <div class="author-name">Ana Paula T.</div>
+            <div class="author-role">Especialista em Saúde Integrativa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PRICING -->
+<section id="pricing" class="section">
+  <div class="container">
+    <div class="tag" style="display:block;text-align:center;width:fit-content;margin:0 auto;">Planos e Investimento</div>
+    <h2 class="section-title" style="margin-top:20px; text-align:center;">Escolha seu nível de <span class="highlight">inteligência</span></h2>
+    <p class="section-sub" style="text-align:center; margin:0 auto;">Três planos desenhados para cada estágio da sua ambição. Sem mensalidades surpresa, sem contratos longos.</p>
+
+    <div class="pricing-grid">
+
+      <!-- DIAGNOSTIC -->
+      <div class="plan-card">
+        <div class="plan-name">Signal Diagnostic</div>
+        <div class="plan-tagline">Identifique gargalos e corrija a rota imediatamente.</div>
+        <div class="plan-price">
+          <div class="label">Investimento único</div>
+          <div class="amount">R$&nbsp;497</div>
+          <div class="recurrence">Pagamento único · 3 dias de entrega</div>
+        </div>
+        <ul class="plan-features">
+          <li><span class="check">✔</span><span>Auditoria completa de Bio, últimos Posts e Posicionamento Estratégico</span></li>
+          <li><span class="check">✔</span><span>Benchmark visual de <strong>01 Concorrente</strong> direto</span></li>
+          <li><span class="check">✔</span><span>Análise de Métricas Principais (Engajamento e Mix de Formatos)</span></li>
+          <li><span class="check">✔</span><span>Mapa de <strong>03 Recomendações Práticas</strong> para execução imediata</span></li>
+          <li><span class="check">✔</span><span><strong>10 copies</strong> para Posts + <strong>10 roteiros</strong> para Reels no seu nicho</span></li>
+        </ul>
+        <div class="plan-roi">Uma consultoria de Instagram cobra R$800+ só pela análise. Aqui você sai com diagnóstico completo <strong>e 20 roteiros prontos.</strong></div>
+        <a href="#cta-final" class="btn btn-outline">Quero o Diagnostic</a>
+        <div class="plan-guarantee"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg> Entrega em 3 dias ou devolvemos seu dinheiro</div>
+        <p class="plan-profile">Para empreendedores e autônomos em fase inicial de ajuste de perfil.</p>
+      </div>
+
+      <!-- PRO -->
+      <div class="plan-card featured">
+        <div class="plan-badge">Mais Popular</div>
+        <div class="plan-name">Signal Pro</div>
+        <div class="plan-tagline">Espionagem + execução mastigada para quem precisa de velocidade.</div>
+        <div class="plan-price">
+          <div class="label">Investimento único</div>
+          <div class="amount">R$&nbsp;1.497</div>
+          <div class="recurrence">Pagamento único · 5 dias de entrega</div>
+        </div>
+        <ul class="plan-features">
+          <li><span class="check">✔</span><span><strong>Tudo do Diagnostic</strong>, mais:</span></li>
+          <li><span class="check">✔</span><span>Benchmark com <strong>02 Concorrentes</strong> (Anúncios + Virais)</span></li>
+          <li><span class="check">✔</span><span>Sprint de Guerra de <strong>22 Dias</strong> (Atração, Autoridade e Conversão)</span></li>
+          <li><span class="check">✔</span><span><strong>10 Roteiros de Reels</strong> Dissecados (Ganchos, Falas e CTAs)</span></li>
+          <li><span class="check">✔</span><span><strong>05 Edições de Vídeo</strong> automáticas (Cortes, Legendas e Capas)</span></li>
+          <li><span class="check">✔</span><span>Diretrizes de Tom de Voz e SEO para Instagram</span></li>
+        </ul>
+        <div class="plan-roi">Uma agência cobra R$5.000+/mês pelo mesmo resultado. Com o Signal Pro você paga uma fração, <strong>executa em 5 dias</strong> e sai com conteúdo pronto.</div>
+        <a href="#cta-final" class="btn btn-primary">Quero o Signal Pro</a>
+        <div class="plan-guarantee"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg> Entrega em 5 dias ou devolvemos seu dinheiro</div>
+        <p class="plan-profile">Para negócios que já faturam e precisam de escala sem agências caras.</p>
+      </div>
+
+      <!-- ELITE -->
+      <div class="plan-card">
+        <div class="plan-name">Signal Elite</div>
+        <div class="plan-tagline">Domínio total do nicho com inteligência em tempo real.</div>
+        <div class="plan-price">
+          <div class="label">Mensalidade</div>
+          <div class="amount">R$&nbsp;2.497</div>
+          <div class="recurrence">por mês · 7 dias para 1ª entrega</div>
+        </div>
+        <ul class="plan-features">
+          <li><span class="check">✔</span><span><strong>Tudo do Signal Pro</strong>, mais:</span></li>
+          <li><span class="check">✔</span><span>Monitoramento mensal contínuo de até <strong>03 Concorrentes</strong></span></li>
+          <li><span class="check">✔</span><span><strong>10 Edições de Vídeo</strong> incluídas por mês</span></li>
+          <li><span class="check">✔</span><span><strong>Canal VIP</strong> de Análise Instantânea: envie qualquer link e receba o roteiro adaptado na hora</span></li>
+          <li><span class="check">✔</span><span>Plano de Crescimento Estratégico <strong>30/60/90 dias</strong></span></li>
+          <li><span class="check">✔</span><span>Bio Otimizada + Estratégia para Posts Fixados</span></li>
+        </ul>
+        <div class="plan-roi">Inteligência de agência premium por menos que o salário de um <strong>social media júnior.</strong> Sem contrato longo, sem overhead.</div>
+        <a href="#cta-final" class="btn btn-outline">Quero o Elite</a>
+        <div class="plan-guarantee"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg> 1ª entrega em 7 dias ou devolvemos seu dinheiro</div>
+        <p class="plan-profile">Para Mentores, Especialistas e Empresas que buscam o topo e delegação total.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- METHODOLOGY -->
+<section id="methodology" class="section-sm">
+  <div class="container">
+    <div class="tag" style="display:block;width:fit-content;margin:0 auto;">Como Funciona</div>
+    <h2 class="section-title" style="margin-top:20px; text-align:center;">4 passos, <span class="highlight">zero complicação</span></h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Briefing via WhatsApp</h3>
+        <p>Sem formulários infinitos. Apenas o essencial para começar.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Processamento de Dados</h3>
+        <p>Nossas APIs varrem anúncios e transcrições em tempo real.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Entrega Estratégica</h3>
+        <p>Você recebe o plano e já começa a gravar os roteiros.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Edição Incluída</h3>
+        <p>Mande o bruto, receba o post. Fricção zero na publicação.</p>
+      </div>
+    </div>
+
+    <div class="content-note">
+      <div class="content-note-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <div class="content-note-body">
+        <p>A partir do vídeo editado, o Signal também gera <strong>posts e carrosséis prontos</strong> para reforçar a mesma mensagem — atacando todas as frentes de conteúdo de uma vez. O vídeo final é entregue otimizado para <strong>Instagram, TikTok, YouTube Shorts e LinkedIn</strong>. Uma gravação, múltiplas plataformas.</p>
+      </div>
+    </div>
+
+    <div class="guarantee-banner">
+      <div class="guarantee-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      </div>
+      <div class="guarantee-text">
+        <div class="g-label">Garantia de entrega</div>
+        <div class="g-title">Se não entregarmos tudo pronto em até 5 dias<br><strong style="-webkit-text-fill-color:#25D366; background:none; color:#25D366;">DEVOLVEMOS SEU DINHEIRO</strong></div>
+        <div class="g-sub">Sem burocracia, sem perguntas. Confiança total na nossa execução.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section id="faq" class="section">
+  <div class="container">
+    <div class="tag" style="display:block;width:fit-content;margin:0 auto;">FAQ</div>
+    <h2 class="section-title" style="margin-top:20px; text-align:center;">Perguntas <span class="highlight">frequentes</span></h2>
+    <p class="section-sub" style="text-align:center; margin:0 auto 0;">Todas as respostas antes de você decidir.</p>
+
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          O que é exatamente o Firemode Signal?
+          <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-a">
+          O Firemode Signal não é uma ferramenta de agendamento ou um gerador de posts genéricos. Ele é uma infraestrutura de inteligência competitiva que espiona anúncios ativos (Meta e LinkedIn), transcreve vídeos virais dos seus <strong>Concorrentes</strong> e transforma esses dados em roteiros prontos e vídeos editados. É o fim do achismo estratégico para quem busca escala.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          Por que o serviço é operado 100% via WhatsApp?
+          <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-a">
+          Empresários de alto valor não têm tempo para aprender a usar dashboards complexos ou memorizar novas senhas. O Signal foi desenvolvido para ter fricção zero: você recebe os diagnósticos, envia seus vídeos brutos e recebe o material finalizado — tudo dentro de uma conversa no <strong>WhatsApp</strong>. Se você sabe encaminhar uma mensagem, você sabe operar nossa inteligência.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          Como funciona a edição de vídeo automática?
+          <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-a">
+          Após receber o roteiro estratégico baseado em dados, você grava o vídeo pelo celular e nos envia o arquivo bruto. Nosso sistema processa o vídeo aplicando cortes automáticos de respiro, inserindo legendas dinâmicas de alta retenção e gerando uma capa (thumbnail) com título de alto impacto. O foco é a performance algorítmica e a velocidade de postagem.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          O Signal garante o crescimento do meu perfil?
+          <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-a">
+          Nenhuma inteligência séria garante resultados sem a execução do cliente. O Signal entrega o diagnóstico preciso e o plano de guerra pronto, mas o resultado final depende da sua consistência em gravar e publicar. O que garantimos é que você parará de quebrar a cabeça com o que postar e passará a usar o que o mercado já validou como lucrativo.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          Eu preciso saber quem são meus Concorrentes?
+          <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-a">
+          Se você já os conhece, a análise será ainda mais cirúrgica. Caso contrário, nossas APIs identificam os líderes do seu nicho através de anúncios ativos e volumes de engajamento para realizar o benchmark competitivo de forma automática.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          Qual a diferença entre os planos Pro e Elite?
+          <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-a">
+          O <strong>Plano Pro (R$ 1.497)</strong> é focado em quem quer um sprint imediato de 22 dias com 5 <strong>Edições</strong> de vídeo inclusas para validar o novo posicionamento.<br><br>
+          O <strong>Plano Elite (R$ 2.497/mês)</strong> é focado em monitoramento contínuo e recorrência, oferecendo 10 <strong>Edições</strong> por mês e o Canal VIP de Análise Instantânea, onde você envia o link de qualquer postagem e o Signal devolve o roteiro adaptado na hora.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          Isso funciona para o meu nicho específico?
+          <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-a">
+          Sim. O Signal não entrega templates genéricos — ele analisa os concorrentes <strong>reais do seu mercado</strong>, não de um mercado parecido. Se existem líderes e conteúdos virais no seu nicho (e existem, em qualquer nicho), nossas APIs os encontram e o diagnóstico é feito com base neles. Já atendemos nichos como saúde, finanças, moda, advocacia, gastronomia, educação e consultoria B2B.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          Isso é para quem já tem um negócio grande ou serve para quem está começando?
+          <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-a">
+          Para os dois — mas de formas diferentes. Quem está começando usa o <strong>Signal Diagnostic</strong> para não errar o posicionamento desde o início e já sair com 20 roteiros prontos. Quem já fatura usa o <strong>Signal Pro ou Elite</strong> para escalar sem depender de agência cara ou de equipe grande. O denominador comum é que você precisa levar o Instagram a sério como canal de aquisição de clientes.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          O relatório é feito por Inteligência Artificial?
+          <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-a">
+          Utilizamos tecnologia de ponta e análise assistida por dados para capturar o que é invisível ao olho humano (como tags de anúncios e métricas de retenção), mas toda a entrega é estruturada sob uma lógica de negócio e conversão — para garantir que o conteúdo gere autoridade e lucro, não apenas curtidas.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="cta-final">
+  <div class="container" style="text-align:center;">
+    <div class="tag" style="display:inline-flex;">Último passo</div>
+    <h2 class="section-title">
+      Chega de postar no<br><span class="highlight">escuro.</span>
+    </h2>
+    <p class="section-sub">
+      Enquanto você lê isso, seus concorrentes estão interpretando sinais que você ainda ignora. O Signal traduz esses sinais em conteúdo pronto — hoje, via <strong>WhatsApp</strong>.
+    </p>
+
+    <a href="https://wa.me/5511999999999?text=Ol%C3%A1%2C+quero+conhecer+o+Firemode+Signal" class="btn btn-wpp" style="margin-bottom:16px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      FALAR COM O SIGNAL AGORA
+    </a>
+
+    <p style="font-size:13px; color:var(--text-muted); margin-top:16px;">
+      Resposta em até 2h em dias úteis · Sem compromisso inicial
+    </p>
+
+    <div class="founder-block" style="margin-top:40px;">
+      <div class="founder-avatar">C</div>
+      <div class="founder-text">
+        <div class="founder-name">Claudio Damasco</div>
+        <div class="founder-role">Fundador, Firemode Signal</div>
+        <div class="founder-quote">"Construí o Signal porque cansei de ver negócios sérios perdendo para concorrentes medíocres — só porque eles sabiam interpretar o mercado e agir rápido. Agora você também sabe."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-logo">FIREMODE SIGNAL</div>
+    <p>Inteligência competitiva para quem busca lucro, não apenas curtidas.</p>
+    <p style="margin-top:12px;">© 2025 Firemode Signal. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<script>
+  // Hero light reveal
+  const heroEl = document.getElementById('hero');
+  let heroRevealed = false;
+
+  function revealHero() {
+    if (heroRevealed) return;
+    heroRevealed = true;
+    heroEl.classList.add('revealed');
+    document.body.classList.add('light');
+  }
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 10) revealHero();
+  }, { passive: true });
+
+  // Fallback: acende automaticamente após 2s se não rolar
+  setTimeout(revealHero, 2000);
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+      btn.setAttribute('aria-expanded', !isOpen);
+    });
+  });
+
+  // Smooth active nav highlight (optional)
+  const sections = document.querySelectorAll('section[id]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      }
+    });
+  }, { threshold: 0.5 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
