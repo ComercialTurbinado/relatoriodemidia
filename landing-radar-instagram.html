@@ -868,6 +868,48 @@
     body.light footer p { color: #6A6A82; }
     body.light footer .footer-logo { /* gradient stays the same */ }
 
+    /* ── LEAD MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px 36px; max-width: 420px; width: 100%;
+      position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+      transform: translateY(16px); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      background: transparent; border: none; cursor: pointer;
+      color: var(--text-muted); padding: 4px; line-height: 1;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-wpp-icon { margin-bottom: 16px; }
+    .modal-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+    .modal-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .form-group input {
+      width: 100%; padding: 12px 14px; border-radius: 10px;
+      border: 1.5px solid var(--border); background: var(--bg-base);
+      color: var(--text); font-size: 15px; font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+    }
+    .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
+    .form-group input.error { border-color: #ef4444; }
+    .modal-submit { width: 100%; margin-top: 8px; justify-content: center; border: none; cursor: pointer; font-family: inherit; }
+    .modal-privacy { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 14px; }
+    body.light .modal-box { background: #fff; }
+    body.light .form-group input { background: #f5f4ef; border-color: rgba(0,0,0,0.12); color: #0D0D18; }
+    body.light .form-group input:focus { border-color: var(--accent); }
+
     /* ── VIDEO: oculto até ter o vídeo — remover linha abaixo para reexibir ── */
     .hero-video-wrap { display: none !important; }
 
@@ -1440,10 +1482,10 @@
       Enquanto você lê isso, seus concorrentes estão interpretando sinais que você ainda ignora. O Signal traduz esses sinais em conteúdo pronto — hoje, via <strong>WhatsApp</strong>.
     </p>
 
-    <a href="https://wa.me/5511999999999?text=Ol%C3%A1%2C+quero+conhecer+o+Firemode+Signal" class="btn btn-wpp" style="margin-bottom:16px;">
+    <button onclick="openLeadModal()" class="btn btn-wpp" style="margin-bottom:16px; border:none; cursor:pointer;">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       FALAR COM O SIGNAL AGORA
-    </a>
+    </button>
 
     <p style="font-size:13px; color:var(--text-muted); margin-top:16px;">
       Resposta em até 2h em dias úteis · Sem compromisso inicial
@@ -1451,6 +1493,39 @@
 
   </div>
 </section>
+
+<!-- LEAD MODAL -->
+<div id="lead-modal" class="modal-overlay" onclick="closeLeadModal(event)">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" onclick="closeLeadModal()" aria-label="Fechar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-wpp-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </div>
+    <h3 id="modal-title" class="modal-title">Fale com o Signal</h3>
+    <p class="modal-sub">Preencha abaixo e te enviamos tudo via WhatsApp em até 2h.</p>
+    <form id="lead-form" onsubmit="submitLeadForm(event)" novalidate>
+      <div class="form-group">
+        <label for="lead-name">Nome</label>
+        <input type="text" id="lead-name" placeholder="Seu nome completo" required autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="lead-phone">WhatsApp / Telefone</label>
+        <input type="tel" id="lead-phone" placeholder="+55 11 9 9999-9999" required autocomplete="tel" />
+      </div>
+      <div class="form-group">
+        <label for="lead-email">E-mail</label>
+        <input type="email" id="lead-email" placeholder="seu@email.com" required autocomplete="email" />
+      </div>
+      <button type="submit" class="btn btn-wpp modal-submit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Enviar pelo WhatsApp
+      </button>
+    </form>
+    <p class="modal-privacy">Seus dados são usados apenas para entrar em contato. Sem spam.</p>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -1850,6 +1925,51 @@
     const btn = document.querySelector(`.lang-btn[data-lang="${savedLang}"]`);
     if (btn) { document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     applyLang(savedLang);
+  }
+
+  /* ── LEAD MODAL ── */
+  const SIGNAL_WPP = '5511982195839';
+
+  function openLeadModal() {
+    document.getElementById('lead-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('lead-name').focus(), 100);
+  }
+
+  function closeLeadModal(e) {
+    if (e && e.target !== document.getElementById('lead-modal')) return;
+    document.getElementById('lead-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLeadModal();
+  });
+
+  function submitLeadForm(e) {
+    e.preventDefault();
+    const name  = document.getElementById('lead-name').value.trim();
+    const phone = document.getElementById('lead-phone').value.trim();
+    const email = document.getElementById('lead-email').value.trim();
+
+    // Validação simples
+    let valid = true;
+    [['lead-name', name], ['lead-phone', phone], ['lead-email', email]].forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (!val) { el.classList.add('error'); valid = false; }
+      else el.classList.remove('error');
+    });
+    if (!valid) return;
+
+    const msg = `Olá! Tenho interesse no Firemode Signal. 🚀\n\n` +
+                `👤 Nome: ${name}\n` +
+                `📱 Telefone: ${phone}\n` +
+                `📧 E-mail: ${email}`;
+
+    window.open(`https://wa.me/${SIGNAL_WPP}?text=${encodeURIComponent(msg)}`, '_blank');
+    document.getElementById('lead-modal').classList.remove('open');
+    document.body.style.overflow = '';
+    document.getElementById('lead-form').reset();
   }
 </script>
 </body>
