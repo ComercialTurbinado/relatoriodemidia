@@ -41,7 +41,42 @@ declare global {
   }
 }
 
-const marketingData = (window.__MARKETING_DATA__ as typeof demoData) ?? demoData;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function withDefaults(raw: any): typeof demoData {
+  const ov = raw?.overview_cliente ?? {};
+  const dt = raw?.diretrizes_tecnicas ?? {};
+  return {
+    overview_cliente: {
+      diagnostico_identidade:      ov.diagnostico_identidade      ?? '',
+      posicionamento_atual:        ov.posicionamento_atual         ?? '',
+      pontos_fortes:               ov.pontos_fortes                ?? [],
+      pontos_fracos:               ov.pontos_fracos                ?? [],
+      comparativo_concorrentes:    ov.comparativo_concorrentes     ?? [],
+      caminhos_de_crescimento:     ov.caminhos_de_crescimento      ?? [],
+      previsao_resultados:         ov.previsao_resultados          ?? { '30_dias': '—', '60_dias': '—', '90_dias': '—' },
+      carta_para_cliente_markdown: ov.carta_para_cliente_markdown  ?? '',
+    },
+    diretrizes_tecnicas: {
+      tom_de_voz:             dt.tom_de_voz            ?? { personalidade: '', como_falar: [], como_nao_falar: [], exemplos_frase_ok: [], exemplos_frase_evitar: [] },
+      seo_instagram:          dt.seo_instagram          ?? { palavras_chave_principais: [], bio_otimizada: '', hashtags_fixas: [] },
+      frequencia_publicacao:  dt.frequencia_publicacao  ?? { posts_por_semana: 0, posts_por_dia: 0, melhor_horario: '', distribuicao_formatos: {} },
+      pilares_conteudo:       dt.pilares_conteudo        ?? [],
+      assuntos_quentes:       dt.assuntos_quentes        ?? [],
+      ideias_de_titulos:      dt.ideias_de_titulos       ?? [],
+      ganchos_modelo:         dt.ganchos_modelo          ?? [],
+      ctas_recomendados:      dt.ctas_recomendados       ?? [],
+      hashtags_estrategicas:  dt.hashtags_estrategicas   ?? { volume_alto: [], volume_medio: [], volume_baixo: [], branded: [] },
+      identidade_visual:      dt.identidade_visual       ?? { paleta_cores: { primaria: '', secundaria: '', apoio1: '', apoio2: '', neutro: '' }, tipografia: { titulo: '', corpo: '' }, elementos_visuais: [] },
+      calendario_30_dias:     dt.calendario_30_dias      ?? [],
+      stories_recorrentes:    dt.stories_recorrentes     ?? [],
+      kpis_acompanhar:        dt.kpis_acompanhar         ?? [],
+      briefing_redatores:     dt.briefing_redatores      ?? '',
+      briefing_designers:     dt.briefing_designers      ?? '',
+    },
+  } as typeof demoData;
+}
+
+const marketingData = withDefaults((window.__MARKETING_DATA__ as typeof demoData) ?? demoData);
 const auditData: AuditData | undefined = window.__AUDIT_DATA__;
 
 function fmtNum(n: number): string {
