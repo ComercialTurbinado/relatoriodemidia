@@ -1,11 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { marketingData as demoData } from './data';
 
+interface Comentario {
+  id: string; texto: string; palavras: number;
+  comentador_username: string | null; is_verified: boolean;
+  created_at: number | null;
+  comentario_foi_respondido_pelo_dono?: boolean;
+  respostas: Comentario[];
+}
 interface AuditPost {
   link_post: string; tipo_conteudo: string; formato_midia: string;
   link_midia: string; thumb: string | null; legenda: string;
   curtidas: number; comentarios: number; views: number;
   engajamento_total: number; publicado_em: string;
+  comentarios_ordenados?: Comentario[];
 }
 interface AuditData {
   nome_cliente: string; handle_cliente: string;
@@ -716,6 +724,219 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
         </div>
       );
     }});
+
+    // ── COMENTÁRIOS ──────────────────────────────────────────────────────────────
+    const auditPostsComt = (auditData?.cliente?.posts ?? []).filter(p => (p.comentarios_ordenados?.length ?? 0) > 0);
+    const hasComentarios = auditPostsComt.length > 0;
+
+    if (hasComentarios) {
+      // Slide 1 — Visão geral dos comentários
+      all.push({ id: 'ov-comentarios-visao', section: 'overview_cliente', render: () => {
+        const todosComentarios = auditPostsComt.flatMap(p => p.comentarios_ordenados ?? []);
+        const totalComt = todosComentarios.length;
+        const respondidos = todosComentarios.filter(c => c.comentario_foi_respondido_pelo_dono).length;
+        const taxaResposta = totalComt > 0 ? Math.round((respondidos / totalComt) * 100) : 0;
+        const mediaPalavras = totalComt > 0 ? Math.round(todosComentarios.reduce((s, c) => s + c.palavras, 0) / totalComt) : 0;
+        const verificados = todosComentarios.filter(c => c.is_verified).length;
+        const topPosts = [...auditPostsComt]
+          .sort((a, b) => (b.comentarios_ordenados?.length ?? 0) - (a.comentarios_ordenados?.length ?? 0))
+          .slice(0, 5);
+        const maxComt = topPosts[0]?.comentarios_ordenados?.length ?? 1;
+        const cards = [
+          { label: 'Total de comentários', val: totalComt.toString(), icon: '💬', color: C.primary },
+          { label: 'Taxa de resposta', val: `${taxaResposta}%`, icon: '↩️', color: C.green },
+          { label: 'Média de palavras', val: mediaPalavras.toString(), icon: '📝', color: C.yellow },
+          { label: 'Contas verificadas', val: verificados.toString(), icon: '✅', color: '#8B5CF6' },
+        ];
+        return (
+          <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: `${f(28)}px ${f(48)}px ${f(16)}px`, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', letterSpacing: 4, textTransform: 'uppercase' }}>Insights</div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(32), color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>
+                COMENTÁRIOS — <span style={{ color: C.primary }}>VISÃO GERAL</span>
+              </div>
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(20), padding: `${f(20)}px ${f(48)}px` }}>
+              {/* Cards métricas */}
+              <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(14), width: isP ? '100%' : '32%', flexWrap: isP ? 'wrap' : 'nowrap' }}>
+                {cards.map((c, i) => (
+                  <div key={i} style={{ flex: 1, minWidth: isP ? '45%' : undefined, background: 'rgba(255,255,255,0.05)', border: `1px solid rgba(255,255,255,0.1)`, borderRadius: f(10), padding: `${f(14)}px ${f(16)}px`, display: 'flex', flexDirection: 'column', gap: f(4) }}>
+                    <div style={{ fontSize: f(22) }}>{c.icon}</div>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(28), color: c.color, lineHeight: 1 }}>{c.val}</div>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 1 }}>{c.label}</div>
+                  </div>
+                ))}
+              </div>
+              {/* Ranking de posts */}
+              <div style={{ flex: 1, background: 'rgba(255,255,255,0.03)', borderRadius: f(10), padding: `${f(16)}px ${f(20)}px`, border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(14) }}>Posts com mais comentários</div>
+                {topPosts.map((p, i) => {
+                  const qt = p.comentarios_ordenados?.length ?? 0;
+                  const pct = Math.round((qt / maxComt) * 100);
+                  const label = p.link_post ? p.link_post.replace('https://www.instagram.com/p/', '').replace('/', '') : `Post ${i + 1}`;
+                  return (
+                    <div key={i} style={{ marginBottom: f(12) }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(5) }}>
+                        <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.65)', maxWidth: '70%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>#{i + 1} {label}</span>
+                        <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.primary }}>{qt}</span>
+                      </div>
+                      <div style={{ height: f(8), borderRadius: 99, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${pct}%`, borderRadius: 99, background: `linear-gradient(90deg, ${C.primary}, ${C.yellow})` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      }});
+
+      // Slide 2 — Top 6 comentários por palavras
+      all.push({ id: 'ov-comentarios-top', section: 'overview_cliente', render: () => {
+        const todosComt = auditPostsComt.flatMap(p => p.comentarios_ordenados ?? []);
+        const topComt = [...todosComt].sort((a, b) => b.palavras - a.palavras).slice(0, 6);
+        return (
+          <div style={{ width: '100%', height: '100%', background: '#111', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: `${f(28)}px ${f(48)}px ${f(16)}px`, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', letterSpacing: 4, textTransform: 'uppercase' }}>Comentários</div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(32), color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>
+                TOP COMENTÁRIOS <span style={{ color: C.green }}>MAIS ELABORADOS</span>
+              </div>
+            </div>
+            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: isP ? '1fr' : '1fr 1fr 1fr', gridTemplateRows: isP ? undefined : '1fr 1fr', gap: f(12), padding: `${f(16)}px ${f(48)}px ${f(24)}px` }}>
+              {topComt.map((c, i) => {
+                const colors = [C.primary, C.green, C.yellow, '#8B5CF6', '#EC4899', '#14B8A6'];
+                const accent = colors[i % colors.length];
+                return (
+                  <div key={c.id ?? i} style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid rgba(255,255,255,0.09)`, borderTop: `3px solid ${accent}`, borderRadius: f(10), padding: `${f(14)}px ${f(16)}px`, display: 'flex', flexDirection: 'column', gap: f(8), overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: f(8) }}>
+                      <div style={{ width: f(28), height: f(28), borderRadius: '50%', background: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(13), color: '#fff', flexShrink: 0 }}>
+                        {(c.comentador_username?.[0] ?? '?').toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.8)' }}>
+                          @{c.comentador_username ?? 'anon'} {c.is_verified ? '✅' : ''}
+                        </div>
+                        <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.35)' }}>{c.palavras} palavras</div>
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: lh, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical' as any }}>
+                      "{c.texto}"
+                    </div>
+                    {c.comentario_foi_respondido_pelo_dono && (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: f(4), padding: `${f(3)}px ${f(8)}px`, borderRadius: 99, background: 'rgba(0,179,126,0.15)', border: `1px solid ${C.green}`, width: 'fit-content' }}>
+                        <span style={{ fontSize: f(10) }}>↩️</span>
+                        <span style={{ fontFamily: 'Roboto', fontSize: f(10), color: C.green }}>Respondido pelo dono</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      }});
+
+      // Slide 3 — Padrões: frequência de palavras + emojis + sentimento
+      all.push({ id: 'ov-comentarios-padroes', section: 'overview_cliente', render: () => {
+        const todosComt = auditPostsComt.flatMap(p => p.comentarios_ordenados ?? []);
+        const textoTotal = todosComt.map(c => c.texto).join(' ');
+
+        // Frequência de palavras (ignora stopwords)
+        const stopwords = new Set(['de','a','o','que','e','do','da','em','um','para','com','uma','os','no','se','na','por','mais','as','dos','como','mas','foi','ao','ele','das','tem','à','seu','sua','ou','ser','quando','muito','há','nos','já','está','também','só','pelo','pela','até','isso','ela','entre','era','depois','sem','mesmo','aos','ter','seus','quem','nas','me','esse','eles','você','essa','num','nem','suas','meu','às','minha','têm','numa','pelos','elas','havia','seja','qual','será','nós','tenho','lhe','deles','essas','esses','pelas','este','fosse','dele','tu','te','vocês','vos','lhes','meus','minhas','teu','tua','teus','tuas','nosso','nossa','nossos','nossas','dela','delas','esta','estes','estas','aquele','aquela','aqueles','aquelas','isto','aquilo','estou','está','estamos','estão','estive','esteve','estivemos','estiveram','estava','estávamos','estavam','estivera','estivéramos','esteja','estejamos','estejam','estivesse','estivéssemos','estivessem','estiver','estivermos','estiverem','hei','há','havemos','hão','houve','houvemos','houveram','houvera','houvéramos','haja','hajamos','hajam','houvesse','houvéssemos','houvessem','houver','houvermos','houverem','houverei','houverá','houveremos','houverão','houveria','houveríamos','houveriam','sou','somos','são','era','éramos','eram','fui','foi','fomos','foram','fora','fôramos','seja','sejamos','sejam','fosse','fôssemos','fossem','for','formos','forem','serei','será','seremos','serão','seria','seríamos','seriam','tenho','tem','temos','têm','tinha','tínhamos','tinham','tive','teve','tivemos','tiveram','tivera','tivéramos','tenha','tenhamos','tenham','tivesse','tivéssemos','tivessem','tiver','tivermos','tiverem','terei','terá','teremos','terão','teria','teríamos','teriam']);
+        const wordFreq: Record<string, number> = {};
+        textoTotal.toLowerCase().replace(/[^\p{L}\s]/gu, '').split(/\s+/).forEach(w => {
+          if (w.length > 2 && !stopwords.has(w)) wordFreq[w] = (wordFreq[w] || 0) + 1;
+        });
+        const topWords = Object.entries(wordFreq).sort((a, b) => b[1] - a[1]).slice(0, 12);
+        const maxWFreq = topWords[0]?.[1] ?? 1;
+
+        // Frequência de emojis
+        const emojiFreq: Record<string, number> = {};
+        [...textoTotal.matchAll(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)].forEach(([e]) => {
+          emojiFreq[e] = (emojiFreq[e] || 0) + 1;
+        });
+        const topEmojis = Object.entries(emojiFreq).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+        // Sentimento estimado
+        const posWords = ['amei','adorei','incrível','maravilhoso','ótimo','perfeito','lindo','top','excelente','parabéns','fantástico','bom','boa','show','demais'];
+        const negWords = ['ruim','péssimo','horrível','decepcionante','fraco','chato','medíocre','decepcionei','pior'];
+        let posCount = 0, negCount = 0;
+        const textoLow = textoTotal.toLowerCase();
+        posWords.forEach(w => { const m = textoLow.match(new RegExp(`\\b${w}\\b`, 'g')); if (m) posCount += m.length; });
+        negWords.forEach(w => { const m = textoLow.match(new RegExp(`\\b${w}\\b`, 'g')); if (m) negCount += m.length; });
+        const neutroCount = Math.max(0, todosComt.length - posCount - negCount);
+        const sentTotal = posCount + negCount + neutroCount || 1;
+        const sentimentos = [
+          { label: 'Positivo', val: posCount, pct: Math.round((posCount / sentTotal) * 100), color: C.green },
+          { label: 'Neutro', val: neutroCount, pct: Math.round((neutroCount / sentTotal) * 100), color: 'rgba(255,255,255,0.3)' },
+          { label: 'Negativo', val: negCount, pct: Math.round((negCount / sentTotal) * 100), color: '#EF4444' },
+        ];
+
+        return (
+          <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: `${f(24)}px ${f(48)}px ${f(14)}px`, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', letterSpacing: 4, textTransform: 'uppercase' }}>Comentários</div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(30), color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>
+                PADRÕES & <span style={{ color: C.yellow }}>SENTIMENTO</span>
+              </div>
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(20), padding: `${f(16)}px ${f(48)}px ${f(20)}px` }}>
+              {/* Palavras mais frequentes */}
+              <div style={{ flex: 1, background: 'rgba(255,255,255,0.03)', borderRadius: f(10), padding: `${f(14)}px ${f(18)}px`, border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(12) }}>📊 Palavras mais citadas</div>
+                {topWords.slice(0, 8).map(([word, freq], i) => (
+                  <div key={word} style={{ marginBottom: f(8) }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(3) }}>
+                      <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', fontWeight: i < 3 ? 700 : 400 }}>{word}</span>
+                      <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(11), color: C.primary }}>{freq}×</span>
+                    </div>
+                    <div style={{ height: f(5), borderRadius: 99, background: 'rgba(255,255,255,0.07)' }}>
+                      <div style={{ height: '100%', width: `${Math.round((freq / maxWFreq) * 100)}%`, borderRadius: 99, background: i < 3 ? C.primary : 'rgba(255,102,0,0.4)' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Emojis */}
+              <div style={{ width: isP ? '100%' : '28%', background: 'rgba(255,255,255,0.03)', borderRadius: f(10), padding: `${f(14)}px ${f(18)}px`, border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(12) }}>😍 Top emojis</div>
+                {topEmojis.length > 0 ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(8) }}>
+                    {topEmojis.map(([emoji, freq]) => (
+                      <div key={emoji} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: f(2), padding: `${f(8)}px ${f(10)}px`, background: 'rgba(255,255,255,0.06)', borderRadius: f(8) }}>
+                        <span style={{ fontSize: f(22) }}>{emoji}</span>
+                        <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(10), color: C.yellow }}>{freq}×</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>Nenhum emoji encontrado</div>
+                )}
+              </div>
+              {/* Sentimento */}
+              <div style={{ width: isP ? '100%' : '28%', background: 'rgba(255,255,255,0.03)', borderRadius: f(10), padding: `${f(14)}px ${f(18)}px`, border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(12) }}>🧠 Sentimento (estimado)</div>
+                {sentimentos.map(s => (
+                  <div key={s.label} style={{ marginBottom: f(14) }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(5) }}>
+                      <span style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.7)' }}>{s.label}</span>
+                      <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: s.color }}>{s.pct}%</span>
+                    </div>
+                    <div style={{ height: f(10), borderRadius: 99, background: 'rgba(255,255,255,0.08)' }}>
+                      <div style={{ height: '100%', width: `${s.pct}%`, borderRadius: 99, background: s.color }} />
+                    </div>
+                  </div>
+                ))}
+                <div style={{ marginTop: f(12), padding: `${f(8)}px ${f(12)}px`, background: 'rgba(255,255,255,0.04)', borderRadius: f(8), borderLeft: `3px solid ${C.yellow}` }}>
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)', marginBottom: f(3) }}>⚠️ Estimativa baseada em palavras-chave</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }});
+    }
   }
 
   // ── DIRETRIZES ───────────────────────────────────────────────────────────────
