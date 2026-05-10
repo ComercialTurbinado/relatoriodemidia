@@ -936,6 +936,89 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
           </div>
         );
       }});
+
+      // Slide 4 — Ranking de @ que mais comentam
+      all.push({ id: 'ov-comentarios-autores', section: 'overview_cliente', render: () => {
+        const todosComt = auditPostsComt.flatMap(p => p.comentarios_ordenados ?? []);
+        // Agrupar por username (excluindo nulos)
+        const autorMap: Record<string, { qtd: number; palavrasTotal: number; is_verified: boolean; melhorComentario: string }> = {};
+        for (const c of todosComt) {
+          const u = c.comentador_username;
+          if (!u) continue;
+          if (!autorMap[u]) autorMap[u] = { qtd: 0, palavrasTotal: 0, is_verified: false, melhorComentario: '' };
+          autorMap[u].qtd++;
+          autorMap[u].palavrasTotal += c.palavras;
+          if (c.is_verified) autorMap[u].is_verified = true;
+          if (c.palavras > (autorMap[u].melhorComentario ? autorMap[u].melhorComentario.split(' ').length : 0)) {
+            autorMap[u].melhorComentario = c.texto;
+          }
+        }
+        const ranking = Object.entries(autorMap)
+          .map(([username, d]) => ({ username, ...d, mediaPalavras: Math.round(d.palavrasTotal / d.qtd) }))
+          .sort((a, b) => b.qtd - a.qtd || b.palavrasTotal - a.palavrasTotal)
+          .slice(0, 15);
+        const maxQtd = ranking[0]?.qtd ?? 1;
+        const top3Colors = [C.yellow, 'rgba(255,255,255,0.55)', '#CD7F32'];
+
+        return (
+          <div style={{ width: '100%', height: '100%', background: '#0F0F0F', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: `${f(24)}px ${f(48)}px ${f(14)}px`, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', letterSpacing: 4, textTransform: 'uppercase' }}>Comunidade</div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(30), color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>
+                @ QUE MAIS <span style={{ color: C.primary }}>COMENTAM</span>
+              </div>
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(20), padding: `${f(14)}px ${f(48)}px ${f(18)}px`, overflow: 'hidden' }}>
+              {/* Tabela ranking */}
+              <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: f(6) }}>
+                {/* Header */}
+                <div style={{ display: 'grid', gridTemplateColumns: `${f(28)}px 1fr ${f(56)}px ${f(60)}px ${f(70)}px`, gap: f(8), padding: `0 ${f(8)}px ${f(6)}px`, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                  {['#', 'Usuário', 'Comt.', 'Méd.pal', 'Bar'].map((h, i) => (
+                    <span key={i} style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(10), color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1, textAlign: i >= 2 ? 'center' : 'left' }}>{h}</span>
+                  ))}
+                </div>
+                {/* Linhas */}
+                {ranking.map((r, i) => {
+                  const pct = Math.round((r.qtd / maxQtd) * 100);
+                  const medalha = i < 3 ? top3Colors[i] : null;
+                  return (
+                    <div key={r.username} style={{ display: 'grid', gridTemplateColumns: `${f(28)}px 1fr ${f(56)}px ${f(60)}px ${f(70)}px`, gap: f(8), alignItems: 'center', padding: `${f(5)}px ${f(8)}px`, borderRadius: f(6), background: i < 3 ? 'rgba(255,255,255,0.04)' : 'transparent', border: i === 0 ? `1px solid rgba(255,214,0,0.2)` : '1px solid transparent' }}>
+                      <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(13), color: medalha ?? 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
+                        {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: f(6), overflow: 'hidden' }}>
+                        <div style={{ width: f(22), height: f(22), borderRadius: '50%', background: medalha ? `${medalha}33` : 'rgba(255,255,255,0.08)', border: `1.5px solid ${medalha ?? 'rgba(255,255,255,0.12)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(10), color: medalha ?? 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                          {r.username[0].toUpperCase()}
+                        </div>
+                        <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: i < 3 ? C.white : 'rgba(255,255,255,0.65)', fontWeight: i < 3 ? 700 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          @{r.username}{r.is_verified ? ' ✅' : ''}
+                        </span>
+                      </div>
+                      <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: i < 3 ? C.primary : 'rgba(255,255,255,0.55)', textAlign: 'center' }}>{r.qtd}</div>
+                      <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>{r.mediaPalavras}p</div>
+                      <div style={{ height: f(6), borderRadius: 99, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${pct}%`, borderRadius: 99, background: i < 3 ? C.primary : 'rgba(255,102,0,0.35)' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Destaques top 3 */}
+              <div style={{ width: isP ? '100%' : '34%', display: 'flex', flexDirection: 'column', gap: f(10) }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2 }}>🏆 Comentários destaque</div>
+                {ranking.slice(0, 3).map((r, i) => (
+                  <div key={r.username} style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${top3Colors[i]}33`, borderLeft: `3px solid ${top3Colors[i]}`, borderRadius: f(8), padding: `${f(10)}px ${f(12)}px`, flex: 1 }}>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: top3Colors[i], marginBottom: f(4) }}>@{r.username} · {r.qtd} comentários</div>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.6)', lineHeight: lh, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as any }}>
+                      "{r.melhorComentario}"
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      }});
     }
   }
 
