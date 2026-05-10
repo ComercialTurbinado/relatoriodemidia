@@ -30,8 +30,8 @@
         },
         "simplifyOutput": false,
         "options": {
-          "maxTokens": 4500,
-          "temperature": 0.4
+          "maxTokens": 6000,
+          "temperature": 0.35
         },
         "requestOptions": {}
       },
@@ -744,8 +744,8 @@
         },
         "simplifyOutput": false,
         "options": {
-          "maxTokens": 6500,
-          "temperature": 0.55
+          "maxTokens": 9000,
+          "temperature": 0.45
         },
         "requestOptions": {}
       },
