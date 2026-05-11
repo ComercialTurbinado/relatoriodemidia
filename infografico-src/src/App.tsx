@@ -72,10 +72,14 @@ function withDefaults(raw: any): typeof demoData {
         exemplos_frase_evitar:tv.exemplos_frase_evitar?? [],
       },
       seo_instagram: {
-        palavras_chave_principais:  seo.palavras_chave_principais  ?? [],
-        palavras_chave_secundarias: seo.palavras_chave_secundarias ?? [],
-        bio_otimizada:              seo.bio_otimizada              ?? seo.uso_em_bio ?? '',
-        hashtags_fixas:             seo.hashtags_fixas             ?? [],
+        palavras_chave_principais:   seo.palavras_chave_principais   ?? [],
+        palavras_chave_secundarias:  seo.palavras_chave_secundarias  ?? [],
+        bio_otimizada:               seo.bio_otimizada               ?? seo.uso_em_bio ?? '',
+        hashtags_fixas:              seo.hashtags_fixas              ?? [],
+        uso_em_bio:                  seo.uso_em_bio                  ?? seo.bio_otimizada ?? '',
+        uso_em_legenda:              seo.uso_em_legenda              ?? '',
+        uso_em_alt_text:             seo.uso_em_alt_text             ?? '',
+        categoria_perfil_recomendada:seo.categoria_perfil_recomendada ?? seo.categoria_recomendada ?? '',
       },
       frequencia_publicacao: {
         posts_por_semana:      freq.posts_por_semana      ?? 0,
@@ -823,10 +827,10 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
           .slice(0, 5);
         const maxComt = topPosts[0]?.comentarios_ordenados?.length ?? 1;
         const cards = [
-          { label: 'Total de comentários', val: totalComt.toString(), icon: '💬', color: C.primary },
-          { label: 'Taxa de resposta', val: `${taxaResposta}%`, icon: '↩️', color: C.green },
-          { label: 'Média de palavras', val: mediaPalavras.toString(), icon: '📝', color: C.yellow },
-          { label: 'Contas verificadas', val: verificados.toString(), icon: '✅', color: '#8B5CF6' },
+          { label: 'Total de comentários', val: totalComt.toString(), color: C.primary },
+          { label: 'Taxa de resposta', val: `${taxaResposta}%`, color: C.green },
+          { label: 'Média de palavras', val: mediaPalavras.toString(), color: C.yellow },
+          { label: 'Contas verificadas', val: verificados.toString(), color: '#8B5CF6' },
         ];
         return (
           <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column' }}>
@@ -840,10 +844,9 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
               {/* Cards métricas */}
               <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(14), width: isP ? '100%' : '32%', flexWrap: isP ? 'wrap' : 'nowrap' }}>
                 {cards.map((c, i) => (
-                  <div key={i} style={{ flex: 1, minWidth: isP ? '45%' : undefined, background: 'rgba(255,255,255,0.05)', border: `1px solid rgba(255,255,255,0.1)`, borderRadius: f(10), padding: `${f(14)}px ${f(16)}px`, display: 'flex', flexDirection: 'column', gap: f(4) }}>
-                    <div style={{ fontSize: f(22) }}>{c.icon}</div>
-                    <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(28), color: c.color, lineHeight: 1 }}>{c.val}</div>
-                    <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 1 }}>{c.label}</div>
+                  <div key={i} style={{ flex: 1, minWidth: isP ? '45%' : undefined, background: 'rgba(255,255,255,0.05)', border: `1px solid rgba(255,255,255,0.1)`, borderLeft: `4px solid ${c.color}`, borderRadius: f(10), padding: `${f(14)}px ${f(16)}px`, display: 'flex', flexDirection: 'column', gap: f(6) }}>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(30), color: c.color, lineHeight: 1 }}>{c.val}</div>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>{c.label}</div>
                   </div>
                 ))}
               </div>
@@ -853,12 +856,16 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
                 {topPosts.map((p, i) => {
                   const qt = p.comentarios_ordenados?.length ?? 0;
                   const pct = Math.round((qt / maxComt) * 100);
-                  const label = p.link_post ? p.link_post.replace('https://www.instagram.com/p/', '').replace('/', '') : `Post ${i + 1}`;
+                  const rawLeg = p.legenda ?? '';
+                  const firstLine = rawLeg.split('\n')[0].trim();
+                  const label = firstLine.length > 0 ? (firstLine.length > 60 ? firstLine.slice(0, 57) + '…' : firstLine) : `Post ${i + 1}`;
                   return (
                     <div key={i} style={{ marginBottom: f(12) }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(5) }}>
-                        <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.65)', maxWidth: '70%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>#{i + 1} {label}</span>
-                        <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.primary }}>{qt}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: f(5), gap: f(8) }}>
+                        <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <span style={{ color: 'rgba(255,255,255,0.35)', marginRight: f(6) }}>#{i + 1}</span>{label}
+                        </span>
+                        <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.primary, flexShrink: 0 }}>{qt} coment.</span>
                       </div>
                       <div style={{ height: f(8), borderRadius: 99, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${pct}%`, borderRadius: 99, background: `linear-gradient(90deg, ${C.primary}, ${C.yellow})` }} />
@@ -963,53 +970,39 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
               </div>
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(20), padding: `${f(16)}px ${f(48)}px ${f(20)}px` }}>
-              {/* Palavras mais frequentes */}
-              <div style={{ flex: 1, background: 'rgba(255,255,255,0.03)', borderRadius: f(10), padding: `${f(14)}px ${f(18)}px`, border: '1px solid rgba(255,255,255,0.07)' }}>
-                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(12) }}>📊 Palavras mais citadas</div>
-                {topWords.slice(0, 8).map(([word, freq], i) => (
-                  <div key={word} style={{ marginBottom: f(8) }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(3) }}>
-                      <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.75)', fontWeight: i < 3 ? 700 : 400 }}>{word}</span>
-                      <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(11), color: C.primary }}>{freq}×</span>
-                    </div>
-                    <div style={{ height: f(5), borderRadius: 99, background: 'rgba(255,255,255,0.07)' }}>
-                      <div style={{ height: '100%', width: `${Math.round((freq / maxWFreq) * 100)}%`, borderRadius: 99, background: i < 3 ? C.primary : 'rgba(255,102,0,0.4)' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Emojis */}
-              <div style={{ width: isP ? '100%' : '28%', background: 'rgba(255,255,255,0.03)', borderRadius: f(10), padding: `${f(14)}px ${f(18)}px`, border: '1px solid rgba(255,255,255,0.07)' }}>
-                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(12) }}>😍 Top emojis</div>
-                {topEmojis.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(8) }}>
-                    {topEmojis.map(([emoji, freq]) => (
-                      <div key={emoji} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: f(2), padding: `${f(8)}px ${f(10)}px`, background: 'rgba(255,255,255,0.06)', borderRadius: f(8) }}>
-                        <span style={{ fontSize: f(22) }}>{emoji}</span>
-                        <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(10), color: C.yellow }}>{freq}×</span>
+              {/* Palavras mais frequentes — expandido */}
+              <div style={{ flex: 2, background: 'rgba(255,255,255,0.03)', borderRadius: f(10), padding: `${f(14)}px ${f(18)}px`, border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(12) }}>📊 Palavras mais citadas nos comentários</div>
+                <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr' : '1fr 1fr', gap: `${f(6)}px ${f(24)}px` }}>
+                  {topWords.slice(0, 12).map(([word, freq], i) => (
+                    <div key={word} style={{ marginBottom: f(4) }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(3) }}>
+                        <span style={{ fontFamily: 'Roboto', fontSize: f(13), color: i < 3 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.65)', fontWeight: i < 3 ? 700 : 400 }}>{word}</span>
+                        <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.primary }}>{freq}×</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>Nenhum emoji encontrado</div>
-                )}
+                      <div style={{ height: f(5), borderRadius: 99, background: 'rgba(255,255,255,0.07)' }}>
+                        <div style={{ height: '100%', width: `${Math.round((freq / maxWFreq) * 100)}%`, borderRadius: 99, background: i < 3 ? C.primary : 'rgba(255,102,0,0.35)' }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
               {/* Sentimento */}
-              <div style={{ width: isP ? '100%' : '28%', background: 'rgba(255,255,255,0.03)', borderRadius: f(10), padding: `${f(14)}px ${f(18)}px`, border: '1px solid rgba(255,255,255,0.07)' }}>
-                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(12) }}>🧠 Sentimento (estimado)</div>
+              <div style={{ flex: 1, background: 'rgba(255,255,255,0.03)', borderRadius: f(10), padding: `${f(14)}px ${f(18)}px`, border: '1px solid rgba(255,255,255,0.07)', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(16) }}>🧠 Sentimento geral (estimado)</div>
                 {sentimentos.map(s => (
-                  <div key={s.label} style={{ marginBottom: f(14) }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(5) }}>
-                      <span style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.7)' }}>{s.label}</span>
-                      <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: s.color }}>{s.pct}%</span>
+                  <div key={s.label} style={{ marginBottom: f(18) }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: f(6) }}>
+                      <span style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.75)' }}>{s.label}</span>
+                      <span style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(18), color: s.color }}>{s.pct}%</span>
                     </div>
-                    <div style={{ height: f(10), borderRadius: 99, background: 'rgba(255,255,255,0.08)' }}>
+                    <div style={{ height: f(12), borderRadius: 99, background: 'rgba(255,255,255,0.08)' }}>
                       <div style={{ height: '100%', width: `${s.pct}%`, borderRadius: 99, background: s.color }} />
                     </div>
                   </div>
                 ))}
-                <div style={{ marginTop: f(12), padding: `${f(8)}px ${f(12)}px`, background: 'rgba(255,255,255,0.04)', borderRadius: f(8), borderLeft: `3px solid ${C.yellow}` }}>
-                  <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)', marginBottom: f(3) }}>⚠️ Estimativa baseada em palavras-chave</div>
+                <div style={{ marginTop: 'auto', padding: `${f(10)}px ${f(12)}px`, background: 'rgba(255,255,255,0.04)', borderRadius: f(8), borderLeft: `3px solid ${C.yellow}` }}>
+                  <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>⚠️ Estimativa baseada em análise de palavras-chave do texto dos comentários</div>
                 </div>
               </div>
             </div>
@@ -1099,6 +1092,105 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
           </div>
         );
       }});
+      // Slide 5 — Comentários dos concorrentes
+      const compComtData = (auditData?.concorrentes ?? []).filter(c => (c.posts ?? []).some((p: any) => (p.comentarios_ordenados?.length ?? 0) > 0));
+      if (compComtData.length > 0) {
+        all.push({ id: 'ov-comentarios-concorrentes', section: 'overview_cliente', render: () => {
+          const compStats = compComtData.map((comp: any) => {
+            const posts = comp.posts ?? [];
+            const allComt = posts.flatMap((p: any) => p.comentarios_ordenados ?? []);
+            const total = allComt.length;
+            const respondidos = allComt.filter((c: any) => c.comentario_foi_respondido_pelo_dono).length;
+            const taxaResp = total > 0 ? Math.round((respondidos / total) * 100) : 0;
+            const mediaPalavras = total > 0 ? Math.round(allComt.reduce((s: number, c: any) => s + (c.palavras ?? 0), 0) / total) : 0;
+            const verificados = allComt.filter((c: any) => c.is_verified).length;
+            // sentiment
+            const posW = ['amei','adorei','incrível','maravilhoso','ótimo','perfeito','lindo','top','excelente','parabéns','fantástico','bom','boa','show','demais'];
+            const negW = ['ruim','péssimo','horrível','decepcionante','fraco','chato','medíocre'];
+            const txt = allComt.map((c: any) => c.texto ?? '').join(' ').toLowerCase();
+            const pos = posW.reduce((s: number, w: string) => s + (txt.match(new RegExp(`\\b${w}\\b`, 'g'))?.length ?? 0), 0);
+            const neg = negW.reduce((s: number, w: string) => s + (txt.match(new RegExp(`\\b${w}\\b`, 'g'))?.length ?? 0), 0);
+            const sentTotal = pos + neg || 1;
+            // top comment
+            const topComt = [...allComt].sort((a: any, b: any) => (b.palavras ?? 0) - (a.palavras ?? 0))[0];
+            // word freq
+            const stopW = new Set(['de','a','o','que','e','do','da','em','um','para','com','uma','os','no','se','na','por','mais','é','foi','ao','das','tem','seu','sua','ou','ser','me','esse','você','essa','nem','suas','meu','às','minha','seus']);
+            const wordFreq: Record<string, number> = {};
+            txt.replace(/[^\p{L}\s]/gu, '').split(/\s+/).forEach((w: string) => {
+              if (w.length > 3 && !stopW.has(w)) wordFreq[w] = (wordFreq[w] || 0) + 1;
+            });
+            const topWords = Object.entries(wordFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            return { handle: comp.handle, total, taxaResp, mediaPalavras, verificados, posPct: Math.round((pos / sentTotal) * 100), negPct: Math.round((neg / sentTotal) * 100), topComt, topWords };
+          });
+          const accentColors = [C.green, '#8B5CF6', '#EC4899'];
+          return (
+            <div style={{ width: '100%', height: '100%', background: '#111', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: `${f(24)}px ${f(48)}px ${f(14)}px`, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.35)', letterSpacing: 4, textTransform: 'uppercase' }}>Insights Competitivos</div>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(30), color: C.white, textTransform: 'uppercase', lineHeight: 1.1 }}>
+                  COMENTÁRIOS DOS <span style={{ color: C.green }}>CONCORRENTES</span>
+                </div>
+              </div>
+              <div style={{ flex: 1, display: 'grid', gridTemplateColumns: isP ? '1fr' : compStats.map(() => '1fr').join(' '), gap: f(16), padding: `${f(16)}px ${f(48)}px ${f(20)}px`, overflow: 'hidden' }}>
+                {compStats.map((comp, ci) => {
+                  const accent = accentColors[ci % accentColors.length];
+                  return (
+                    <div key={comp.handle} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid rgba(255,255,255,0.08)`, borderTop: `3px solid ${accent}`, borderRadius: f(12), padding: `${f(14)}px ${f(16)}px`, display: 'flex', flexDirection: 'column', gap: f(10), overflow: 'hidden' }}>
+                      {/* Header */}
+                      <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(16), color: accent }}>@{comp.handle}</div>
+                      {/* Métricas */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(8) }}>
+                        {[
+                          { label: 'Total comentários', val: comp.total.toString() },
+                          { label: 'Taxa de resposta', val: `${comp.taxaResp}%` },
+                          { label: 'Média de palavras', val: comp.mediaPalavras.toString() },
+                          { label: 'Contas verificadas', val: comp.verificados.toString() },
+                        ].map((m, mi) => (
+                          <div key={mi} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: f(8), padding: `${f(8)}px ${f(10)}px` }}>
+                            <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(18), color: accent, lineHeight: 1 }}>{m.val}</div>
+                            <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginTop: f(2) }}>{m.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Sentimento */}
+                      <div>
+                        <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: f(6) }}>Sentimento estimado</div>
+                        <div style={{ display: 'flex', gap: f(4), height: f(10), borderRadius: 99, overflow: 'hidden' }}>
+                          <div style={{ flex: comp.posPct, background: C.green }} />
+                          <div style={{ flex: Math.max(0, 100 - comp.posPct - comp.negPct), background: 'rgba(255,255,255,0.12)' }} />
+                          <div style={{ flex: comp.negPct, background: '#EF4444' }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: f(12), marginTop: f(5) }}>
+                          <span style={{ fontFamily: 'Roboto', fontSize: f(10), color: C.green }}>✓ {comp.posPct}% positivo</span>
+                          <span style={{ fontFamily: 'Roboto', fontSize: f(10), color: '#EF4444' }}>✗ {comp.negPct}% negativo</span>
+                        </div>
+                      </div>
+                      {/* Top palavras */}
+                      <div>
+                        <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: f(6) }}>Palavras mais citadas</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(5) }}>
+                          {comp.topWords.map(([word, freq]) => (
+                            <span key={word} style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.7)', background: `${accent}22`, border: `1px solid ${accent}44`, borderRadius: f(5), padding: `${f(3)}px ${f(8)}px` }}>{word} <span style={{ color: accent }}>{freq}×</span></span>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Melhor comentário */}
+                      {comp.topComt && (
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: f(8), padding: `${f(8)}px ${f(10)}px`, borderLeft: `3px solid ${accent}`, overflow: 'hidden' }}>
+                          <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.35)', marginBottom: f(4) }}>💬 Comentário mais elaborado</div>
+                          <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as any }}>
+                            "@{comp.topComt.comentador_username}" — "{comp.topComt.texto}"
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }});
+      }
     }
   }
 
@@ -1176,56 +1268,148 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
 
     all.push({ id: 'dt-frequencia', section: 'diretrizes_tecnicas', render: () => {
       const dist = dt.frequencia_publicacao.distribuicao_formatos;
+      const storiesVal = dist.stories_por_dia != null ? String(dist.stories_por_dia) : '—';
+      const diasPicoLower = (dt.frequencia_publicacao.dias_de_pico ?? []).map((d: string) => d.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''));
+      const diasSemana = [
+        { label: 'Seg', full: 'Segunda' },
+        { label: 'Ter', full: 'Terça'   },
+        { label: 'Qua', full: 'Quarta'  },
+        { label: 'Qui', full: 'Quinta'  },
+        { label: 'Sex', full: 'Sexta'   },
+        { label: 'Sáb', full: 'Sábado'  },
+        { label: 'Dom', full: 'Domingo' },
+      ];
+
+      // Competitor timing from publicado_em
+      const dayNamesIdx = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+      interface TimeStat { count: number; totalEng: number }
+      const compTiming = (auditData?.concorrentes ?? []).map((comp: any) => {
+        const posts: any[] = comp.posts ?? [];
+        const dayMap: Record<string, TimeStat> = {};
+        const hourBuckets: Record<string, TimeStat> = { 'Manhã (6-11h)': {count:0,totalEng:0}, 'Tarde (12-17h)': {count:0,totalEng:0}, 'Noite (18-23h)': {count:0,totalEng:0}, 'Madrugada (0-5h)': {count:0,totalEng:0} };
+        for (const p of posts) {
+          if (!p.publicado_em) continue;
+          const d = new Date(p.publicado_em);
+          const dayKey = dayNamesIdx[d.getDay()];
+          const hour = d.getHours();
+          const eng = p.engajamento_total ?? 0;
+          if (!dayMap[dayKey]) dayMap[dayKey] = { count: 0, totalEng: 0 };
+          dayMap[dayKey].count++;
+          dayMap[dayKey].totalEng += eng;
+          const bucket = hour < 6 ? 'Madrugada (0-5h)' : hour < 12 ? 'Manhã (6-11h)' : hour < 18 ? 'Tarde (12-17h)' : 'Noite (18-23h)';
+          hourBuckets[bucket].count++;
+          hourBuckets[bucket].totalEng += eng;
+        }
+        const bestDay = Object.entries(dayMap).sort((a,b) => (b[1].totalEng/Math.max(b[1].count,1)) - (a[1].totalEng/Math.max(a[1].count,1)))[0];
+        const bestHour = Object.entries(hourBuckets).filter(([,v]) => v.count > 0).sort((a,b) => (b[1].totalEng/Math.max(b[1].count,1)) - (a[1].totalEng/Math.max(a[1].count,1)))[0];
+        const dayDist = dayNamesIdx.map(day => ({ day, count: dayMap[day]?.count ?? 0, avgEng: dayMap[day] ? Math.round(dayMap[day].totalEng / dayMap[day].count) : 0 }));
+        const maxDayEng = Math.max(...dayDist.map(d => d.avgEng), 1);
+        return { handle: comp.handle, dayDist, bestDay: bestDay?.[0], bestHour: bestHour?.[0], hourBuckets, maxDayEng };
+      });
+
+      const accentComp = [C.green, '#8B5CF6'];
       return (
-        <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
-          <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>Frequência & Formatos</div>
-          <div style={{ display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(32), flex: 1 }}>
-            <div style={{ display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(14), width: isP ? '100%' : 400, flexShrink: 0 }}>
-              {[
-                { label: 'Posts / dia',    val: dt.frequencia_publicacao.posts_por_dia,     icon: '📅' },
-                { label: 'Posts / semana', val: String(dt.frequencia_publicacao.posts_por_semana), icon: '📆' },
-                { label: 'Stories / dia',  val: String(dist.stories_por_dia),               icon: '📸' },
-              ].map((m) => (
-                <div key={m.label} style={{ borderRadius: 16, padding: f(16), background: 'rgba(255,102,0,0.1)', border: '1px solid rgba(255,102,0,0.28)', flex: isP ? 1 : undefined }}>
-                  <div style={{ fontSize: f(24) }}>{m.icon}</div>
-                  <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(26), color: C.primary, marginTop: f(4) }}>{m.val}</div>
-                  <div style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)' }}>{m.label}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: isP ? 'row' : 'column', gap: f(24) }}>
-              <div style={{ flex: 1 }}>
-                <DonutChart f={f} data={[
-                  { label: 'Reels',     value: dist.reels_pct,     color: C.primary },
-                  { label: 'Carrossel', value: dist.carrossel_pct, color: C.green   },
-                  { label: 'Foto',      value: dist.foto_pct,      color: C.yellow  },
-                ]} />
+        <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: `${f(28)}px ${f(48)}px ${f(20)}px` }}>
+          <div style={{ marginBottom: f(16), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(28), color: C.white, textTransform: 'uppercase' }}>
+            Frequência & <span style={{ color: C.primary }}>Formatos</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(20), flex: 1, overflow: 'hidden' }}>
+            {/* Coluna esquerda — métricas + dias */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: f(12), width: isP ? '100%' : '28%', flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: f(10) }}>
+                {[
+                  { label: 'Posts/semana', val: String(dt.frequencia_publicacao.posts_por_semana) },
+                  { label: 'Posts/dia',    val: String(dt.frequencia_publicacao.posts_por_dia)    },
+                ].map((m) => (
+                  <div key={m.label} style={{ flex: 1, borderRadius: f(10), padding: `${f(10)}px ${f(12)}px`, background: 'rgba(255,102,0,0.1)', border: '1px solid rgba(255,102,0,0.25)' }}>
+                    <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(24), color: C.primary, lineHeight: 1 }}>{m.val}</div>
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.45)', marginTop: f(3), textTransform: 'uppercase', letterSpacing: 0.5 }}>{m.label}</div>
+                  </div>
+                ))}
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.yellow, textTransform: 'uppercase', marginBottom: f(10) }}>⏰ Melhores Horários</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: f(8) }}>
-                  {dt.frequencia_publicacao.melhores_horarios?.map((h, i) => (
-                    <div key={i} style={{ padding: f(10), borderRadius: 10, background: 'rgba(255,214,0,0.07)', border: '1px solid rgba(255,214,0,0.18)' }}>
-                      <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.8)' }}>{h}</span>
+              {/* Melhores horários */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: f(10), padding: `${f(10)}px ${f(14)}px` }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(11), color: C.yellow, textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(8) }}>⏰ Melhores Horários</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: f(5) }}>
+                  {dt.frequencia_publicacao.melhores_horarios?.map((h: string, i: number) => (
+                    <div key={i} style={{ padding: `${f(6)}px ${f(10)}px`, borderRadius: f(6), background: 'rgba(255,214,0,0.07)', border: '1px solid rgba(255,214,0,0.15)' }}>
+                      <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.85)' }}>{h}</span>
                     </div>
                   ))}
                 </div>
-                {!isP && (
-                  <div style={{ marginTop: f(16) }}>
-                    <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.white, textTransform: 'uppercase', marginBottom: f(8) }}>🔥 Dias de Pico</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(6) }}>
-                      {['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'].map((d) => {
-                        const isPico = dt.frequencia_publicacao.dias_de_pico?.includes(d);
-                        return (
-                          <div key={d} style={{ borderRadius: 8, padding: `${f(5)}px ${f(10)}px`, background: isPico ? C.primary : 'rgba(255,255,255,0.04)', border: isPico ? 'none' : '1px solid rgba(255,255,255,0.08)' }}>
-                            <span style={{ fontFamily: 'Roboto', fontSize: f(12), color: C.white }}>{d}{isPico ? ' 🔥' : ''}</span>
+              </div>
+              {/* Dias de pico */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: f(10), padding: `${f(10)}px ${f(14)}px` }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(11), color: C.primary, textTransform: 'uppercase', letterSpacing: 2, marginBottom: f(8) }}>🔥 Dias de Pico</div>
+                <div style={{ display: 'flex', gap: f(5), flexWrap: 'wrap' }}>
+                  {diasSemana.map(({ label, full }) => {
+                    const key = full.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+                    const isPico = diasPicoLower.includes(key);
+                    return (
+                      <div key={label} style={{ borderRadius: f(6), padding: `${f(5)}px ${f(9)}px`, background: isPico ? C.primary : 'rgba(255,255,255,0.05)', border: isPico ? 'none' : '1px solid rgba(255,255,255,0.09)' }}>
+                        <span style={{ fontFamily: 'Roboto', fontSize: f(11), fontWeight: isPico ? 700 : 400, color: isPico ? '#fff' : 'rgba(255,255,255,0.45)' }}>{label}{isPico ? ' 🔥' : ''}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* Donut */}
+              <div style={{ flex: 1, minHeight: 0 }}>
+                <DonutChart f={f} data={[
+                  { label: 'Reels',     value: dist.reels_pct     ?? 0, color: C.primary },
+                  { label: 'Carrossel', value: dist.carrossel_pct ?? 0, color: C.green   },
+                  { label: 'Foto',      value: dist.foto_pct      ?? 0, color: C.yellow  },
+                ]} />
+              </div>
+            </div>
+            {/* Coluna direita — timing dos concorrentes */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(12), overflow: 'hidden' }}>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 2 }}>📊 Padrão de publicação dos concorrentes</div>
+              {compTiming.map((comp, ci) => {
+                const accent = accentComp[ci % accentComp.length];
+                return (
+                  <div key={comp.handle} style={{ flex: 1, background: 'rgba(255,255,255,0.03)', border: `1px solid rgba(255,255,255,0.07)`, borderTop: `2px solid ${accent}`, borderRadius: f(10), padding: `${f(12)}px ${f(16)}px`, display: 'flex', flexDirection: 'column', gap: f(10), overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(14), color: accent }}>@{comp.handle}</div>
+                      <div style={{ display: 'flex', gap: f(12) }}>
+                        {comp.bestDay && <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.5)' }}>🏆 Melhor dia: <span style={{ color: accent, fontWeight: 700 }}>{comp.bestDay}</span></span>}
+                        {comp.bestHour && <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.5)' }}>⏰ Melhor período: <span style={{ color: accent, fontWeight: 700 }}>{comp.bestHour}</span></span>}
+                      </div>
+                    </div>
+                    {/* Mini heatmap por dia */}
+                    <div>
+                      <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: f(6) }}>Engajamento médio por dia da semana</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: f(4) }}>
+                        {comp.dayDist.map(({ day, count, avgEng }) => {
+                          const pct = comp.maxDayEng > 0 ? Math.round((avgEng / comp.maxDayEng) * 100) : 0;
+                          const isTop = pct === 100 && count > 0;
+                          return (
+                            <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: f(3) }}>
+                              <div style={{ width: '100%', height: f(36), borderRadius: f(5), background: `${accent}${Math.round(pct * 0.8 + 10).toString(16).padStart(2,'0')}`, border: isTop ? `1px solid ${accent}` : '1px solid transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {count > 0 && <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(9), color: '#fff' }}>{count}p</span>}
+                              </div>
+                              <span style={{ fontFamily: 'Roboto', fontSize: f(9), color: isTop ? accent : 'rgba(255,255,255,0.35)', fontWeight: isTop ? 700 : 400 }}>{day}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {/* Turno */}
+                    <div>
+                      <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: f(6) }}>Distribuição por período do dia</div>
+                      <div style={{ display: 'flex', gap: f(8) }}>
+                        {Object.entries(comp.hourBuckets).filter(([,v]) => v.count > 0).sort((a,b) => b[1].totalEng - a[1].totalEng).map(([bucket, stat]) => (
+                          <div key={bucket} style={{ flex: 1, padding: `${f(6)}px ${f(8)}px`, borderRadius: f(6), background: 'rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                            <div style={{ fontFamily: 'Roboto', fontSize: f(10), color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>{bucket.split(' ')[0]}</div>
+                            <div style={{ fontFamily: 'Roboto', fontSize: f(9), color: 'rgba(255,255,255,0.3)' }}>{bucket.match(/\(([^)]+)\)/)?.[1]}</div>
+                            <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: accent, marginTop: f(2) }}>{stat.count}p</div>
                           </div>
-                        );
-                      })}
+                        ))}
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1247,9 +1431,11 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
                     <div style={{ borderRadius: '50%', width: f(36), height: f(36), background: pillarColors[i], display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(13), color: i === 2 ? C.secondary : C.white, flexShrink: 0 }}>{p2.porcentagem}%</div>
                   </div>
                   <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: lh, marginBottom: f(8), marginTop: 0 }}>{p2.descricao}</p>
-                  <div style={{ padding: f(8), borderRadius: 8, background: 'rgba(255,255,255,0.04)' }}>
-                    <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.4)' }}>💡 {p2.por_que_funciona}</span>
-                  </div>
+                  {!!p2.por_que_funciona && (
+                    <div style={{ padding: f(8), borderRadius: 8, background: 'rgba(255,255,255,0.04)' }}>
+                      <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.4)' }}>💡 {p2.por_que_funciona}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -1258,35 +1444,60 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
       );
     }});
 
+    // Slide: Assuntos Quentes (movido para depois de dt-pilares)
+    all.push({ id: 'dt-assuntos', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
+        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>🔥 Assuntos Quentes</div>
+        <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr 1fr' : '1fr 1fr 1fr', gap: f(10), flex: 1 }}>
+          {dt.assuntos_quentes?.map((a, i) => {
+            const cols = [C.primary, C.green, C.yellow];
+            const col  = cols[i % 3];
+            return (
+              <div key={i} style={{ borderRadius: 12, padding: f(14), display: 'flex', alignItems: 'center', gap: f(10), background: `${col}0c`, border: `1px solid ${col}2a` }}>
+                <div style={{ width: f(28), height: f(28), borderRadius: '50%', background: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(11), color: i % 3 === 2 ? C.secondary : C.white, flexShrink: 0 }}>{i + 1}</div>
+                <span style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh }}>{a}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    )});
+
     // Slide: Ganchos Modelo + CTAs Recomendados
     all.push({ id: 'dt-ganchos', section: 'diretrizes_tecnicas', render: () => (
       <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row', overflow: 'hidden' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isP ? '40px 48px 24px' : 64, borderRight: isP ? 'none' : '1px solid rgba(255,255,255,0.06)', borderBottom: isP ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-          <div style={{ marginBottom: f(20), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>🪝 Ganchos Modelo</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: f(14), flex: 1 }}>
-            {dt.ganchos_modelo?.map((g, i) => (
-              <div key={i} style={{ borderRadius: 14, padding: f(18), position: 'relative', overflow: 'hidden', background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.25)' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isP ? '28px 36px 16px' : '40px 48px', borderRight: isP ? 'none' : '1px solid rgba(255,255,255,0.06)', borderBottom: isP ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+          <div style={{ marginBottom: f(14), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(20), color: C.white, textTransform: 'uppercase' }}>🪝 Ganchos Modelo</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: f(8), flex: 1, overflow: 'hidden' }}>
+            {dt.ganchos_modelo?.map((g: any, i) => {
+              const gancho = typeof g === 'string' ? g : (g.gancho ?? String(g));
+              const inspir = typeof g === 'string' ? null : g.inspirado_em;
+              return (
+              <div key={i} style={{ borderRadius: 10, padding: `${f(10)}px ${f(14)}px`, position: 'relative', overflow: 'hidden', background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.25)', flex: 1, display: 'flex', alignItems: 'center' }}>
                 <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: C.primary }} />
-                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(15), color: C.white, marginBottom: f(8), lineHeight: lh }}>"{g.gancho}"</div>
-                <Tag text={`Inspirado em ${g.inspirado_em}`} color={C.primary} f={f} />
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.white, lineHeight: 1.3, paddingLeft: 8 }}>"{gancho}"</div>
+                {inspir && <Tag text={`Inspirado em ${inspir}`} color={C.primary} f={f} />}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isP ? '24px 48px 40px' : 64 }}>
-          <div style={{ marginBottom: f(16), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>💬 CTAs Recomendados</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: f(12), flex: 1 }}>
-            {dt.ctas_recomendados?.map((c, i) => {
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isP ? '16px 36px 28px' : '40px 48px' }}>
+          <div style={{ marginBottom: f(14), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(20), color: C.white, textTransform: 'uppercase' }}>💬 CTAs Recomendados</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: f(8), flex: 1, overflow: 'hidden' }}>
+            {dt.ctas_recomendados?.map((c: any, i) => {
               const icons = ['💬', '📩', '🔗', '📣', '✉️'];
               const cols  = [C.green, C.primary, C.yellow, C.green, C.primary];
               const col   = cols[i % cols.length];
+              const ctatext = typeof c === 'string' ? c : (c.cta ?? String(c));
+              const quando  = typeof c === 'string' ? null : c.quando_usar;
               return (
-                <div key={i} style={{ flex: 1, borderRadius: 14, padding: f(16), background: `${col}0e`, border: `1px solid ${col}2a` }}>
-                  <div style={{ display: 'flex', gap: f(10), alignItems: 'flex-start' }}>
-                    <span style={{ fontSize: f(20), flexShrink: 0 }}>{icons[i % icons.length]}</span>
+                <div key={i} style={{ flex: 1, borderRadius: 10, padding: `${f(10)}px ${f(14)}px`, background: `${col}0e`, border: `1px solid ${col}2a`, display: 'flex', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: f(8), alignItems: 'center', width: '100%' }}>
+                    <span style={{ fontSize: f(16), flexShrink: 0 }}>{icons[i % icons.length]}</span>
                     <div>
-                      <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: col, marginBottom: f(6), lineHeight: lh }}>"{c.cta}"</div>
-                      <Tag text={c.quando_usar} color={col} f={f} />
+                      <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: col, lineHeight: 1.3 }}>"{ctatext}"</div>
+                      {quando && <Tag text={quando} color={col} f={f} />}
                     </div>
                   </div>
                 </div>
@@ -1297,45 +1508,58 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
       </div>
     )});
 
-    // Slide: Ideias de Títulos + Stories Recorrentes
+    // Slide: Ideias de Títulos + Stories Recorrentes (empilhados verticalmente)
     all.push({ id: 'dt-titulos', section: 'diretrizes_tecnicas', render: () => (
-      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: isP ? 'column' : 'row', overflow: 'hidden' }}>
-        <div style={{ flex: isP ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column', padding: isP ? '40px 48px 24px' : 64, borderRight: isP ? 'none' : '1px solid rgba(255,255,255,0.06)', borderBottom: isP ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-          <div style={{ marginBottom: f(20), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>💬 Ideias de Títulos</div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(12) }}>
-            {dt.ideias_de_titulos?.map((t, i) => {
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: isP ? '32px 32px' : '40px 64px', overflow: 'hidden', gap: f(24) }}>
+
+        {/* Ideias de Títulos */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ marginBottom: f(14), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(20), color: C.white, textTransform: 'uppercase' }}>💬 Ideias de Títulos</div>
+          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `${f(8)}px ${f(32)}px`, alignContent: 'start', overflow: 'hidden' }}>
+            {dt.ideias_de_titulos?.map((t: any, i) => {
+              const titulo  = typeof t === 'string' ? t : (t.titulo ?? String(t));
+              const formato = typeof t === 'string' ? null : t.formato_sugerido;
+              const pilar   = typeof t === 'string' ? null : t.pilar;
               const pCols: Record<string, string> = { 'Transformação': C.primary, 'Storytelling Pessoal': C.green, 'Dicas Práticas': C.yellow, 'Oferta e CTA': 'rgba(200,200,255,0.8)', 'Storytelling Real': C.green, 'Educação & Dica Prática': C.yellow, 'Alerta & Oportunidade': C.primary, 'Bastidor & Prova Social': C.green };
-              const col = pCols[t.pilar] || C.white;
+              const col = pilar ? (pCols[pilar] || C.white) : C.white;
               return (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: f(12) }}>
-                  <div style={{ width: f(28), height: f(28), borderRadius: '50%', background: C.yellow, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(13), color: C.secondary, flexShrink: 0, marginTop: 2 }}>{i + 1}</div>
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: f(10) }}>
+                  <div style={{ width: f(26), height: f(26), borderRadius: '50%', background: C.yellow, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(12), color: C.secondary, flexShrink: 0, marginTop: 2 }}>{i + 1}</div>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.9)' }}>{t.titulo} </span>
-                    <Tag text={t.formato_sugerido} color={C.yellow} f={f} />
-                    {' '}<Tag text={t.pilar} color={col} f={f} />
+                    <span style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.9)', lineHeight: 1.35 }}>{titulo}</span>
+                    {formato && <>{' '}<Tag text={formato} color={C.yellow} f={f} /></>}
+                    {pilar && <>{' '}<Tag text={pilar} color={col} f={f} /></>}
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
-        <div style={{ flex: isP ? '0 0 auto' : '0 0 460px', display: 'flex', flexDirection: 'column', padding: isP ? '24px 48px 40px' : 56 }}>
-          <div style={{ marginBottom: f(16), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(22), color: C.white, textTransform: 'uppercase' }}>📱 Stories Recorrentes</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: f(8), flex: 1 }}>
-            {dt.stories_recorrentes?.map((s, i) => {
+
+        {/* Divisor */}
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
+
+        {/* Stories Recorrentes */}
+        <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ marginBottom: f(14), fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(20), color: C.white, textTransform: 'uppercase' }}>📱 Stories Recorrentes</div>
+          <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr' : '1fr 1fr 1fr', gap: f(10) }}>
+            {dt.stories_recorrentes?.map((s: any, i) => {
               const storyIcons = ['📊', '📹', '📬', '✅', '💡', '🎯'];
+              const ideia    = typeof s === 'string' ? s : (s.ideia ?? s.tipo ?? s.descricao ?? String(s));
+              const objetivo = typeof s === 'string' ? null : (s.objetivo ?? s.frequencia ?? null);
               return (
-                <div key={i} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: f(10), borderRadius: 10, padding: `${f(9)}px ${f(12)}px`, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <span style={{ fontSize: f(16), flexShrink: 0 }}>{storyIcons[i % storyIcons.length]}</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: f(12), borderRadius: 10, padding: `${f(12)}px ${f(16)}px`, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <span style={{ fontSize: f(22), flexShrink: 0 }}>{storyIcons[i % storyIcons.length]}</span>
                   <div>
-                    <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.85)', marginBottom: f(4) }}>{s.ideia}</div>
-                    <Tag text={s.objetivo} color={C.green} f={f} />
+                    <div style={{ fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.9)', marginBottom: f(4), lineHeight: 1.3 }}>{ideia}</div>
+                    {objetivo && <Tag text={objetivo} color={C.green} f={f} />}
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
+
       </div>
     )});
 
@@ -1360,25 +1584,32 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
           </div>
           {/* Usos e instruções */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: f(14) }}>
-            <div style={{ borderRadius: 16, padding: f(18), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, textTransform: 'uppercase', marginBottom: f(8) }}>📝 Uso na Bio</div>
-              <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{dt.seo_instagram.uso_em_bio}</p>
-            </div>
-            <div style={{ borderRadius: 16, padding: f(18), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, textTransform: 'uppercase', marginBottom: f(8) }}>✍️ Uso na Legenda</div>
-              <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{dt.seo_instagram.uso_em_legenda}</p>
-            </div>
-            <div style={{ borderRadius: 16, padding: f(18), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, textTransform: 'uppercase', marginBottom: f(8) }}>🖼️ Uso no Alt Text</div>
-              <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{dt.seo_instagram.uso_em_alt_text}</p>
-            </div>
-            <div style={{ padding: `${f(10)}px ${f(16)}px`, borderRadius: 12, background: `${C.primary}15`, border: `1px solid ${C.primary}33`, display: 'flex', alignItems: 'center', gap: f(10) }}>
-              <span style={{ fontSize: f(16) }}>📍</span>
-              <div>
-                <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase' }}>Categoria recomendada: </span>
-                <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.white }}>{dt.seo_instagram.categoria_perfil_recomendada}</span>
+            {[
+              { icon: '📝', label: 'Uso na Bio',      val: dt.seo_instagram.uso_em_bio },
+              { icon: '✍️', label: 'Uso na Legenda',  val: dt.seo_instagram.uso_em_legenda },
+              { icon: '🖼️', label: 'Uso no Alt Text', val: dt.seo_instagram.uso_em_alt_text },
+            ].filter(m => !!m.val).map(m => (
+              <div key={m.label} style={{ borderRadius: 16, padding: f(18), background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: C.yellow, textTransform: 'uppercase', marginBottom: f(8) }}>{m.icon} {m.label}</div>
+                <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh, margin: 0 }}>{m.val}</p>
               </div>
-            </div>
+            ))}
+            {!!dt.seo_instagram.categoria_perfil_recomendada && (
+              <div style={{ padding: `${f(10)}px ${f(16)}px`, borderRadius: 12, background: `${C.primary}15`, border: `1px solid ${C.primary}33`, display: 'flex', alignItems: 'center', gap: f(10) }}>
+                <span style={{ fontSize: f(16) }}>📍</span>
+                <div>
+                  <span style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase' }}>Categoria recomendada: </span>
+                  <span style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(13), color: C.white }}>{dt.seo_instagram.categoria_perfil_recomendada}</span>
+                </div>
+              </div>
+            )}
+            {!dt.seo_instagram.uso_em_bio && !dt.seo_instagram.uso_em_legenda && !dt.seo_instagram.uso_em_alt_text && !dt.seo_instagram.categoria_perfil_recomendada && (
+              <div style={{ padding: f(18), borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <p style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.3)', fontStyle: 'italic', margin: 0 }}>
+                  Instruções de uso não foram geradas para este cliente.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1429,12 +1660,15 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
             </div>
           </div>
         </div>
-        <div style={{ marginTop: f(16), padding: f(14), borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.5)', margin: 0 }}>
-            📍 <strong style={{ color: C.white }}>Categoria:</strong> {dt.seo_instagram.categoria_perfil_recomendada}&nbsp;&nbsp;|&nbsp;&nbsp;
-            📝 <strong style={{ color: C.white }}>Bio:</strong> {dt.seo_instagram.uso_em_bio}
-          </p>
-        </div>
+        {(!!dt.seo_instagram.categoria_perfil_recomendada || !!dt.seo_instagram.uso_em_bio) && (
+          <div style={{ marginTop: f(16), padding: f(14), borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <p style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+              {!!dt.seo_instagram.categoria_perfil_recomendada && <>📍 <strong style={{ color: C.white }}>Categoria:</strong> {dt.seo_instagram.categoria_perfil_recomendada}</>}
+              {!!dt.seo_instagram.categoria_perfil_recomendada && !!dt.seo_instagram.uso_em_bio && <>&nbsp;&nbsp;|&nbsp;&nbsp;</>}
+              {!!dt.seo_instagram.uso_em_bio && <>📝 <strong style={{ color: C.white }}>Bio:</strong> {dt.seo_instagram.uso_em_bio}</>}
+            </p>
+          </div>
+        )}
       </div>
     )});
 
@@ -1601,23 +1835,63 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
       )});
     }
 
-    all.push({ id: 'dt-assuntos', section: 'diretrizes_tecnicas', render: () => (
-      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56 }}>
-        <div style={{ marginBottom: f(24), fontFamily: 'Montserrat', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>🔥 Assuntos Quentes</div>
-        <div style={{ display: 'grid', gridTemplateColumns: isP ? '1fr 1fr' : '1fr 1fr 1fr', gap: f(10), flex: 1 }}>
-          {dt.assuntos_quentes?.map((a, i) => {
-            const cols = [C.primary, C.green, C.yellow];
-            const col  = cols[i % 3];
-            return (
-              <div key={i} style={{ borderRadius: 12, padding: f(14), display: 'flex', alignItems: 'center', gap: f(10), background: `${col}0c`, border: `1px solid ${col}2a` }}>
-                <div style={{ width: f(28), height: f(28), borderRadius: '50%', background: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(11), color: i % 3 === 2 ? C.secondary : C.white, flexShrink: 0 }}>{i + 1}</div>
-                <span style={{ fontFamily: 'Roboto', fontSize: f(13), color: 'rgba(255,255,255,0.85)', lineHeight: lh }}>{a}</span>
+    // Slide final — encerramento + próximos passos
+    const clienteNome = auditData?.cliente?.perfil?.full_name || auditData?.cliente?.perfil?.username || 'Cliente';
+    const clienteHandle = auditData?.cliente?.perfil?.username ? `@${auditData.cliente.perfil.username}` : '';
+    all.push({ id: 'dt-encerramento', section: 'diretrizes_tecnicas', render: () => (
+      <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Barra superior laranja */}
+        <div style={{ height: f(6), background: `linear-gradient(90deg, ${C.primary}, ${C.yellow})`, flexShrink: 0 }} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: isP ? 'column' : 'row', overflow: 'hidden' }}>
+          {/* Lado esquerdo — mensagem */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: isP ? `${f(40)}px ${f(40)}px ${f(24)}px` : `${f(48)}px ${f(72)}px` }}>
+            <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.3)', letterSpacing: 4, textTransform: 'uppercase', marginBottom: f(16) }}>Relatório Concluído</div>
+            <div style={{ fontFamily: 'Montserrat', fontWeight: 900, fontSize: isP ? f(28) : 54, color: C.white, lineHeight: 1.1, textTransform: 'uppercase' }}>
+              {clienteNome.split(' ')[0]},<br />
+              <span style={{ color: C.primary }}>está pronta</span><br />
+              para decolar! 🚀
+            </div>
+            <div style={{ marginTop: f(28), fontFamily: 'Roboto', fontSize: f(14), color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, maxWidth: 540 }}>
+              Esse plano foi construído especialmente para{' '}
+              <strong style={{ color: C.white }}>{clienteHandle || clienteNome}</strong>.
+              Cada estratégia foi pensada para acelerar seu crescimento no Instagram com consistência e autenticidade.
+            </div>
+          </div>
+          {/* Lado direito — CTAs */}
+          <div style={{ width: isP ? '100%' : '42%', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: f(20), padding: isP ? `${f(24)}px ${f(40)}px ${f(48)}px` : `${f(48)}px ${f(56)}px ${f(48)}px ${f(40)}px` }}>
+            {/* WhatsApp */}
+            <div style={{ borderRadius: f(16), padding: `${f(24)}px ${f(28)}px`, background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.25)', display: 'flex', gap: f(18), alignItems: 'flex-start' }}>
+              <div style={{ width: f(44), height: f(44), borderRadius: '50%', background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width={f(24)} height={f(24)} viewBox="0 0 24 24" fill="white">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.025.507 3.933 1.395 5.608L0 24l6.562-1.378A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.366l-.36-.214-3.713.78.793-3.623-.235-.373A9.818 9.818 0 1112 21.818z"/>
+                </svg>
               </div>
-            );
-          })}
+              <div>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: '#25D366', marginBottom: f(6) }}>Dúvidas? Novos insights?</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+                  Me chama no WhatsApp! Estou aqui para responder perguntas, ajustar estratégias e trazer novos insights sempre que precisar.
+                </div>
+              </div>
+            </div>
+            {/* Próximo relatório */}
+            <div style={{ borderRadius: f(16), padding: `${f(24)}px ${f(28)}px`, background: `rgba(255,102,0,0.08)`, border: `1px solid rgba(255,102,0,0.25)`, display: 'flex', gap: f(18), alignItems: 'flex-start' }}>
+              <div style={{ width: f(44), height: f(44), borderRadius: '50%', background: C.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'Montserrat', fontWeight: 900, fontSize: f(18), color: C.white }}>7</div>
+              <div>
+                <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(14), color: C.primary, marginBottom: f(6) }}>Próximo relatório em 7 dias</div>
+                <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+                  Em uma semana teremos um novo relatório de acompanhamento para analisar a execução do plano, medir a evolução e ajustar o que for necessário.
+                </div>
+              </div>
+            </div>
+            <div style={{ textAlign: 'center', fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.2)', letterSpacing: 2, textTransform: 'uppercase' }}>
+              Radar Marketing · Powered by IA
+            </div>
+          </div>
         </div>
       </div>
     )});
+
   }
 
   return all;
