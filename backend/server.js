@@ -21,6 +21,7 @@ const puppeteer   = require('puppeteer-core');
 const fs          = require('fs');
 const path        = require('path');
 const crypto      = require('crypto');
+const { exec }    = require('child_process');
 
 const CHROME_PATH = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
@@ -817,6 +818,138 @@ app.post('/api/lp/analyze', async (req, res) => {
     if (browser) await browser.close().catch(() => {});
     console.error('[lp/analyze]', err.message);
     return res.json({ ok: false, url, error: err.message });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// 9. VIDEO INFO — extrai metadados e URL de download via yt-dlp
+//
+//  POST /api/video-info
+//  x-api-key: <API_SECRET>
+//  Body JSON: { url: "https://...", tipo: "instagram|tiktok|youtube" }
+//
+//  Retorna: { ok, link_download, duracao_segundos, legenda, titulo, tipo }
+//  Se duracao_segundos > 120 → ok: false, motivo: "video_longo"
+// ═════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Executa yt-dlp e retorna o JSON de metadados do vídeo.
+ * Usa --no-playlist para não baixar playlists inteiras.
+ * Usa --cookies-from-browser ou arquivo de cookies se configurado.
+ */
+function ytdlpInfo(url) {
+  return new Promise((resolve, reject) => {
+    // Tenta yt-dlp; fallback para yt-dlp-nox em alguns servidores
+    const ytdlp = process.env.YTDLP_PATH || 'yt-dlp';
+
+    // Opcional: suporte a cookies do Instagram para evitar bloqueio
+    const cookiesArg = process.env.YTDLP_COOKIES_FILE
+      ? `--cookies "${process.env.YTDLP_COOKIES_FILE}"`
+      : '';
+
+    const cmd = `${ytdlp} --no-playlist --dump-json --no-warnings ${cookiesArg} "${url}"`;
+
+    exec(cmd, { timeout: 30000, maxBuffer: 4 * 1024 * 1024 }, (err, stdout, stderr) => {
+      if (err) return reject(new Error(stderr || err.message));
+      try {
+        // stdout pode conter múltiplas linhas JSON (playlist) — pega apenas a primeira
+        const firstLine = stdout.trim().split('\n')[0];
+        resolve(JSON.parse(firstLine));
+      } catch (e) {
+        reject(new Error('Resposta inválida do yt-dlp: ' + stdout.slice(0, 200)));
+      }
+    });
+  });
+}
+
+/**
+ * Obtém a URL de download direta (melhor formato ≤ 480p para economizar banda/Whisper).
+ */
+function ytdlpGetUrl(url) {
+  return new Promise((resolve, reject) => {
+    const ytdlp = process.env.YTDLP_PATH || 'yt-dlp';
+    const cookiesArg = process.env.YTDLP_COOKIES_FILE
+      ? `--cookies "${process.env.YTDLP_COOKIES_FILE}"`
+      : '';
+
+    // Formato: melhor vídeo+áudio até 480p, prefer mp4
+    const formatArg = '-f "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]/best"';
+    const cmd = `${ytdlp} --no-playlist --no-warnings ${cookiesArg} ${formatArg} -g "${url}"`;
+
+    exec(cmd, { timeout: 30000 }, (err, stdout, stderr) => {
+      if (err) return reject(new Error(stderr || err.message));
+      // -g pode retornar múltiplas URLs (vídeo + áudio separados); pega a primeira
+      const firstUrl = stdout.trim().split('\n')[0];
+      resolve(firstUrl);
+    });
+  });
+}
+
+app.post('/api/video-info', async (req, res) => {
+  const { url, tipo } = req.body || {};
+
+  if (!url) {
+    return res.status(400).json({ ok: false, motivo: 'url_ausente' });
+  }
+
+  const MAX_DURACAO = parseInt(process.env.VIDEO_MAX_SECONDS || '120', 10);
+
+  try {
+    // 1. Busca metadados via yt-dlp
+    let info;
+    try {
+      info = await ytdlpInfo(url);
+    } catch (e) {
+      console.error('[video-info] yt-dlp info error:', e.message);
+      return res.status(422).json({
+        ok: false,
+        motivo: 'erro_extracao',
+        detalhe: e.message.slice(0, 300),
+      });
+    }
+
+    const duracao_segundos = Math.round(info.duration || 0);
+    const titulo           = info.title       || info.fulltitle || '';
+    const legenda          = info.description || '';
+
+    // 2. Verifica duração máxima permitida
+    if (duracao_segundos > MAX_DURACAO) {
+      return res.json({
+        ok: false,
+        motivo: 'video_longo',
+        duracao_segundos,
+        titulo,
+        mensagem: `O vídeo tem ${Math.ceil(duracao_segundos / 60)} minuto(s). Só analiso vídeos de até ${Math.ceil(MAX_DURACAO / 60)} minuto(s). 🎬`,
+      });
+    }
+
+    // 3. Obtém URL de download direto
+    let link_download = '';
+    try {
+      link_download = await ytdlpGetUrl(url);
+    } catch (e) {
+      // Se falhar em obter URL direta, tenta usar a thumbnail/URL alternativa do info
+      console.warn('[video-info] Não foi possível obter URL de download:', e.message);
+      link_download = info.url || info.webpage_url || url;
+    }
+
+    return res.json({
+      ok: true,
+      link_download,
+      duracao_segundos,
+      titulo,
+      legenda: legenda.slice(0, 2000), // limita para não estourar tokens
+      tipo: tipo || info.extractor_key?.toLowerCase() || 'desconhecido',
+      thumbnail: info.thumbnail || '',
+    });
+
+  } catch (err) {
+    console.error('[video-info] Erro geral:', err.message);
+    return res.status(500).json({
+      ok: false,
+      motivo: 'erro_interno',
+      detalhe: err.message,
+    });
   }
 });
 
