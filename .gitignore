@@ -21,3 +21,29 @@ backend/.env
 .claude/
 start-dev.sh
 _slides_tmp_*.html
+
+# Fluxos n8n (nunca comitar)
+flow/*.json
+fluxo-*.json
+
+# Respostas de API / dados de análise (nunca comitar)
+*-dados.json
+analise*.json
+jsonresposta*.json
+saadamasco*.json
+claudioteste*.json
+ultimatentativa*
+*-1105-*.json
+*-1205-*.json
+infografico-src/public/d4u_data.json
+
+# Dados de usuários (sensível)
+data/users/
+
+# PDFs e previews locais
+*.pdf
+preview-*.html
+relatorio-*.html
+d4u_*.html
+teste-*.html
+test_*.html
