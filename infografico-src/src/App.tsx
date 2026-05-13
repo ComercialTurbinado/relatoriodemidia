@@ -1715,7 +1715,7 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
               <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(12), color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginBottom: f(6) }}>👔 Vestimenta / Aparições</div>
               <p style={{ fontFamily: 'Roboto', fontSize: f(11), color: 'rgba(255,255,255,0.75)', lineHeight: lh, margin: `0 0 ${f(8)}px` }}>{dt.identidade_visual.vestimenta_aparicoes.diretrizes}</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(5), marginBottom: f(6) }}>
-                {dt.identidade_visual.vestimenta_aparicoes.mood_referencias?.map((m) => <Tag key={m} text={m} color={C.green} f={f} />)}
+                {dt.identidade_visual.vestimenta_aparicoes.mood_referencias?.map((m) => { const handle = m.split(' — ')[0].trim(); return <Tag key={m} text={handle} color={C.green} f={f} />; })}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: f(5) }}>
                 {dt.identidade_visual.vestimenta_aparicoes.evitar?.map((e) => (
@@ -1812,7 +1812,7 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
             </div>
             {/* Tema + Gancho */}
             <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: 13, color: C.white, lineHeight: 1.2 }}>{String(item.tema)}</div>
-            <div style={{ fontFamily: 'Roboto', fontSize: 11, color: col }}>🎣 {String(item.gancho_3s)}</div>
+            <div style={{ fontFamily: 'Roboto', fontSize: 11, color: col }}>{String(item.gancho_3s)}</div>
             {/* Mídia: carrossel */}
             {sc && sc.qtd_slides ? (
               <div style={{ background: 'rgba(0,0,0,0.25)', borderRadius: 8, padding: '7px 9px' }}>
@@ -1898,7 +1898,7 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
           {/* Tema */}
           <div style={{ fontFamily: 'Montserrat', fontWeight: 700, fontSize: f(15), color: C.white, lineHeight: lh }}>{String(item.tema)}</div>
           {/* Gancho */}
-          <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: col, lineHeight: lh }}>🎣 {String(item.gancho_3s)}</div>
+          <div style={{ fontFamily: 'Roboto', fontSize: f(12), color: col, lineHeight: lh }}>{String(item.gancho_3s)}</div>
 
           {sc && sc.qtd_slides ? (
             /* ── CARROSSEL: grid 2 colunas (slides | legenda) ─────────────── */
