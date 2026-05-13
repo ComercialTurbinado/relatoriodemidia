@@ -22,6 +22,7 @@ const fs          = require('fs');
 const path        = require('path');
 const crypto      = require('crypto');
 const { exec }    = require('child_process');
+const os          = require('os');
 // ─── Supabase REST (sem SDK — usa axios direto) ───────────────────────────────
 const SUPA_URL  = process.env.SUPABASE_URL  || 'https://mblntoimrkfoocbztozb.supabase.co';
 const SUPA_KEY  = process.env.SUPABASE_ANON_KEY || '';
@@ -993,8 +994,52 @@ function ytdlpGetUrl(url) {
   });
 }
 
+/**
+ * Baixa apenas o áudio do vídeo em mp3 (máx 25 MB para Whisper).
+ * Usa yt-dlp -x para extrair áudio sem baixar o vídeo completo.
+ * Retorna o caminho do arquivo temporário gerado.
+ */
+function ytdlpDownloadAudio(url) {
+  return new Promise((resolve, reject) => {
+    const ytdlp      = process.env.YTDLP_PATH || 'yt-dlp';
+    const cookiesArg = process.env.YTDLP_COOKIES_FILE
+      ? `--cookies "${process.env.YTDLP_COOKIES_FILE}"`
+      : '';
+
+    // Arquivo temporário único por requisição
+    const tmpPath = path.join(os.tmpdir(), `radar_audio_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+
+    // -x extrai só o áudio; --audio-format mp3 converte via ffmpeg
+    // --audio-quality 5 = qualidade média (bom para transcrição, arquivo menor)
+    const cmd = `${ytdlp} --no-playlist --no-warnings ${cookiesArg} -x --audio-format mp3 --audio-quality 5 -o "${tmpPath}.%(ext)s" "${url}"`;
+
+    exec(cmd, { timeout: 60000 }, (err, stdout, stderr) => {
+      if (err) return reject(new Error(stderr || err.message));
+      resolve(`${tmpPath}.mp3`);
+    });
+  });
+}
+
+/**
+ * Transcreve um arquivo de áudio via OpenAI Whisper.
+ * Remove o arquivo temporário após a transcrição.
+ */
+async function transcreveAudio(filePath) {
+  try {
+    const transcription = await openai.audio.transcriptions.create({
+      file:     fs.createReadStream(filePath),
+      model:    'whisper-1',
+      language: 'pt',
+    });
+    return transcription.text || '';
+  } finally {
+    // Sempre limpa o arquivo temporário, mesmo se der erro
+    try { fs.unlinkSync(filePath); } catch (_) {}
+  }
+}
+
 app.post('/api/video-info', async (req, res) => {
-  const { url, tipo } = req.body || {};
+  const { url, tipo, transcribe } = req.body || {};
 
   if (!url) {
     return res.status(400).json({ ok: false, motivo: 'url_ausente' });
@@ -1041,14 +1086,31 @@ app.post('/api/video-info', async (req, res) => {
       link_download = info.url || info.webpage_url || url;
     }
 
+    // 4. Transcrição via Whisper (opcional — só quando transcribe: true)
+    let transcricao = '';
+    if (transcribe) {
+      try {
+        console.log('[video-info] Baixando áudio para transcrição...');
+        const audioFile = await ytdlpDownloadAudio(url);
+        console.log('[video-info] Transcrevendo com Whisper...');
+        transcricao = await transcreveAudio(audioFile);
+        console.log(`[video-info] Transcrição ok (${transcricao.length} chars)`);
+      } catch (e) {
+        // Transcrição falhou — continua sem ela, não bloqueia o fluxo
+        console.warn('[video-info] Transcrição falhou, seguindo sem ela:', e.message);
+        transcricao = '';
+      }
+    }
+
     return res.json({
       ok: true,
       link_download,
       duracao_segundos,
       titulo,
-      legenda: legenda.slice(0, 2000), // limita para não estourar tokens
-      tipo: tipo || info.extractor_key?.toLowerCase() || 'desconhecido',
-      thumbnail: info.thumbnail || '',
+      legenda:     legenda.slice(0, 2000),
+      transcricao: transcricao.slice(0, 4000), // limita tokens do Whisper
+      tipo:        tipo || info.extractor_key?.toLowerCase() || 'desconhecido',
+      thumbnail:   info.thumbnail || '',
     });
 
   } catch (err) {
