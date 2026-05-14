@@ -1055,12 +1055,16 @@ app.post('/api/video-info', async (req, res) => {
       });
     }
 
-    const duracao_segundos = Math.round(info.duration || 0);
-    const titulo           = info.title || '';
-    const legenda          = info.description || '';
+    const titulo  = info.title || info.fulltitle || '';
+    const legenda = info.description || '';
 
-    // 2. Verifica duração máxima permitida
-    if (duracao_segundos > MAX_DURACAO) {
+    // Duração: se vier > 3600s provavelmente é metadata errado (Facebook, etc.)
+    // Nesse caso trata como desconhecida (0) e deixa passar
+    const duracaoBruta     = Math.round(info.duration || 0);
+    const duracao_segundos = duracaoBruta > 3600 ? 0 : duracaoBruta;
+
+    // 2. Verifica duração máxima permitida (só bloqueia se soubermos a duração real)
+    if (duracao_segundos > 0 && duracao_segundos > MAX_DURACAO) {
       return res.json({
         ok: false,
         motivo: 'video_longo',
