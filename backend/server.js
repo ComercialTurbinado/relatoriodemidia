@@ -1123,7 +1123,7 @@ function ytdlpGetAudioUrl(videoUrl) {
     // -f bestaudio: áudio puro de menor tamanho
     // --get-url: imprime só a URL, sem baixar
     // --no-playlist: não expande playlists
-    const cmd = `yt-dlp -f bestaudio --get-url --no-playlist "${videoUrl}"`;
+    const cmd = `yt-dlp -f bestaudio --get-url --no-playlist --js-runtimes node "${videoUrl}"`;
     exec(cmd, { timeout: 30000 }, (err, stdout, stderr) => {
       if (err) return reject(new Error((stderr || err.message).slice(0, 300)));
       const url = stdout.trim().split('\n')[0];
