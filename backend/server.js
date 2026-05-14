@@ -1100,6 +1100,51 @@ app.post('/api/video-info', async (req, res) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
+// 10c. DOWNLOAD BASE64 — baixa qualquer URL e devolve o arquivo em base64
+//
+//  POST /api/download-base64
+//  x-api-key: <API_SECRET>
+//  Body JSON: { url: "https://...", mime: "audio/mp4" }
+//
+//  mime (opcional) — usado no data URI retornado (default: application/octet-stream)
+//  Retorna: { ok, base64, mime, bytes, data_uri }
+// ═════════════════════════════════════════════════════════════════════════════
+app.post('/api/download-base64', async (req, res) => {
+  const { url, mime = 'application/octet-stream' } = req.body || {};
+
+  if (!url) return res.status(400).json({ ok: false, motivo: 'url ausente' });
+
+  try {
+    const resp = await axios.get(url, {
+      responseType: 'arraybuffer',
+      timeout: 60000,
+      maxContentLength: 50 * 1024 * 1024, // 50 MB máximo
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+
+    const buffer   = Buffer.from(resp.data);
+    const base64   = buffer.toString('base64');
+    const mimeReal = resp.headers['content-type']?.split(';')[0] || mime;
+
+    console.log(`[download-base64] ${url.slice(0, 60)}... → ${buffer.length} bytes`);
+
+    return res.json({
+      ok:       true,
+      base64,
+      mime:     mimeReal,
+      bytes:    buffer.length,
+      data_uri: `data:${mimeReal};base64,${base64}`,
+    });
+
+  } catch (err) {
+    console.error('[download-base64] Erro:', err.message);
+    return res.status(500).json({ ok: false, motivo: err.message.slice(0, 300) });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
 // 10b. TRANSCRIÇÃO — baixa URL de áudio CDN e transcreve via Whisper
 //
 //  POST /api/transcribe
