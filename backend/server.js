@@ -104,16 +104,53 @@ app.post('/api/fetch-instagram', async (req, res) => {
 
     const nicho = nichoRes.choices[0].message.content.trim().toLowerCase();
 
-    return res.json({ nicho, followers, taxa_engajamento, handle: cleanHandle });
+    return res.json({
+      ok:              true,
+      handle:          cleanHandle,
+      nicho,
+      full_name:       profile.fullName        || '',
+      biografia:       profile.biography        || '',
+      seguidores:      followers,
+      seguindo:        profile.followsCount     || 0,
+      qtd_posts:       profile.postsCount       || 0,
+      is_verificado:   !!(profile.verified      || profile.isVerified),
+      is_privado:      !!(profile.private       || profile.isPrivate),
+      is_business:     !!(profile.businessCategory || profile.isBusinessAccount),
+      has_website:     !!(profile.externalUrl   || profile.bioLinks?.[0]),
+      site_externo:    profile.externalUrl      || profile.bioLinks?.[0]?.url || '',
+      foto_perfil:     profile.profilePicUrlHD  || profile.profilePicUrl || '',
+      taxa_engajamento,
+      avg_likes:       avgLikes,
+      avg_comments:    avgComments,
+      ultimos_posts:   posts.slice(0, 3).map(p => ({
+        tipo:          p.type           || 'foto',
+        curtidas:      p.likesCount     || 0,
+        comentarios:   p.commentsCount  || 0,
+        legenda_preview: (p.caption     || '').slice(0, 120),
+      })),
+    });
 
   } catch (err) {
     console.error('[fetch-instagram]', err.message);
-    // Fallback para não travar o fluxo em desenvolvimento
     return res.json({
-      nicho:            'negócio',
-      followers:        1000,
-      taxa_engajamento: '1.50',
-      handle:           cleanHandle,
+      ok:              false,
+      handle:          cleanHandle,
+      nicho:           '',
+      full_name:       '',
+      biografia:       '',
+      seguidores:      0,
+      seguindo:        0,
+      qtd_posts:       0,
+      is_verificado:   false,
+      is_privado:      false,
+      is_business:     false,
+      has_website:     false,
+      site_externo:    '',
+      foto_perfil:     '',
+      taxa_engajamento:'0.00',
+      avg_likes:       0,
+      avg_comments:    0,
+      ultimos_posts:   [],
     });
   }
 });
