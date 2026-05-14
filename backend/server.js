@@ -1106,29 +1106,97 @@ app.post('/api/video-info', async (req, res) => {
 //  x-api-key: <API_SECRET>
 //  Body JSON: { url: "https://...", mime: "audio/mp4" }
 //
+//  Aceita tanto URLs diretas (CDN) quanto URLs originais (youtube.com, instagram.com, etc).
+//  Se o download direto falhar com 403 (CDN IP-locked), usa yt-dlp para obter
+//  uma URL fresca assinada para o IP do servidor, depois baixa.
+//
 //  mime (opcional) — usado no data URI retornado (default: application/octet-stream)
 //  Retorna: { ok, base64, mime, bytes, data_uri }
 // ═════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Usa yt-dlp para extrair a melhor URL de áudio de uma URL de vídeo social.
+ * Retorna a URL CDN fresca (assinada para o IP do servidor).
+ */
+function ytdlpGetAudioUrl(videoUrl) {
+  return new Promise((resolve, reject) => {
+    // -f bestaudio: áudio puro de menor tamanho
+    // --get-url: imprime só a URL, sem baixar
+    // --no-playlist: não expande playlists
+    const cmd = `yt-dlp -f bestaudio --get-url --no-playlist "${videoUrl}"`;
+    exec(cmd, { timeout: 30000 }, (err, stdout, stderr) => {
+      if (err) return reject(new Error((stderr || err.message).slice(0, 300)));
+      const url = stdout.trim().split('\n')[0];
+      if (!url) return reject(new Error('yt-dlp não retornou URL'));
+      resolve(url);
+    });
+  });
+}
+
 app.post('/api/download-base64', async (req, res) => {
   const { url, mime = 'application/octet-stream' } = req.body || {};
 
   if (!url) return res.status(400).json({ ok: false, motivo: 'url ausente' });
 
-  try {
-    const resp = await axios.get(url, {
+  // Detecta se é URL de plataforma social (vai precisar de yt-dlp)
+  const isSocialUrl = /instagram\.com|tiktok\.com|youtube\.com|youtu\.be|facebook\.com|fb\.watch/i.test(url);
+
+  async function downloadDirect(targetUrl) {
+    const resp = await axios.get(targetUrl, {
       responseType: 'arraybuffer',
-      timeout: 60000,
-      maxContentLength: 50 * 1024 * 1024, // 50 MB máximo
+      timeout: 90000,
+      maxContentLength: 50 * 1024 * 1024,
+      maxRedirects: 10,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept':          '*/*',
+        'Accept-Encoding': 'identity',
+        'Referer':         'https://www.youtube.com/',
       },
     });
+    return resp;
+  }
 
-    const buffer   = Buffer.from(resp.data);
-    const base64   = buffer.toString('base64');
-    const mimeReal = resp.headers['content-type']?.split(';')[0] || mime;
+  try {
+    let buffer, mimeReal;
 
-    console.log(`[download-base64] ${url.slice(0, 60)}... → ${buffer.length} bytes`);
+    if (isSocialUrl) {
+      // URL social → yt-dlp gera CDN URL fresca para o IP do servidor
+      console.log(`[download-base64] URL social detectada, usando yt-dlp: ${url.slice(0, 60)}...`);
+      let cdnUrl;
+      try {
+        cdnUrl = await ytdlpGetAudioUrl(url);
+      } catch (ytErr) {
+        console.error('[download-base64] yt-dlp falhou:', ytErr.message);
+        return res.status(422).json({ ok: false, motivo: 'yt-dlp falhou', detalhe: ytErr.message });
+      }
+      const resp = await downloadDirect(cdnUrl);
+      buffer   = Buffer.from(resp.data);
+      mimeReal = resp.headers['content-type']?.split(';')[0] || mime;
+
+    } else {
+      // URL direta (CDN) → tenta download direto
+      let resp;
+      try {
+        resp = await downloadDirect(url);
+      } catch (err) {
+        const status = err.response?.status;
+        // Se 403 e parece URL de googlevideo, não tem como contornar sem a URL original
+        if (status === 403 && url.includes('googlevideo.com')) {
+          return res.status(422).json({
+            ok: false,
+            motivo: 'cdn_ip_locked',
+            detalhe: 'URL do Google Video é assinada para outro IP. Envie a URL original do YouTube (youtube.com/watch ou youtu.be) em vez da URL do CDN.',
+          });
+        }
+        throw err;
+      }
+      buffer   = Buffer.from(resp.data);
+      mimeReal = resp.headers['content-type']?.split(';')[0] || mime;
+    }
+
+    const base64 = buffer.toString('base64');
+    console.log(`[download-base64] OK → ${buffer.length} bytes, mime: ${mimeReal}`);
 
     return res.json({
       ok:       true,
