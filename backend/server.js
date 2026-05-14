@@ -1429,4 +1429,286 @@ app.post('/api/page-text', async (req, res) => {
   }
 });
 
+// ═════════════════════════════════════════════════════════════════════════════
+// 12. SAVE ANALISE — persiste JSON completo de análise no Supabase
+//
+//  POST /api/save-analise
+//  x-api-key: <API_SECRET>
+//  Body JSON: o objeto completo gerado pelo pipeline de análise
+//
+//  Salva em ordem:
+//   1. clientes (upsert)
+//   2. concorrentes (upsert)
+//   3. analises (insert)
+//   4. analises_concorrentes (insert)
+//   5. planos_diretores (insert)
+//   6. analise_conteudo (insert — cliente + concorrentes)
+//   7. metricas_semanais (insert snapshot)
+//   8. hashtags_oportunidade (insert)
+//   9. videos_transcritos (insert)
+//  10. keywords_google (insert)
+//
+//  Retorna: { ok, analise_id }
+// ═════════════════════════════════════════════════════════════════════════════
+
+async function supaPost(table, payload, options = '') {
+  const r = await axios.post(
+    `${SUPA_URL}/rest/v1/${table}${options}`,
+    payload,
+    { headers: supaHeaders() }
+  );
+  return r.data;
+}
+
+async function supaUpsert(table, payload, onConflict) {
+  const r = await axios.post(
+    `${SUPA_URL}/rest/v1/${table}?on_conflict=${onConflict}`,
+    payload,
+    {
+      headers: {
+        ...supaHeaders(),
+        'Prefer': 'resolution=merge-duplicates,return=representation',
+      },
+    }
+  );
+  return r.data;
+}
+
+app.post('/api/save-analise', async (req, res) => {
+  const body = req.body;
+
+  // Suporta tanto array[0] quanto objeto direto
+  const raw = Array.isArray(body) ? body[0] : body;
+
+  // Extrai as seções principais
+  const pd  = raw.plano_diretor || {};
+  const ov  = pd.overview_cliente || {};
+  const dt  = pd.diretrizes_tecnicas || {};
+  const dm  = pd.dados_metricas_perfis || {};
+  const cli = dm.cliente || raw.cliente || {};
+  const mp  = cli.metricas_perfil || cli.metricas || {};
+  const mpp = cli.metricas_posts_resumo || cli.metricas_posts || {};
+
+  const handle = (raw.handle_cliente || cli.handle || '').replace('@', '').toLowerCase().trim();
+  if (!handle) return res.status(400).json({ ok: false, motivo: 'handle_cliente ausente' });
+
+  try {
+    // ── 1. Upsert cliente ────────────────────────────────────────────────────
+    const perfil = cli.perfil || {};
+    await supaUpsert('clientes', {
+      handle,
+      nome_completo:  perfil.full_name  || raw.nome_cliente || '',
+      username:       perfil.username   || handle,
+      nicho:          raw.nicho         || '',
+      biografia:      perfil.biografia  || '',
+      is_verificado:  perfil.is_verificado  ?? false,
+      is_privado:     perfil.is_privado     ?? false,
+      is_business:    perfil.is_business    ?? false,
+      categoria:      perfil.categoria  || '',
+      email:          perfil.contato?.email || '',
+      site_externo:   perfil.links?.site_externo || '',
+      atualizado_em:  new Date().toISOString(),
+    }, 'handle');
+
+    // ── 2. Upsert concorrentes ───────────────────────────────────────────────
+    const concorrentes = dm.concorrentes || raw.concorrentes || [];
+    for (const c of concorrentes) {
+      const cp = c.perfil || {};
+      await supaUpsert('concorrentes', {
+        handle:        (c.handle || '').replace('@', '').toLowerCase(),
+        nome_completo: cp.full_name  || '',
+        nicho:         raw.nicho     || '',
+        biografia:     cp.biografia  || '',
+        is_verificado: cp.is_verificado ?? false,
+        email:         cp.contato?.email || '',
+        site_externo:  cp.links?.site_externo || '',
+        atualizado_em: new Date().toISOString(),
+      }, 'handle');
+    }
+
+    // ── 3. Insert analise ────────────────────────────────────────────────────
+    const sc = raw.score_comparativo || {};
+    const analisePayload = {
+      cliente_handle:    handle,
+      gerado_em:         raw.gerado_em || new Date().toISOString(),
+      nicho:             raw.nicho || '',
+      titulo_documento:  raw.titulo_documento || '',
+      tokens_dossie:     raw.tokens_dossie   || 0,
+      tokens_diretor:    raw.tokens_diretor  || 0,
+      tokens_total:      raw.tokens_total    || 0,
+      dossie_completo:   (raw.dossie_completo || '').slice(0, 500000),
+
+      // Métricas do cliente
+      instagram_id:     perfil.id || '',
+      foto_perfil:      perfil.foto_perfil    || cli.foto_perfil    || '',
+      foto_perfil_hd:   perfil.foto_perfil_hd || cli.foto_perfil_hd || '',
+      seguidores:       mp.seguidores  || 0,
+      seguindo:         mp.seguindo    || 0,
+      qtd_posts:        mp.qtd_posts   || 0,
+      qtd_reels:        mp.qtd_reels   || 0,
+      ratio_seguidor:   mp.ratio_seguidor_seguindo || 0,
+      tem_destaques:    mp.tem_destaques ?? false,
+      taxa_engajamento: parseFloat(mpp.taxa_engajamento || 0),
+      media_curtidas:   mpp.media_curtidas   || 0,
+      media_comentarios:mpp.media_comentarios|| 0,
+      media_views:      mpp.media_views      || 0,
+      mix_reels_pct:    mpp.mix_formatos?.reels_pct     || 0,
+      mix_carrossel_pct:mpp.mix_formatos?.carrossel_pct || 0,
+      mix_foto_pct:     mpp.mix_formatos?.foto_pct      || 0,
+      score_comparativo: sc,
+    };
+
+    const [analise] = await supaPost('analises', analisePayload, '?select=id');
+    const analise_id = analise.id;
+
+    // ── 4. Insert analises_concorrentes ──────────────────────────────────────
+    for (const c of concorrentes) {
+      const cmp  = c.metricas_perfil  || c.perfil?.metricas || {};
+      const cmpp = c.metricas_posts   || {};
+      const cp   = c.perfil || {};
+      await supaPost('analises_concorrentes', {
+        analise_id,
+        concorrente_handle: (c.handle || '').replace('@', '').toLowerCase(),
+        foto_perfil:        cp.foto_perfil    || c.foto_perfil    || '',
+        biografia:          cp.biografia      || '',
+        seguidores:         cmp.seguidores    || 0,
+        seguindo:           cmp.seguindo      || 0,
+        qtd_posts:          cmp.qtd_posts     || 0,
+        qtd_reels:          cmp.qtd_reels     || 0,
+        ratio_seguidor:     cmp.ratio_seguidor_seguindo || 0,
+        tem_destaques:      cmp.tem_destaques ?? false,
+        taxa_engajamento:   parseFloat(cmpp.taxa_engajamento || 0),
+        media_curtidas:     cmpp.media_curtidas    || 0,
+        media_comentarios:  cmpp.media_comentarios || 0,
+        media_views:        cmpp.media_views       || 0,
+        mix_reels_pct:      cmpp.mix_formatos?.reels_pct     || 0,
+        mix_carrossel_pct:  cmpp.mix_formatos?.carrossel_pct || 0,
+        mix_foto_pct:       cmpp.mix_formatos?.foto_pct      || 0,
+        ganchos_top:        c.ganchos_top || null,
+        top_posts:          (c.top_3_melhores_posts || c.top_posts || []).slice(0, 5),
+      });
+    }
+
+    // ── 5. Insert plano_diretor ──────────────────────────────────────────────
+    await supaPost('planos_diretores', {
+      analise_id,
+      cliente_handle:          handle,
+      diagnostico_identidade:  ov.diagnostico_identidade  || '',
+      posicionamento_atual:    ov.posicionamento_atual     || '',
+      pontos_fortes:           ov.pontos_fortes            || [],
+      pontos_fracos:           ov.pontos_fracos            || [],
+      carta_para_cliente:      ov.carta_para_cliente_markdown || '',
+      previsao_30_dias:        ov.previsao_resultados?.['30_dias'] || '',
+      previsao_60_dias:        ov.previsao_resultados?.['60_dias'] || '',
+      previsao_90_dias:        ov.previsao_resultados?.['90_dias'] || '',
+      caminhos_crescimento:    ov.caminhos_de_crescimento  || [],
+      comparativo_concorrentes:ov.comparativo_concorrentes || [],
+      tom_de_voz:              dt.tom_de_voz               || {},
+      seo_instagram:           dt.seo_instagram            || {},
+      frequencia_publicacao:   dt.frequencia_publicacao    || {},
+      pilares_conteudo:        dt.pilares_conteudo         || [],
+      assuntos_quentes:        dt.assuntos_quentes         || [],
+      ideias_titulos:          dt.ideias_de_titulos        || [],
+      ganchos_modelo:          dt.ganchos_modelo           || [],
+      ctas_recomendados:       dt.ctas_recomendados        || [],
+      hashtags_estrategicas:   dt.hashtags_estrategicas    || {},
+      identidade_visual:       dt.identidade_visual        || {},
+      stories_recorrentes:     dt.stories_recorrentes      || [],
+      kpis_acompanhar:         dt.kpis_acompanhar          || [],
+      briefing_redatores:      dt.briefing_redatores       || '',
+      briefing_designers:      dt.briefing_designers       || '',
+      calendario_30_dias:      dt.calendario_30_dias       || [],
+    });
+
+    // ── 6. Insert analise_conteudo (cliente + concorrentes) ──────────────────
+    const ac = raw.analise_conteudo || {};
+    const acEntries = [
+      ...(ac.cliente ? [{ ...ac.cliente, tipo: 'cliente' }] : []),
+      ...(ac.concorrentes || []).map(c => ({ ...c, tipo: 'concorrente' })),
+    ];
+    for (const entry of acEntries) {
+      await supaPost('analise_conteudo', {
+        analise_id,
+        handle:                        (entry.handle || '').replace('@', '').toLowerCase(),
+        tipo:                          entry.tipo,
+        ganchos_top:                   entry.ganchos_top           || [],
+        hashtags_frequentes:           entry.hashtags_frequentes   || [],
+        cta_dominante:                 entry.cta_dominante         || '',
+        comprimento_legenda_media_todos: entry.comprimento_legenda_media_todos || 0,
+        comprimento_legenda_media_top:   entry.comprimento_legenda_media_top   || 0,
+        temas_pilares:                 entry.temas_pilares         || [],
+      });
+    }
+
+    // ── 7. Insert metricas_semanais (snapshot) ───────────────────────────────
+    await supaPost('metricas_semanais', {
+      cliente_handle:    handle,
+      analise_id,
+      capturado_em:      raw.gerado_em || new Date().toISOString(),
+      seguidores:        mp.seguidores  || 0,
+      seguindo:          mp.seguindo    || 0,
+      qtd_posts:         mp.qtd_posts   || 0,
+      qtd_reels:         mp.qtd_reels   || 0,
+      ratio_seguidor:    mp.ratio_seguidor_seguindo || 0,
+      tem_destaques:     mp.tem_destaques ?? false,
+      taxa_engajamento:  parseFloat(mpp.taxa_engajamento || 0),
+      media_curtidas:    mpp.media_curtidas    || 0,
+      media_comentarios: mpp.media_comentarios || 0,
+      media_views:       mpp.media_views       || 0,
+      reels_pct:         mpp.mix_formatos?.reels_pct     || 0,
+      carrossel_pct:     mpp.mix_formatos?.carrossel_pct || 0,
+      foto_pct:          mpp.mix_formatos?.foto_pct      || 0,
+      score_comparativo: sc,
+      hashtags_oportunidade: raw.hashtags_oportunidade || [],
+    });
+
+    // ── 8. Insert hashtags_oportunidade ──────────────────────────────────────
+    const hashtags = raw.hashtags_oportunidade || [];
+    if (hashtags.length > 0) {
+      await supaPost('hashtags_oportunidade',
+        hashtags.map(h => ({
+          analise_id,
+          hashtag:               h.hashtag || h,
+          freq_entre_concorrentes: h.freq_entre_concorrentes || 0,
+        }))
+      );
+    }
+
+    // ── 9. Insert videos_transcritos ─────────────────────────────────────────
+    const videos = raw.videos_transcritos || [];
+    for (const v of videos) {
+      await supaPost('videos_transcritos', {
+        analise_id,
+        handle:      (v.handle || '').replace('@', '').toLowerCase(),
+        shortcode:   (v.link_post || '').match(/\/p\/([^/]+)/)?.[1] || null,
+        legenda:     (v.legenda || '').slice(0, 5000),
+        curtidas:    v.curtidas   || 0,
+        comentarios: v.comentarios || 0,
+        engajamento: v.engajamento || 0,
+        transcricao: (v.transcricao || '').slice(0, 50000),
+      }).catch(e => console.warn('[save-analise] video_transcrito skip:', e.response?.data || e.message));
+    }
+
+    // ── 10. Insert keywords_google ───────────────────────────────────────────
+    const keywords = raw.keywords_google || [];
+    if (keywords.length > 0) {
+      await supaPost('keywords_google',
+        keywords.map(k => ({
+          analise_id,
+          titulo:  k.titulo  || '',
+          snippet: k.snippet || '',
+        }))
+      );
+    }
+
+    console.log(`[save-analise] @${handle} salvo — analise_id: ${analise_id}`);
+    return res.json({ ok: true, analise_id, handle });
+
+  } catch (err) {
+    const detail = err.response?.data || err.message;
+    console.error('[save-analise] Erro:', detail);
+    return res.status(500).json({ ok: false, motivo: 'erro_ao_salvar', detalhe: detail });
+  }
+});
+
 app.listen(PORT, () => console.log(`\n🚀 Auditoria IA Backend rodando em http://localhost:${PORT}\n`));
