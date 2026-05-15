@@ -56,6 +56,8 @@ const SOFIA_ROUTES = new Set([
   '/historico-analises',
   '/iniciar-auditoria',
   '/debitar-credito',
+  '/fetch-instagram',
+  '/transcribe',
 ]);
 
 app.use('/api', (req, res, next) => {
