@@ -49,8 +49,18 @@ const deepseek = new OpenAI({
 
 // ─── Auth simples ─────────────────────────────────────────────────────────────
 
+// Rotas internas do Agente Sofia (chamadas pelo n8n — sem auth pública)
+const SOFIA_ROUTES = new Set([
+  '/cadastrar-cliente',
+  '/verificar-cliente',
+  '/historico-analises',
+  '/iniciar-auditoria',
+  '/debitar-credito',
+]);
+
 app.use('/api', (req, res, next) => {
   if (req.path === '/webhook/pagamento') return next(); // gateway não manda header
+  if (SOFIA_ROUTES.has(req.path)) return next();        // rotas internas Sofia
   const key = req.headers['x-api-key'];
   if (key !== process.env.API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
   next();
