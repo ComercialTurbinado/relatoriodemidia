@@ -696,6 +696,41 @@
     }
     .plan-guarantee svg { width: 14px; height: 14px; stroke: #25D366; flex-shrink: 0; }
 
+    /* ── GUARANTEE STRIP ── */
+    .guarantee-strip {
+      display: flex; align-items: flex-start; gap: 20px;
+      background: rgba(37,211,102,0.05);
+      border: 1px solid rgba(37,211,102,0.2);
+      border-radius: 18px; padding: 28px 32px; margin-bottom: 40px;
+    }
+    .guarantee-strip-icon {
+      flex-shrink: 0; width: 44px; height: 44px;
+      background: rgba(37,211,102,0.1); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .guarantee-strip-icon svg { width: 20px; height: 20px; stroke: #25D366; }
+    .guarantee-strip-body { flex: 1; }
+    .guarantee-strip-title {
+      font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px;
+    }
+    .guarantee-strip-sub {
+      font-size: 14px; color: var(--text-muted); line-height: 1.65;
+    }
+    .guarantee-strip-sub strong { color: var(--text); font-weight: 600; }
+    .guarantee-strip-link {
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600; color: #25D366;
+      text-decoration: none; white-space: nowrap; margin-top: 4px;
+      transition: gap .15s;
+    }
+    .guarantee-strip-link:hover { gap: 9px; }
+    .guarantee-strip-link svg { width: 13px; height: 13px; stroke: #25D366; }
+    body.light .guarantee-strip { background: rgba(37,211,102,0.04); }
+    @media (max-width: 680px) {
+      .guarantee-strip { flex-direction: column; gap: 14px; }
+      .guarantee-strip-link { margin-top: 0; }
+    }
+
     /* ── TRUST ── */
     #trust { padding: 56px 0; }
     .trust-box {
@@ -1319,6 +1354,21 @@
     <h2 class="section-title" style="margin-top:20px; text-align:center;">Escolha seu nível de <span class="highlight">inteligência</span></h2>
     <p class="section-sub" style="text-align:center; margin:0 auto;">Três planos desenhados para cada estágio da sua ambição. Sem mensalidades surpresa, sem contratos longos.</p>
 
+    <!-- GUARANTEE STRIP -->
+    <div class="guarantee-strip reveal-item">
+      <div class="guarantee-strip-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      </div>
+      <div class="guarantee-strip-body">
+        <div class="guarantee-strip-title">Garantia de 30 dias — sem pegadinha, sem letra miúda</div>
+        <div class="guarantee-strip-sub">Siga 100% do nosso protocolo: grave os vídeos, publique os posts, respeite o padrão de qualidade. Se em 30 dias não tiver nenhuma melhora mensurável de alcance, <strong>devolvemos 100% do seu dinheiro.</strong> É claro, é direto, é isso.</div>
+      </div>
+      <a href="/protocolo-de-performance.html" class="guarantee-strip-link" target="_blank">
+        Ver o protocolo completo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
     <div class="pricing-grid">
 
       <!-- DIAGNOSTIC -->
@@ -1363,7 +1413,7 @@
         </ul>
         <div class="plan-roi">Uma agência cobra R$5.000+/mês pelo mesmo resultado. Com o Signal Pro você paga uma fração, <strong>executa em 5 dias</strong> e sai com conteúdo pronto.</div>
         <a href="#cta-final" class="btn btn-primary">Quero o Signal Pro</a>
-        <div class="plan-guarantee"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg> Entrega em 5 dias ou devolvemos seu dinheiro</div>
+        <div class="plan-guarantee"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg> Garantia de performance de 30 dias · <a href="/protocolo-de-performance.html" target="_blank" style="color:#25D366;text-decoration:none;font-weight:700;">ver protocolo</a></div>
         <p class="plan-profile">Para negócios que já faturam e precisam de escala sem agências caras.</p>
       </div>
 

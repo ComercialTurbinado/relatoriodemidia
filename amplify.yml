@@ -5,6 +5,7 @@ frontend:
       commands:
         - mkdir -p dist
         - cp landing-radar-instagram.html dist/index.html
+        - cp protocolo-de-performance.html dist/protocolo-de-performance.html
     build:
       commands:
         - echo "Static build complete"

@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Protocolo de Performance — Firemode Signal</title>
+  <meta name="description" content="Garantia de 30 dias do Firemode Signal. Sem pegadinha, sem letra miúda. Entenda exatamente como funciona e o que é exigido para solicitar reembolso." />
+  <meta name="robots" content="noindex, follow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:    #07070F;
+      --bg-card:    #0F0F1C;
+      --bg-card-2:  #141426;
+      --accent:     #7C3AED;
+      --accent-2:   #A855F7;
+      --text:       #EAEAF5;
+      --text-muted: #7A7A9D;
+      --border:     rgba(255,255,255,0.07);
+      --green:      #25D366;
+      --radius:     14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg-base);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      border-bottom: 1px solid var(--border);
+      padding: 18px 0;
+      position: sticky;
+      top: 0;
+      background: rgba(7,7,15,0.92);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+    .topbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-logo {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .topbar-logo span { color: var(--accent-2); }
+    .topbar-back {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .15s;
+    }
+    .topbar-back:hover { color: var(--text); }
+    .topbar-back svg { width: 14px; height: 14px; }
+
+    /* ── HERO ── */
+    .proto-hero {
+      padding: 80px 0 60px;
+      border-bottom: 1px solid var(--border);
+    }
+    .proto-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin-bottom: 28px;
+    }
+    .proto-tag svg { width: 13px; height: 13px; stroke: var(--accent-2); }
+    .proto-hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .proto-hero h1 em {
+      color: var(--accent-2);
+      font-style: normal;
+    }
+    .proto-hero .lead {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 620px;
+      margin-bottom: 36px;
+    }
+    .proto-hero .lead strong { color: var(--text); }
+    .guarantee-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(37,211,102,0.07);
+      border: 1px solid rgba(37,211,102,0.2);
+      border-radius: var(--radius);
+      padding: 16px 24px;
+    }
+    .guarantee-badge svg { width: 28px; height: 28px; stroke: var(--green); flex-shrink: 0; }
+    .guarantee-badge-text { font-size: 14px; font-weight: 600; color: var(--text); }
+    .guarantee-badge-text span { display: block; font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── SECTION ── */
+    .proto-section {
+      padding: 56px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .proto-section:last-of-type { border-bottom: none; }
+
+    .section-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .proto-section h2 {
+      font-size: clamp(20px, 2.5vw, 27px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .proto-section > p,
+    .proto-section .body-text {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+    .proto-section > p strong,
+    .proto-section .body-text strong { color: var(--text); font-weight: 600; }
+    .proto-section > p:last-child { margin-bottom: 0; }
+
+    /* ── APPLIES TO ── */
+    .applies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .applies-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .applies-card.eligible { border-color: rgba(37,211,102,0.25); background: rgba(37,211,102,0.04); }
+    .applies-card.ineligible { border-color: rgba(255,255,255,0.05); opacity: .6; }
+    .applies-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .applies-label.yes { color: var(--green); }
+    .applies-label.no { color: var(--text-muted); }
+    .applies-plan { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .applies-why { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+    /* ── CHECKLIST ── */
+    .checklist { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
+    .check-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .check-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 22px 24px;
+    }
+    .check-num {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(124,58,237,0.12);
+      border: 1px solid rgba(124,58,237,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent-2);
+      margin-top: 2px;
+    }
+    .check-content { flex: 1; }
+    .check-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .check-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+    .check-desc strong { color: var(--text); font-weight: 600; }
+    .check-proof {
+      background: rgba(124,58,237,0.06);
+      border-top: 1px solid rgba(124,58,237,0.12);
+      padding: 14px 24px 14px 72px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .check-proof svg { width: 13px; height: 13px; stroke: var(--accent); flex-shrink: 0; }
+    .check-proof strong { color: var(--accent-2); font-weight: 600; }
+
+    /* ── PROCESS STEPS ── */
+    .process-steps { margin-top: 28px; display: flex; flex-direction: column; gap: 0; }
+    .process-step {
+      display: flex;
+      gap: 20px;
+      padding: 0 0 32px 0;
+      position: relative;
+    }
+    .process-step:last-child { padding-bottom: 0; }
+    .process-step::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+    }
+    .process-step:last-child::before { display: none; }
+    .step-dot {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-card-2);
+      border: 1px solid rgba(124,58,237,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--accent-2);
+      position: relative;
+      z-index: 1;
+    }
+    .step-content { padding-top: 8px; flex: 1; }
+    .step-content h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .step-content p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+    .step-content p strong { color: var(--text); font-weight: 600; }
+    .step-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: rgba(37,211,102,0.08);
+      border-radius: 100px;
+      padding: 3px 10px;
+      margin-top: 8px;
+    }
+
+    /* ── ALERT BOX ── */
+    .alert-box {
+      background: rgba(124,58,237,0.07);
+      border: 1px solid rgba(124,58,237,0.22);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-top: 28px;
+    }
+    .alert-box.warning {
+      background: rgba(251,191,36,0.05);
+      border-color: rgba(251,191,36,0.2);
+    }
+    .alert-box.danger {
+      background: rgba(239,68,68,0.05);
+      border-color: rgba(239,68,68,0.18);
+    }
+    .alert-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .alert-box.warning .alert-title { color: #FBBF24; }
+    .alert-box.danger .alert-title { color: #F87171; }
+    .alert-title svg { width: 15px; height: 15px; }
+    .alert-box p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+    .alert-box p:last-child { margin-bottom: 0; }
+    .alert-box p strong { color: var(--text); font-weight: 600; }
+
+    /* ── IP CLAUSE ── */
+    .ip-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-top: 24px;
+    }
+    .ip-box ol {
+      list-style: none;
+      counter-reset: ip-counter;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .ip-box ol li {
+      counter-increment: ip-counter;
+      display: flex;
+      gap: 14px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+    .ip-box ol li::before {
+      content: counter(ip-counter);
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(124,58,237,0.12);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--accent-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .ip-box ol li strong { color: var(--text); font-weight: 600; }
+
+    /* ── FAQ ── */
+    .faq-list { margin-top: 24px; display: flex; flex-direction: column; gap: 2px; }
+    .faq-entry {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .faq-entry summary {
+      padding: 18px 22px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      user-select: none;
+    }
+    .faq-entry summary::-webkit-details-marker { display: none; }
+    .faq-entry summary::after {
+      content: '+';
+      font-size: 20px;
+      font-weight: 300;
+      color: var(--accent-2);
+      flex-shrink: 0;
+      line-height: 1;
+      transition: transform .25s;
+    }
+    .faq-entry[open] summary::after { transform: rotate(45deg); }
+    .faq-entry .faq-body {
+      padding: 0 22px 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .faq-entry .faq-body strong { color: var(--text); font-weight: 600; }
+
+    /* ── FINAL CTA ── */
+    .proto-cta {
+      padding: 64px 0;
+      text-align: center;
+    }
+    .proto-cta h2 {
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .proto-cta p {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      padding: 16px 32px;
+      border-radius: 12px;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.35); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 14px;
+      text-decoration: none;
+      margin-top: 16px;
+      transition: color .15s;
+    }
+    .btn-secondary:hover { color: var(--text); }
+
+    /* ── FOOTER ── */
+    .proto-footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .proto-hero { padding: 56px 0 40px; }
+      .check-proof { padding-left: 24px; }
+      .applies-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="container">
+    <div class="topbar-logo">FIREMODE <span>SIGNAL</span></div>
+    <a href="/" class="topbar-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Voltar aos planos
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="proto-hero">
+  <div class="container">
+    <div class="proto-tag">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      Garantia de Performance
+    </div>
+    <h1>30 Dias.<br><em>Sem Pegadinha.</em></h1>
+    <p class="lead">
+      Se você seguir 100% do que recomendamos — gravar os vídeos, publicar os posts, respeitar o protocolo de qualidade — e em 30 dias não tiver nenhuma melhora mensurável de alcance, <strong>devolvemos 100% do seu dinheiro.</strong>
+      <br><br>
+      Esta página explica tudo. Cada critério. Cada etapa. Exatamente o que você precisa fazer e como solicitar o reembolso se for o caso. Sem surpresa, sem letra miúda escondida.
+    </p>
+    <div class="guarantee-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      <div class="guarantee-badge-text">
+        Garantia de Performance de 30 Dias
+        <span>Válida para o plano Signal Pro · Sujeita à comprovação de execução completa</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SECTION 1: PARA QUEM SE APLICA -->
+<section class="proto-section">
+  <div class="container">
+    <div class="section-num">01 — Elegibilidade</div>
+    <h2>Para quem essa garantia se aplica</h2>
+    <p>A Garantia de Performance é válida exclusivamente para o plano <strong>Signal Pro</strong>. Os outros planos possuem suas próprias garantias de entrega — descritas no rodapé de cada card na página de planos.</p>
+
+    <div class="applies-grid">
+      <div class="applies-card eligible">
+        <div class="applies-label yes">✔ Elegível</div>
+        <div class="applies-plan">Signal Pro</div>
+        <div class="applies-why">Plano de inteligência semanal com roteiros, edições e benchmark competitivo. Ciclo completo de execução que permite medir resultado em 30 dias.</div>
+      </div>
+      <div class="applies-card ineligible">
+        <div class="applies-label no">— Não se aplica</div>
+        <div class="applies-plan">Signal Diagnostic</div>
+        <div class="applies-why">Plano de diagnóstico único. Garantia de entrega em 3 dias já está inclusa — se não entregarmos no prazo, reembolsamos.</div>
+      </div>
+      <div class="applies-card ineligible">
+        <div class="applies-label no">— Não se aplica</div>
+        <div class="applies-plan">Signal Elite</div>
+        <div class="applies-why">Plano de recorrência mensal com inteligência contínua. Quem está no Elite já passou pelo primeiro ciclo e validou o serviço.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: O QUE É RESULTADO MENSURÁVEL -->
+<section class="proto-section">
+  <div class="container">
+    <div class="section-num">02 — Definição</div>
+    <h2>O que conta como "resultado mensurável"</h2>
+    <p>Para evitar ambiguidade, definimos resultado mensurável como <strong>qualquer uma das seguintes melhorias</strong> nos 30 dias de execução do protocolo, comparado aos 30 dias anteriores à contratação:</p>
+
+    <div class="checklist" style="margin-top: 20px;">
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">A</div>
+          <div class="check-content">
+            <div class="check-title">Crescimento de alcance orgânico</div>
+            <div class="check-desc">Aumento de no mínimo <strong>10% no alcance médio por publicação</strong> (Reels ou posts de feed), comparando as primeiras 48h após publicação de cada peça do protocolo vs. sua média anterior.</div>
+          </div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">B</div>
+          <div class="check-content">
+            <div class="check-title">Crescimento de seguidores</div>
+            <div class="check-desc">Ganho líquido de seguidores durante os 30 dias de execução — qualquer número positivo (mesmo que pequeno) já configura resultado mensurável, desde que os posts do protocolo tenham sido publicados.</div>
+          </div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">C</div>
+          <div class="check-content">
+            <div class="check-title">Engajamento ou DMs de interesse</div>
+            <div class="check-desc">Recebimento de pelo menos <strong>1 mensagem direta de interesse comercial</strong> (cliente perguntando sobre serviço ou produto) atribuível ao conteúdo publicado no período.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-box" style="margin-top: 24px;">
+      <div class="alert-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Importante
+      </div>
+      <p>Se <strong>qualquer um</strong> dos três critérios acima for atingido, a garantia não se aplica. O resultado não precisa ser extraordinário — ele precisa existir. Nossa estratégia, quando executada corretamente, gera resultado desde a primeira semana de conteúdo publicado.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: O PROTOCOLO DE EXECUÇÃO -->
+<section class="proto-section">
+  <div class="container">
+    <div class="section-num">03 — Protocolo de Execução</div>
+    <h2>O que você precisa fazer — critério por critério</h2>
+    <p>Para que a garantia seja válida, <strong>todos os itens abaixo precisam ser cumpridos integralmente</strong>. Cada item tem um critério objetivo de verificação. Não há julgamento subjetivo — ou está dentro do padrão ou não está.</p>
+
+    <div class="checklist">
+
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">1</div>
+          <div class="check-content">
+            <div class="check-title">Usar 100% dos roteiros enviados</div>
+            <div class="check-desc">Todos os roteiros de Reels e copies de posts entregues pelo Signal naquela semana precisam ser gravados e publicados. <strong>Não é permitido escolher apenas os que mais gostou</strong> — o sistema de níveis de consciência depende da sequência completa para funcionar. Adaptações pequenas de linguagem são permitidas, desde que a estrutura, o gancho e o CTA permaneçam.</div>
+          </div>
+        </div>
+        <div class="check-proof">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          <span><strong>Como comprovar:</strong> links de todos os posts e Reels publicados no período, direto do Instagram.</span>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">2</div>
+          <div class="check-content">
+            <div class="check-title">Gravação em Full HD (mínimo 1080p)</div>
+            <div class="check-desc">Todos os vídeos precisam ser gravados em resolução <strong>mínima de 1080p</strong> (Full HD). A câmera traseira do celular em qualquer iPhone 12 ou posterior, ou qualquer Android lançado a partir de 2021, já atinge esse padrão. A resolução impacta diretamente a distribuição pelo algoritmo do Instagram — vídeos em baixa qualidade recebem menos alcance orgânico por padrão.</div>
+          </div>
+        </div>
+        <div class="check-proof">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          <span><strong>Como comprovar:</strong> o arquivo de vídeo original (antes da edição) deve ser enviado para verificação de metadados de resolução em pelo menos 2 vídeos do período.</span>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">3</div>
+          <div class="check-content">
+            <div class="check-title">Iluminação adequada conforme orientação</div>
+            <div class="check-desc">Luz natural (janela à frente ou lateral) ou ring light posicionada à altura dos olhos. <strong>Sem luz de fundo forte (backlight)</strong> que deixe o rosto escuro. Sem iluminação de baixo (efeito caveira). Sem sombras duras sobre o rosto. As instruções de iluminação são enviadas junto com o primeiro ciclo de roteiros — com exemplos visuais do que é aprovado e reprovado.</div>
+          </div>
+        </div>
+        <div class="check-proof">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          <span><strong>Como comprovar:</strong> vídeos publicados verificados visualmente. Critério objetivo: rosto visível, sem sombras dominantes, sem backlight.</span>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">4</div>
+          <div class="check-content">
+            <div class="check-title">Edição com legenda dinâmica e cortes de retenção</div>
+            <div class="check-desc">Os vídeos precisam ser editados <strong>seguindo as instruções de edição enviadas pelo Signal</strong>: legendas dinâmicas (palavra por palavra ou frase por frase em destaque), cortes de respiro removidos, ritmo de fala acelerado para remover silêncios desnecessários, e capa (thumbnail) personalizada com título de alto impacto. As instruções de edição incluem o passo a passo para CapCut (gratuito) ou o cliente pode nos enviar o bruto para editarmos — as edições inclusas no plano Pro servem exatamente para isso.</div>
+          </div>
+        </div>
+        <div class="check-proof">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          <span><strong>Como comprovar:</strong> links dos Reels publicados no Instagram — verificamos legendas dinâmicas, cortes e capa diretamente no vídeo publicado.</span>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">5</div>
+          <div class="check-content">
+            <div class="check-title">Publicar nos dias e horários recomendados</div>
+            <div class="check-desc">O Signal entrega o calendário editorial com os <strong>dias e janelas de horário ideais</strong> para o seu nicho, baseados nos padrões de atividade da audiência identificados na análise de concorrentes. Publicar fora das janelas recomendadas reduz significativamente o alcance inicial — que é o fator mais crítico para a distribuição algorítmica. A tolerância é de <strong>até 2 horas</strong> além da janela recomendada.</div>
+          </div>
+        </div>
+        <div class="check-proof">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          <span><strong>Como comprovar:</strong> prints dos posts publicados com data e hora visíveis (disponível na visualização de insights do próprio Instagram).</span>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">6</div>
+          <div class="check-content">
+            <div class="check-title">Usar as copies de caption exatamente como enviadas</div>
+            <div class="check-desc">Os textos das legendas precisam seguir a estrutura enviada: gancho na primeira linha (o que aparece antes do "ver mais"), corpo do texto com a argumentação, e CTA final. <strong>Adaptações de linguagem pessoal são permitidas</strong> (trocar palavras para soar mais como você), desde que o gancho, a estrutura e o CTA sejam mantidos. Remover o CTA ou mudar o gancho invalida o critério.</div>
+          </div>
+        </div>
+        <div class="check-proof">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          <span><strong>Como comprovar:</strong> textos das legendas dos posts publicados comparados com os enviados pelo Signal via WhatsApp.</span>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <div class="check-header">
+          <div class="check-num">7</div>
+          <div class="check-content">
+            <div class="check-title">Publicar 100% das peças do período — sem exceção</div>
+            <div class="check-desc">Todas as peças entregues na semana devem ser publicadas dentro do período de 30 dias. <strong>Não é permitido acumular conteúdo para publicar depois</strong> — o sistema de frequência é parte da estratégia. Se o Signal entregou 14 peças em 2 semanas, todas as 14 precisam ter sido publicadas até o dia 30. Uma peça não publicada já invalida o critério.</div>
+          </div>
+        </div>
+        <div class="check-proof">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          <span><strong>Como comprovar:</strong> lista completa de links dos posts publicados + contagem total conferida contra as peças entregues pelo Signal.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: COMO SOLICITAR -->
+<section class="proto-section">
+  <div class="container">
+    <div class="section-num">04 — Processo</div>
+    <h2>Como solicitar a análise de conformidade</h2>
+    <p>Se após 30 dias de execução integral do protocolo você não identificar nenhum resultado mensurável (conforme a Seção 02), veja como iniciar o processo:</p>
+
+    <div class="process-steps">
+      <div class="process-step">
+        <div class="step-dot">1</div>
+        <div class="step-content">
+          <h4>Reúna todas as comprovações</h4>
+          <p>Antes de enviar, organize o material de comprovação para cada um dos 7 critérios: links de posts, prints com data/hora, arquivo de vídeo original de pelo menos 2 Reels. Tudo em uma única mensagem ou pasta compartilhada.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-dot">2</div>
+        <div class="step-content">
+          <h4>Envie via WhatsApp até o dia 30</h4>
+          <p>A solicitação deve ser enviada <strong>até o 30º dia corrido após a primeira entrega de conteúdo</strong> pelo Signal. Solicitações feitas após esse prazo não serão elegíveis. Envie tudo para o mesmo número do WhatsApp que você usa para receber o conteúdo.</p>
+          <div class="step-tag">⏱ Prazo máximo: dia 30 após primeira entrega</div>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-dot">3</div>
+        <div class="step-content">
+          <h4>Análise de conformidade — 5 dias úteis</h4>
+          <p>Nossa equipe vai verificar cada critério com base nos links e materiais enviados. <strong>Não há subjetividade</strong>: cada item é aprovado ou reprovado com base nos critérios objetivos desta página. Você recebe o resultado da análise em até 5 dias úteis.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-dot">4</div>
+        <div class="step-content">
+          <h4>Reembolso ou relatório de inconformidade</h4>
+          <p>Se todos os 7 critérios foram cumpridos e nenhum resultado mensurável foi obtido: <strong>reembolso de 100% em até 5 dias úteis</strong> após a confirmação, via o mesmo método de pagamento original.<br><br>Se algum critério não foi cumprido, você recebe um relatório detalhando qual critério falhou e como corrigi-lo — sem custo adicional.</p>
+          <div class="step-tag">✔ Reembolso processado em até 5 dias úteis</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-box warning" style="margin-top: 32px;">
+      <div class="alert-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Atenção
+      </div>
+      <p>A análise de conformidade é feita com base exclusivamente nos materiais enviados. <strong>Não aceitamos comprovações parciais</strong> enviadas após a solicitação inicial. Organize tudo antes de enviar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5: IP CLAUSE -->
+<section class="proto-section">
+  <div class="container">
+    <div class="section-num">05 — Propriedade Intelectual</div>
+    <h2>Uso dos materiais em caso de reembolso</h2>
+    <p>Em caso de reembolso aprovado, os seguintes termos se aplicam imediatamente:</p>
+
+    <div class="ip-box">
+      <ol>
+        <li><strong>Descarte dos materiais estratégicos:</strong> roteiros, análises de concorrentes, benchmarks, calendários editoriais e copies entregues pelo Signal devem ser descartados e não podem ser utilizados comercialmente a partir da data do reembolso.</li>
+        <li><strong>Remoção dos conteúdos publicados:</strong> os vídeos e posts publicados durante o período de execução e que utilizaram os roteiros do Signal devem ser removidos do perfil em até 7 dias corridos após o reembolso.</li>
+        <li><strong>Vedação de uso futuro:</strong> os materiais entregues — incluindo ganchos, estruturas de roteiro, análises de mercado e copies — são propriedade intelectual do Firemode Signal e não podem ser adaptados, repassados ou vendidos para terceiros.</li>
+        <li><strong>Exceção:</strong> os vídeos já publicados onde o resultado foi utilizado como base para a solicitação de reembolso (comprovação de publicação) podem ser mantidos para fins de registro, desde que não sejam promovidos via tráfego pago após o reembolso.</li>
+      </ol>
+    </div>
+
+    <div class="alert-box danger" style="margin-top: 20px;">
+      <div class="alert-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        Uso indevido após reembolso
+      </div>
+      <p>O uso comercial dos materiais do Signal após um reembolso aprovado constitui <strong>uso não autorizado de propriedade intelectual</strong>, sujeito às medidas previstas na Lei 9.610/98 (Lei de Direitos Autorais). Em caso de identificação de uso indevido, o reembolso pode ser revertido.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 6: FAQ -->
+<section class="proto-section">
+  <div class="container">
+    <div class="section-num">06 — Perguntas Frequentes</div>
+    <h2>Dúvidas sobre a garantia</h2>
+
+    <div class="faq-list">
+      <details class="faq-entry">
+        <summary>E se eu postar todos os conteúdos mas não gostar do resultado estético dos vídeos?</summary>
+        <div class="faq-body">
+          A garantia é de <strong>resultado mensurável de alcance</strong>, não de resultado estético. Se você postou tudo corretamente e teve crescimento de alcance, a garantia não se aplica — independentemente de você gostar ou não do visual dos vídeos. A satisfação estética não é um critério de reembolso.
+        </div>
+      </details>
+      <details class="faq-entry">
+        <summary>E se eu não conseguir publicar tudo por doença, viagem ou imprevisto?</summary>
+        <div class="faq-body">
+          Imprevistos acontecem. Se você tiver um impedimento documentado (médico, emergência familiar) que tenha comprometido a publicação de parte do conteúdo, entre em contato via WhatsApp <strong>imediatamente</strong> — antes do dia 30. Avaliamos caso a caso. Solicitações enviadas no dia 30 alegando imprevistos anteriores não serão consideradas.
+        </div>
+      </details>
+      <details class="faq-entry">
+        <summary>Posso pedir reembolso se cresci apenas 5% de alcance?</summary>
+        <div class="faq-body">
+          Não. Qualquer crescimento mensurável — mesmo que pequeno — configura resultado e invalida a solicitação de reembolso. O critério é crescimento em qualquer magnitude, não crescimento a partir de um percentual mínimo. Nosso histórico mostra crescimentos médios muito acima disso quando o protocolo é seguido integralmente.
+        </div>
+      </details>
+      <details class="faq-entry">
+        <summary>O que acontece com as edições de vídeo que o Signal fez para mim se eu pedir reembolso?</summary>
+        <div class="faq-body">
+          As edições realizadas pelo Signal durante o período são parte dos materiais sujeitos aos termos de propriedade intelectual (Seção 05). Em caso de reembolso aprovado, os vídeos editados pelo Signal devem ser removidos do perfil e não podem ser reutilizados ou redistribuídos.
+        </div>
+      </details>
+      <details class="faq-entry">
+        <summary>Gravar com câmera traseira ou frontal faz diferença para a elegibilidade?</summary>
+        <div class="faq-body">
+          Sim. <strong>Câmera traseira é obrigatória</strong> para atingir o padrão de qualidade de imagem que o algoritmo do Instagram favorece. A câmera frontal da maioria dos smartphones ainda não atinge a nitidez necessária para o padrão de conteúdo profissional exigido pelo protocolo — e isso impacta diretamente o alcance orgânico. Excessões podem ser avaliadas pontualmente se o aparelho for um modelo de câmera frontal de alta resolução comprovada.
+        </div>
+      </details>
+      <details class="faq-entry">
+        <summary>Posso contratar um editor externo para fazer a edição?</summary>
+        <div class="faq-body">
+          Sim, desde que a edição final siga integralmente as instruções de edição enviadas pelo Signal (legendas dinâmicas, cortes de respiro, capa). O critério é o resultado da edição, não quem editou. As edições de vídeo inclusas no plano Pro existem justamente para facilitar esse processo — mas se preferir um editor externo com orientação nossa, está dentro das regras.
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="proto-cta">
+  <div class="container">
+    <h2>Pronto para começar?</h2>
+    <p>Confiamos tanto no nosso sistema que colocamos o dinheiro em jogo. Siga o protocolo e os resultados vêm — ou devolvemos tudo.</p>
+    <a href="/" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Ver o plano Signal Pro
+    </a>
+    <br>
+    <a href="/" class="btn-secondary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Voltar à página principal
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="proto-footer">
+  <div class="container">
+    © 2025 Firemode Signal · <a href="/" style="color: inherit; text-decoration: none;">firemode.com.br</a> · Este protocolo é parte integrante dos Termos de Serviço do Signal Pro.
+  </div>
+</footer>
+
+</body>
+</html>
