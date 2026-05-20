@@ -691,6 +691,11 @@
 
     /* ── DIVIDER ── */
     .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+    .contrast-callout { padding: 72px 24px; text-align: center; position: relative; }
+    .contrast-callout::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.09) 0%, transparent 68%); pointer-events: none; }
+    .contrast-callout-text { font-size: clamp(22px, 4vw, 46px); font-weight: 800; line-height: 1.22; letter-spacing: -0.025em; color: var(--text); max-width: 820px; margin: 0 auto; }
+    .contrast-callout-text strong { color: var(--accent-2); }
+    body.light .contrast-callout-text strong { color: var(--accent); }
 
     /* ── PLAN GUARANTEE MINI ── */
     .plan-guarantee {
@@ -1206,10 +1211,14 @@
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         </div>
         <h3>Produção no achismo</h3>
-        <p>Horas perdidas tentando adivinhar o que vai funcionar. <strong>Enquanto você busca inspiração</strong>, seus concorrentes já estão publicando o que o mercado validou.</p>
+        <p>Enquanto você tenta ter ideias, <strong>seu concorrente está ficando com os seus clientes.</strong> Cada semana sem dado é uma semana cedida.</p>
       </div>
     </div>
   </div>
+</section>
+
+<section class="contrast-callout">
+  <p class="contrast-callout-text" id="contrast-callout-text">Enquanto você tenta ter ideias,<br><strong>seu concorrente está ficando com os seus clientes.</strong></p>
 </section>
 
 <div class="divider"></div>
@@ -1705,7 +1714,7 @@
       Chega de postar no<br><span class="highlight">escuro.</span>
     </h2>
     <p class="section-sub">
-      Enquanto você lê isso, seus concorrentes estão interpretando sinais que você ainda ignora. O Signal traduz esses sinais em roteiros prontos e estratégia real — hoje, via <strong>WhatsApp</strong>.
+      Enquanto você lê isso, <strong>seu concorrente está ficando com os seus clientes.</strong> O Signal entrega o mapa do que funciona no seu mercado — você decide se vai agir.
     </p>
 
     <button onclick="openLeadModal()" class="btn btn-wpp" style="margin-bottom:16px; border:none; cursor:pointer;">
@@ -1825,6 +1834,7 @@
       'hero.sub': 'Hoje você tem métricas, mas ninguém as interpreta por você. A cada 7 dias, o Firemode Signal entrega um relatório com o que está funcionando no seu mercado, o que seus concorrentes fazem de diferente, um plano de posts pronto e alertas quando um viral relevante aparece. Você lê, grava, posta. <strong>Nós fazemos o resto.</strong>',
       'hero.cta': 'QUERO MEU SIGNAL AGORA',
       'hero.video': 'Insira aqui o vídeo de apresentação do Firemode Signal',
+      'callout.text': 'Enquanto você tenta ter ideias,<br><strong>seu concorrente está ficando com os seus clientes.</strong>',
       'problem.tag': 'O Problema',
       'problem.title': 'O mercado muda toda semana.<br>Você ainda está postando com os <span class="highlight">dados da semana passada.</span>',
       'problem.sub': 'Postar sem inteligência contínua é garantia de atraso. Enquanto você decide o que postar, seus concorrentes já sabem o que o mercado validou essa semana. O problema não é falta de esforço — é falta de dado atual.',
@@ -1832,7 +1842,7 @@
         { h3: 'Você grava. Eles vendem.', p: 'Você postou 3 Reels esse mês. Nenhum passou de 500 views. Seu concorrente usou a mesma pauta e viralizou. A diferença não é talento — <strong>é saber ler o que o mercado já está sinalizando.</strong>' },
         { h3: 'Curtidas não pagam contas', p: 'Engajamento bonito no dashboard, caixa vazio no banco. Seus posts atraem seguidores, mas <strong>não convertem em DMs, propostas ou vendas.</strong>' },
         { h3: 'Invisível para quem compra', p: 'Quem visita seu perfil não entende o que você vende em 3 segundos — e vai embora. <strong>Sua bio está repelindo clientes</strong> sem que você perceba.' },
-        { h3: 'Produção no achismo', p: 'Horas perdidas tentando adivinhar o que vai funcionar. <strong>Enquanto você busca inspiração</strong>, seus concorrentes já estão publicando o que o mercado validou.' }
+        { h3: 'Produção no achismo', p: 'Enquanto você tenta ter ideias, <strong>seu concorrente está ficando com os seus clientes.</strong> Cada semana sem dado é uma semana cedida.' }
       ],
       'solution.tag': 'A Solução',
       'solution.title': 'O Signal transforma a <span class="highlight">espionagem industrial</span><br>em munição nova, toda semana.',
@@ -1907,7 +1917,7 @@
       ],
       'cta.tag': 'Último passo',
       'cta.title': 'Chega de postar no<br><span class="highlight">escuro.</span>',
-      'cta.sub': 'Enquanto você lê isso, seus concorrentes estão interpretando sinais que você ainda ignora. O Signal traduz esses sinais em roteiros prontos e estratégia real — hoje, via <strong>WhatsApp</strong>.',
+      'cta.sub': 'Enquanto você lê isso, <strong>seu concorrente está ficando com os seus clientes.</strong> O Signal entrega o mapa do que funciona no seu mercado — você decide se vai agir.',
       'cta.btn': 'FALAR COM O SIGNAL AGORA',
       'cta.note': 'Resposta em até 2h em dias úteis · Sem compromisso inicial',
       'trust.tag': 'Segurança & Transparência',
@@ -1926,6 +1936,7 @@
       'hero.sub': 'You have metrics, but no one interprets them for you. Every 7 days, Firemode Signal delivers a report on what\'s working in your market, what your competitors do differently, ready-to-use scripts and real-time competitor alerts. You read, apply, publish. <strong>We handle the intelligence.</strong>',
       'hero.cta': 'GET MY SIGNAL NOW',
       'hero.video': 'Insert your Firemode Signal presentation video here',
+      'callout.text': 'While you try to think of ideas,<br><strong>your competitor is taking your clients.</strong>',
       'problem.tag': 'The Problem',
       'problem.title': 'Your Instagram may be working<br><span class="highlight">against you</span> — and the damage is silent.',
       'problem.sub': 'Posting without diagnosis is like driving in the dark. You record Reels, follow trends, and spend hours editing — but results don\'t show up. The problem isn\'t lack of effort, nor lack of data. Platforms deliver plenty of numbers. What\'s missing is knowing what they mean and what your competitors are doing that you can\'t see.',
@@ -1933,7 +1944,7 @@
         { h3: 'You post. They sell.', p: 'You posted 3 Reels this month. None broke 500 views. Your competitor used the same topic and went viral. The difference isn\'t talent — <strong>it\'s knowing how to read what the market is already signaling.</strong>' },
         { h3: 'Likes don\'t pay bills', p: 'Great engagement on the dashboard, empty bank account. Your posts attract followers, but <strong>don\'t convert into DMs, proposals, or sales.</strong>' },
         { h3: 'Invisible to buyers', p: 'Visitors to your profile don\'t understand what you sell within 3 seconds — and they leave. <strong>Your bio is repelling clients</strong> without you realizing it.' },
-        { h3: 'Guessing what to post', p: 'Hours wasted trying to figure out what will work. <strong>While you search for inspiration</strong>, your competitors are already publishing what the market has validated.' }
+        { h3: 'Guessing what to post', p: 'While you try to think of ideas, <strong>your competitor is taking your clients.</strong> Every week without data is a week given away.' }
       ],
       'solution.tag': 'The Solution',
       'solution.title': 'Signal turns <span class="highlight">competitive intelligence</span><br>into fresh ammunition, every week.',
@@ -2008,7 +2019,7 @@
       ],
       'cta.tag': 'Last step',
       'cta.title': 'Stop posting in the<br><span class="highlight">dark.</span>',
-      'cta.sub': 'While you read this, your competitors are interpreting signals you\'re still missing. Signal translates those signals into ready-to-use scripts and real strategy — today, via <strong>WhatsApp</strong>.',
+      'cta.sub': 'While you read this, <strong>your competitor is taking your clients.</strong> Signal delivers the map of what works in your market — you decide whether to act.',
       'cta.btn': 'TALK TO SIGNAL NOW',
       'cta.note': 'Response within 2h on business days · No initial commitment',
       'trust.tag': 'Safety & Transparency',
@@ -2039,6 +2050,9 @@
     const hcta = $('.hero-cta-group .btn-primary');
     if (hcta) { const svg = hcta.querySelector('svg'); hcta.innerHTML = (svg ? svg.outerHTML + ' ' : '') + t['hero.cta']; }
     const hvp = $('.hero-video-placeholder p'); if (hvp) hvp.textContent = t['hero.video'];
+
+    // Contrast callout
+    const ccText = document.getElementById('contrast-callout-text'); if (ccText && t['callout.text']) ccText.innerHTML = t['callout.text'];
 
     // Problem
     const ptag = $('#problem .tag'); if (ptag) ptag.textContent = t['problem.tag'];
