@@ -1060,8 +1060,8 @@
     body.light .form-group input { background: #f5f4ef; border-color: rgba(0,0,0,0.12); color: #0D0D18; }
     body.light .form-group input:focus { border-color: var(--accent); }
 
-    /* ── VIDEO: oculto até ter o vídeo — remover linha abaixo para reexibir ── */
-    .hero-video-wrap { display: none !important; }
+    /* ── REELS MOCKUP: hero visual ── */
+    /* (linha de display:none removida — agora exibe o social mockup) */
 
     /* ── MODAL CLOSING STATE ── */
     .modal-overlay.closing .modal-box {
@@ -1116,6 +1116,155 @@
       .steps { gap: 32px; }
       nav .btn-primary { display: none; }
     }
+
+    /* ═══════════════════════════════════════════════════
+       SOCIAL MOCKUP ANIMATIONS
+    ═══════════════════════════════════════════════════ */
+    @keyframes floatHeart {
+      0%   { opacity:1; transform:translate(0,0) scale(.7) rotate(-8deg); }
+      20%  { opacity:1; transform:translate(-7px,-38px) scale(1.18) rotate(7deg); }
+      65%  { opacity:.7; transform:translate(5px,-95px) scale(.88) rotate(-5deg); }
+      100% { opacity:0; transform:translate(-4px,-148px) scale(.55) rotate(12deg); }
+    }
+    @keyframes heartPulse {
+      0%,100% { transform:scale(1); filter:none; }
+      35%     { transform:scale(1.55); filter:drop-shadow(0 0 10px #FF2D55); }
+      60%     { transform:scale(.82); }
+    }
+    @keyframes reelProgress { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+    @keyframes numPop {
+      0%   { transform:scale(1) translateY(0); color:#fff; }
+      40%  { transform:scale(1.4) translateY(-3px); color:#FF2D55; }
+      100% { transform:scale(1) translateY(0); color:#fff; }
+    }
+    @keyframes viralPulse {
+      0%,100% { box-shadow:0 0 0 0 rgba(255,45,85,.6); }
+      50%     { box-shadow:0 0 0 7px rgba(255,45,85,0); }
+    }
+    @keyframes ttkGlow {
+      0%,100% { box-shadow:0 0 0 1px #2a2a2a,0 40px 80px rgba(0,0,0,.65),0 0 30px rgba(254,44,85,.12); }
+      50%     { box-shadow:0 0 0 1px #2a2a2a,0 40px 80px rgba(0,0,0,.65),0 0 55px rgba(254,44,85,.32); }
+    }
+    @keyframes notifIn {
+      0%   { opacity:0; transform:translateY(9px); }
+      12%  { opacity:1; transform:translateY(0); }
+      80%  { opacity:1; transform:translateY(0); }
+      100% { opacity:0; transform:translateY(-6px); }
+    }
+    @keyframes statTick {
+      0%   { transform:translateY(0); opacity:1; }
+      40%  { transform:translateY(-8px); opacity:0; }
+      41%  { transform:translateY(8px); opacity:0; }
+      100% { transform:translateY(0); opacity:1; }
+    }
+
+    /* ── REEL SCENE (preenche hero-video-wrap) ─────────── */
+    .reel-scene { position:absolute; inset:0; z-index:1; }
+    .reel-bg {
+      position:absolute; inset:0;
+      background:linear-gradient(168deg,#1a0533 0%,#2d1b69 42%,#0f0f1a 72%,#1a0f2e 100%);
+    }
+    .reel-bg::after {
+      content:''; position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse 62% 48% at 28% 42%,rgba(124,58,237,.32) 0%,transparent 55%),
+        radial-gradient(ellipse 44% 34% at 72% 60%,rgba(168,85,247,.22) 0%,transparent 50%),
+        radial-gradient(ellipse 28% 22% at 50% 18%,rgba(255,45,85,.09) 0%,transparent 50%);
+    }
+    .reel-figure {
+      position:absolute; bottom:22%; left:50%; transform:translateX(-50%);
+      width:88px; height:165px; border-radius:44px 44px 34px 34px;
+      background:linear-gradient(180deg,rgba(168,85,247,.38) 0%,rgba(124,58,237,.12) 100%);
+      filter:blur(4px); z-index:1;
+    }
+    .reel-progress {
+      position:absolute; top:10px; left:10px; right:10px; z-index:10;
+      height:2px; background:rgba(255,255,255,.22); border-radius:2px; overflow:hidden;
+    }
+    .reel-progress-fill {
+      height:100%; background:#fff; border-radius:2px; transform-origin:left;
+      animation:reelProgress 9s linear infinite;
+    }
+    .reel-viral {
+      position:absolute; top:22px; right:12px; z-index:10;
+      background:#FF2D55; color:#fff; font-size:9px; font-weight:900;
+      letter-spacing:.1em; padding:4px 10px; border-radius:100px;
+      animation:viralPulse 2.4s ease-in-out infinite;
+    }
+    .reel-sidebar {
+      position:absolute; right:10px; bottom:105px; z-index:10;
+      display:flex; flex-direction:column; align-items:center; gap:20px;
+    }
+    .reel-action { display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .reel-icon-btn {
+      width:42px; height:42px; border-radius:50%;
+      background:rgba(255,255,255,.14); backdrop-filter:blur(8px);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .reel-heart-anim { animation:heartPulse 2.1s ease-in-out infinite; display:flex; align-items:center; justify-content:center; }
+    .reel-lbl { font-size:11px; font-weight:700; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.7); white-space:nowrap; }
+    .reel-lbl.pop { animation:numPop .38s cubic-bezier(.16,1,.3,1); }
+    .reel-bottom {
+      position:absolute; bottom:0; left:0; right:0; z-index:10;
+      padding:72px 10px 14px;
+      background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 100%);
+    }
+    .reel-avatar-row { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+    .reel-avatar-ring {
+      width:34px; height:34px; border-radius:50%; flex-shrink:0;
+      background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF); border:2px solid #fff;
+    }
+    .reel-uname { font-size:13px; font-weight:700; color:#fff; }
+    .reel-follow { margin-left:6px; padding:2px 9px; border-radius:3px; border:1.5px solid rgba(255,255,255,.9); font-size:11px; font-weight:700; color:#fff; background:transparent; }
+    .reel-caption { font-size:11px; color:rgba(255,255,255,.92); line-height:1.4; margin-bottom:6px; }
+    .reel-song { display:flex; align-items:center; gap:5px; }
+    .reel-song-disc { width:18px; height:18px; border-radius:50%; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-size:9px; }
+    .reel-song-txt { font-size:10px; color:rgba(255,255,255,.75); }
+    .float-zone { position:absolute; right:14px; bottom:152px; z-index:20; width:50px; height:160px; pointer-events:none; }
+    .fheart { position:absolute; bottom:0; right:0; font-size:20px; opacity:0; animation:floatHeart 1.95s ease-out forwards; }
+
+    /* ── TIKTOK PHONE MOCKUP ─────────────────────────── */
+    .tiktok-wrap { display:flex; justify-content:center; margin:48px 0 12px; }
+    .tiktok-phone {
+      width:200px; background:#010101; border-radius:34px;
+      border:5px solid #1c1c1c; outline:1px solid #2a2a2a;
+      overflow:hidden; position:relative;
+      animation:ttkGlow 3s ease-in-out infinite;
+    }
+    .ttk-notch { height:24px; background:#010101; display:flex; align-items:center; justify-content:center; }
+    .ttk-notch-bar { width:68px; height:5px; background:#1a1a1a; border-radius:3px; }
+    .ttk-screen { background:#010101; color:#fff; padding:14px 12px 18px; }
+    .ttk-tabs { display:flex; justify-content:center; border-bottom:1px solid #222; margin-bottom:14px; }
+    .ttk-tab { font-size:10px; font-weight:700; color:rgba(255,255,255,.4); padding:5px 14px; border-bottom:2px solid transparent; }
+    .ttk-tab.active { color:#fff; border-bottom-color:#fff; }
+    .ttk-avatar { width:58px; height:58px; border-radius:50%; margin:0 auto 8px; border:2px solid #222; background:linear-gradient(135deg,#FE2C55 0%,#25F4EE 100%); }
+    .ttk-handle { text-align:center; font-size:12px; font-weight:800; color:#fff; margin-bottom:12px; }
+    .ttk-stats-row { display:flex; justify-content:center; gap:14px; margin-bottom:12px; }
+    .ttk-stat { text-align:center; }
+    .ttk-stat-n { display:block; font-size:13px; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; line-height:1.1; }
+    .ttk-stat-l { display:block; font-size:9px; color:rgba(255,255,255,.45); margin-top:1px; }
+    .ttk-follow-btn { display:block; width:100%; background:#FE2C55; color:#fff; font-size:12px; font-weight:800; text-align:center; padding:8px 0; border-radius:4px; margin-bottom:10px; }
+    .ttk-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; }
+    .ttk-thumb { aspect-ratio:9/14; border-radius:2px; position:relative; overflow:hidden; display:flex; align-items:flex-end; padding:3px; }
+    .ttk-thumb::before { content:''; position:absolute; inset:0; }
+    .ttk-thumb:nth-child(1)::before { background:linear-gradient(135deg,#1a0533,#3d1a6e); }
+    .ttk-thumb:nth-child(2)::before { background:linear-gradient(135deg,#0d1f3a,#1a4a5e); }
+    .ttk-thumb:nth-child(3)::before { background:linear-gradient(135deg,#1a2a0d,#2a5e1a); }
+    .ttk-thumb:nth-child(4)::before { background:linear-gradient(135deg,#3a1a0d,#5e2a1a); }
+    .ttk-thumb:nth-child(5)::before { background:linear-gradient(135deg,#0d1a3a,#1a2a5e); }
+    .ttk-thumb:nth-child(6)::before { background:linear-gradient(135deg,#2a0d3a,#4a1a5e); }
+    .ttk-thumb-views { position:relative; z-index:1; font-size:8px; font-weight:700; color:rgba(255,255,255,.85); }
+    .ttk-notif {
+      margin-top:10px; padding:6px 10px; border-radius:8px;
+      background:rgba(254,44,85,.12); border:1px solid rgba(254,44,85,.3);
+      font-size:10px; font-weight:700; color:#FE2C55; text-align:center; opacity:0;
+    }
+    .ttk-notif.show { animation:notifIn 3.8s ease forwards; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fheart,.reel-heart-anim,.reel-viral,.reel-progress-fill,.tiktok-phone,.ttk-notif
+        { animation:none !important; transition:none !important; }
+    }
   </style>
 </head>
 <body>
@@ -1158,14 +1307,63 @@
 
       </div>
 
-      <!-- COLUNA DIREITA: VÍDEO -->
+      <!-- COLUNA DIREITA: REEL MOCKUP -->
       <div class="hero-video-wrap">
-        <!-- Substitua o src abaixo pelo link do seu vídeo -->
-        <div class="hero-video-placeholder">
-          <div class="play-btn">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <div class="reel-scene">
+
+          <!-- Fundo simulando vídeo -->
+          <div class="reel-bg"></div>
+          <div class="reel-figure"></div>
+
+          <!-- Barra de progresso tipo Reel -->
+          <div class="reel-progress">
+            <div class="reel-progress-fill"></div>
           </div>
-          <p>Insira aqui o vídeo de apresentação do Firemode Signal</p>
+
+          <!-- Badge VIRAL -->
+          <div class="reel-viral">🔥 VIRAL</div>
+
+          <!-- Sidebar de engajamento -->
+          <div class="reel-sidebar">
+            <div class="reel-action">
+              <div class="reel-icon-btn">
+                <div class="reel-heart-anim">
+                  <svg viewBox="0 0 24 24" fill="#FF2D55" width="26" height="26"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </div>
+              </div>
+              <span class="reel-lbl" id="reel-like-count">47.2K</span>
+            </div>
+            <div class="reel-action">
+              <div class="reel-icon-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="24" height="24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <span class="reel-lbl">2.1K</span>
+            </div>
+            <div class="reel-action">
+              <div class="reel-icon-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+              <span class="reel-lbl">8.4K</span>
+            </div>
+          </div>
+
+          <!-- Corações flutuando -->
+          <div class="float-zone" id="float-zone"></div>
+
+          <!-- Info do criador -->
+          <div class="reel-bottom">
+            <div class="reel-avatar-row">
+              <div class="reel-avatar-ring"></div>
+              <span class="reel-uname">@mentora.carol</span>
+              <span class="reel-follow">+ Seguir</span>
+            </div>
+            <div class="reel-caption">Como fechei 5 clientes em 1 semana sem anúncio 🚀</div>
+            <div class="reel-song">
+              <div class="reel-song-disc">♪</div>
+              <span class="reel-song-txt">Som original · mentora.carol</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -1575,6 +1773,46 @@
         <div class="step-num">4</div>
         <h3>Inteligência Contínua</h3>
         <p>O Signal monitora seu nicho e avisa quando algo novo precisa da sua atenção.</p>
+      </div>
+    </div>
+
+    <!-- TIKTOK PHONE MOCKUP — resultado de quem usa o Signal -->
+    <div class="tiktok-wrap reveal-item">
+      <div class="tiktok-phone">
+        <div class="ttk-notch"><div class="ttk-notch-bar"></div></div>
+        <div class="ttk-screen">
+          <div class="ttk-tabs">
+            <div class="ttk-tab">Vídeos</div>
+            <div class="ttk-tab active">Perfil</div>
+            <div class="ttk-tab">❤️</div>
+          </div>
+          <div class="ttk-avatar"></div>
+          <div class="ttk-handle">@mentormarcos</div>
+          <div class="ttk-stats-row">
+            <div class="ttk-stat">
+              <span class="ttk-stat-n">342</span>
+              <span class="ttk-stat-l">Seguindo</span>
+            </div>
+            <div class="ttk-stat">
+              <span class="ttk-stat-n" id="ttk-followers">89.2K</span>
+              <span class="ttk-stat-l">Seguidores</span>
+            </div>
+            <div class="ttk-stat">
+              <span class="ttk-stat-n" id="ttk-likes">1.2M</span>
+              <span class="ttk-stat-l">Curtidas</span>
+            </div>
+          </div>
+          <div class="ttk-follow-btn">Seguir</div>
+          <div class="ttk-grid">
+            <div class="ttk-thumb"><span class="ttk-thumb-views">&#9654; 2.1M</span></div>
+            <div class="ttk-thumb"><span class="ttk-thumb-views">&#9654; 847K</span></div>
+            <div class="ttk-thumb"><span class="ttk-thumb-views">&#9654; 1.4M</span></div>
+            <div class="ttk-thumb"><span class="ttk-thumb-views">&#9654; 320K</span></div>
+            <div class="ttk-thumb"><span class="ttk-thumb-views">&#9654; 590K</span></div>
+            <div class="ttk-thumb"><span class="ttk-thumb-views">&#9654; 2.8M</span></div>
+          </div>
+          <div class="ttk-notif" id="ttk-notif">+1.4K curtidas · agora</div>
+        </div>
       </div>
     </div>
 
@@ -2247,6 +2485,84 @@
     document.body.style.overflow = '';
     document.getElementById('lead-form').reset();
   }
+
+  /* ── SOCIAL MOCKUP ANIMATIONS ──────────────────────── */
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    function fmt(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000)    return (n / 1000).toFixed(1) + 'K';
+      return String(n);
+    }
+
+    /* ── REEL HERO: likes + corações ───────────────── */
+    let reelLikes = 47200;
+    const likeEl   = document.getElementById('reel-like-count');
+    const floatZone = document.getElementById('float-zone');
+    const hearts    = ['❤️','💜','🧡','💕','💗'];
+
+    function spawnHeart() {
+      if (!floatZone) return;
+      const h = document.createElement('div');
+      h.className = 'fheart';
+      h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+      h.style.right  = (Math.random() * 32) + 'px';
+      h.style.bottom = (Math.random() * 10) + 'px';
+      h.style.animationDelay = (Math.random() * 0.25) + 's';
+      h.style.fontSize = (16 + Math.random() * 10) + 'px';
+      floatZone.appendChild(h);
+      setTimeout(() => h.remove(), 2200);
+    }
+
+    function tickReel() {
+      if (!likeEl) return;
+      reelLikes += Math.floor(Math.random() * 180) + 40;
+      likeEl.textContent = fmt(reelLikes);
+      likeEl.classList.remove('pop');
+      void likeEl.offsetWidth;
+      likeEl.classList.add('pop');
+      const n = Math.floor(Math.random() * 3) + 2;
+      for (let i = 0; i < n; i++) setTimeout(spawnHeart, i * 190);
+    }
+
+    if (likeEl) setInterval(tickReel, 1300);
+
+    /* ── TIKTOK PHONE: seguidores + curtidas ────────── */
+    let ttkFollowers = 89200;
+    let ttkLikes     = 1200000;
+    const followerEl = document.getElementById('ttk-followers');
+    const ttkLikeEl  = document.getElementById('ttk-likes');
+    const notifEl    = document.getElementById('ttk-notif');
+    const notifMsgs  = ['+2.1K curtidas · agora', '+847 seguidores · hoje',
+                        'Seu vídeo viralizou 🔥', '+1.4K curtidas · agora',
+                        '+230 seguidores · agora'];
+
+    function tickTiktok() {
+      ttkFollowers += Math.floor(Math.random() * 28) + 4;
+      ttkLikes     += Math.floor(Math.random() * 1800) + 400;
+      if (followerEl) {
+        followerEl.textContent = fmt(ttkFollowers);
+        followerEl.style.color = '#FE2C55';
+        setTimeout(() => { followerEl.style.color = ''; }, 500);
+      }
+      if (ttkLikeEl) ttkLikeEl.textContent = fmt(ttkLikes);
+    }
+
+    function showNotif() {
+      if (!notifEl) return;
+      notifEl.textContent = notifMsgs[Math.floor(Math.random() * notifMsgs.length)];
+      notifEl.classList.remove('show');
+      void notifEl.offsetWidth;
+      notifEl.classList.add('show');
+    }
+
+    if (followerEl || ttkLikeEl) {
+      setInterval(tickTiktok, 1800);
+      setInterval(showNotif, 4200);
+      setTimeout(showNotif, 1800);
+    }
+  })();
 </script>
 </body>
 </html>
