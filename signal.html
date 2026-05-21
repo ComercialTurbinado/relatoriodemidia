@@ -179,6 +179,19 @@
       color: rgba(255,255,255,.38); line-height: 1.5;
     }
 
+    /* ─── CALLOUT STRIP ─── */
+    .callout-strip {
+      padding: 64px 0; text-align: center;
+      background: var(--dark);
+    }
+    .callout-text {
+      font-family: var(--script); font-style: italic; font-weight: 500;
+      font-size: clamp(22px, 3vw, 40px);
+      line-height: 1.3; letter-spacing: -.01em;
+      color: rgba(245,243,238,.45); max-width: 760px; margin: 0 auto;
+    }
+    .callout-text strong { color: var(--gold); font-weight: 500; }
+
     /* ─── SECTION HEADER ─── */
     .sh { max-width: 680px; margin-bottom: 60px; }
     .sh .h2 { margin: 8px 0 18px; }
@@ -482,6 +495,16 @@
 
   </div>
 </section>
+
+<!-- CALLOUT STRIP -->
+<div class="callout-strip">
+  <div class="w">
+    <p class="callout-text ri">
+      Pedir para a IA criar um post todo dia<br>
+      <strong>não é inteligente. É só artificial.</strong>
+    </p>
+  </div>
+</div>
 
 <!-- SEÇÃO 2 — POR QUE VAI FUNCIONAR -->
 <section class="section section-alt" id="why">
