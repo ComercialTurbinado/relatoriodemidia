@@ -7,447 +7,415 @@
   <meta name="description" content="14 posts prontos toda semana. Criados com os dados do seu mercado. Você só publica." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* ── LIGHT MODE PREMIUM ── */
-      --bg:     #FAF8F4;   /* ivory quente — base da página              */
-      --bg-2:   #F0EDE6;   /* linen — seções alternadas                  */
-      --bg-3:   #E8E3D9;   /* areia — cards, alert                       */
-      --bg-dark: #1A1714;  /* dark section (FOMO) — único seção escura   */
-
-      --border: rgba(20,18,16,.09);
-      --border-md: rgba(20,18,16,.14);
-      --border-gold: rgba(196,151,58,.28);
-
-      --gold:       #C4973A;   /* acento premium — pontos de ênfase      */
-      --gold-soft:  rgba(196,151,58,.10);
-      --gold-pale:  rgba(196,151,58,.06);
-
-      --green:      #2D8B56;   /* checks e sucesso — verde sóbrio        */
-      --green-soft: rgba(45,139,86,.09);
-      --red:        #C0392B;
-      --red-soft:   rgba(192,57,43,.07);
-
-      --ink:   #141210;   /* texto principal — quase preto              */
-      --ink-2: #3A3733;   /* corpo — legível em --bg e --bg-2           */
-      --ink-3: #7A7570;   /* labels, microcopy                          */
-
-      --script: 'Cormorant Garamond', Georgia, serif;
-      --container: 1080px;
-      --r: 8px;
+      --white:   #FFFFFF;
+      --off:     #F6F4F0;
+      --stone:   #EDEAE4;
+      --dark:    #0E0D0B;
+      --ink:     #1A1916;
+      --body:    #4A4740;
+      --muted:   #8C8880;
+      --line:    rgba(26,25,22,.1);
+      --line-md: rgba(26,25,22,.16);
+      --gold:    #B8892A;
+      --gold-bg: rgba(184,137,42,.08);
+      --gold-line: rgba(184,137,42,.3);
+      --green:   #1B6B3A;
+      --red-bg:  rgba(180,40,40,.07);
+      --red-line: rgba(180,40,40,.2);
+      --red-text: #9B2121;
+      --script:  'Cormorant Garamond', Georgia, serif;
+      --sans:    'Inter', -apple-system, sans-serif;
+      --wrap:    1080px;
+      --r:       6px;
     }
 
     html { scroll-behavior: smooth; }
     body {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg);
+      font-family: var(--sans);
+      background: var(--white);
       color: var(--ink);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── LAYOUT ── */
-    .container { max-width: var(--container); margin: 0 auto; padding: 0 24px; }
-    .section    { padding: 96px 0; border-top: 1px solid var(--border); }
-    .section-sm { padding: 72px 0; border-top: 1px solid var(--border); }
-    .section-dark { background: var(--bg-2); }
+    /* ─── LAYOUT ─── */
+    .w  { max-width: var(--wrap); margin: 0 auto; padding: 0 28px; }
+    .section { padding: 100px 0; border-top: 1px solid var(--line); }
+    .section-alt { background: var(--off); }
 
-    /* ── TYPOGRAPHY ── */
+    /* ─── TYPE SCALE ─── */
     .label {
-      font-size: 11px; font-weight: 600;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--ink-3); margin-bottom: 20px; display: block;
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 20px;
     }
-    .label-accent { color: var(--gold); }
-
+    .label-gold { color: var(--gold); }
     .h1 {
-      font-size: clamp(36px, 5.5vw, 68px);
-      font-weight: 600; line-height: 1.05;
-      letter-spacing: -0.04em; color: var(--ink);
+      font-size: clamp(38px, 6vw, 72px);
+      font-weight: 600; line-height: 1.04; letter-spacing: -.04em;
+      color: var(--ink);
     }
     .h2 {
-      font-size: clamp(24px, 3.2vw, 44px);
-      font-weight: 600; line-height: 1.08;
-      letter-spacing: -0.03em; color: var(--ink);
+      font-size: clamp(26px, 3.5vw, 48px);
+      font-weight: 600; line-height: 1.06; letter-spacing: -.03em;
+      color: var(--ink);
     }
-    .h3 {
-      font-size: 18px; font-weight: 600;
-      line-height: 1.3; color: var(--ink);
-    }
+    .h3 { font-size: 17px; font-weight: 600; line-height: 1.3; color: var(--ink); }
     .body-lg {
       font-size: clamp(16px, 1.6vw, 18px);
-      color: var(--ink-2); line-height: 1.75;
+      color: var(--body); line-height: 1.78;
     }
-    .body-sm { font-size: 15px; color: var(--ink-2); line-height: 1.7; }
+    .body-sm { font-size: 15px; color: var(--body); line-height: 1.72; }
 
-    /* ── BUTTONS ── */
+    /* ─── BUTTONS ─── */
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
-      font-family: inherit; font-size: 14px; font-weight: 500;
-      padding: 10px 20px; border-radius: var(--r); cursor: pointer;
-      text-decoration: none; border: none; letter-spacing: -0.01em;
-      transition: opacity .15s ease, background .15s ease,
-                  transform .15s cubic-bezier(0.16,1,0.3,1),
-                  box-shadow .15s ease;
-      will-change: transform, opacity;
+      font-family: var(--sans); font-size: 14px; font-weight: 500;
+      padding: 11px 22px; border-radius: var(--r); cursor: pointer;
+      text-decoration: none; border: none; letter-spacing: -.01em;
+      transition: background .15s, transform .15s cubic-bezier(.16,1,.3,1), box-shadow .15s;
+      will-change: transform;
     }
-    .btn:active { transform: scale(0.97); }
-    .btn-primary {
-      background: var(--ink); color: #FAF8F4;
-      box-shadow: 0 1px 3px rgba(20,18,16,.2);
-    }
-    .btn-primary:hover { background: #2C2926; box-shadow: 0 2px 8px rgba(20,18,16,.25); }
-    .btn-wpp {
-      background: #1A7341; color: #fff;
-      box-shadow: 0 1px 3px rgba(0,0,0,.18);
-    }
-    .btn-wpp:hover { background: #155C34; box-shadow: 0 2px 8px rgba(26,115,65,.3); }
-    .btn-outline {
-      background: transparent; color: var(--ink-2);
-      border: 1px solid var(--border-md);
-    }
-    .btn-outline:hover { color: var(--ink); border-color: rgba(20,18,16,.24); background: rgba(20,18,16,.04); }
-    .btn-lg { padding: 13px 26px; font-size: 15px; border-radius: 10px; }
+    .btn:active { transform: scale(.97); }
+    .btn-dark { background: var(--ink); color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+    .btn-dark:hover { background: #2D2B27; }
+    .btn-wpp  { background: #1A7341; color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+    .btn-wpp:hover { background: #155C34; }
+    .btn-ghost { background: transparent; color: var(--body); border: 1px solid var(--line-md); }
+    .btn-ghost:hover { color: var(--ink); border-color: rgba(26,25,22,.24); background: var(--off); }
+    .btn-lg { padding: 14px 28px; font-size: 15px; border-radius: 8px; }
 
-    /* ── NAV ── */
+    /* ─── NAV ─── */
     nav {
       position: sticky; top: 0; z-index: 100;
-      height: 62px; padding: 0 32px;
+      height: 60px; padding: 0 28px;
       display: flex; align-items: center; justify-content: space-between;
-      background: rgba(250,248,244,.94); backdrop-filter: blur(20px) saturate(140%);
-      border-bottom: 1px solid var(--border);
-      transition: border-color .15s ease;
+      background: rgba(255,255,255,.93); backdrop-filter: blur(18px) saturate(140%);
+      border-bottom: 1px solid var(--line);
     }
-    .nav-logo {
-      font-size: 15px; font-weight: 600; letter-spacing: -0.02em;
+    .nav-brand {
+      font-size: 15px; font-weight: 600; letter-spacing: -.02em;
       color: var(--ink); text-decoration: none;
+      display: flex; align-items: baseline; gap: 3px;
     }
-    .nav-logo .script-accent {
-      font-family: var(--script); font-style: italic; font-weight: 500;
-      font-size: 1.15em; color: var(--gold); letter-spacing: 0;
+    .nav-brand .s {
+      font-family: var(--script); font-style: italic;
+      font-size: 1.15em; color: var(--gold);
     }
-    .nav-logo .dim { color: var(--ink-3); font-weight: 400; }
+    .nav-brand .dim { color: var(--muted); font-weight: 400; }
 
-    /* ── HERO ── */
-    #hero { padding: 112px 0 96px; border: none; }
-    .hero-badge {
+    /* ─── HERO ─── */
+    #hero { padding: 120px 0 100px; border: none; }
+    .badge {
       display: inline-flex; align-items: center; gap: 7px;
-      font-size: 11px; font-weight: 500; color: var(--ink-2);
-      letter-spacing: 0.04em;
-      border: 1px solid var(--border-gold); border-radius: 100px;
-      padding: 6px 16px; margin-bottom: 40px;
-      background: var(--gold-soft);
+      font-size: 11px; font-weight: 500; color: var(--body);
+      letter-spacing: .04em;
+      border: 1px solid var(--gold-line); border-radius: 100px;
+      padding: 6px 16px; margin-bottom: 44px;
+      background: var(--gold-bg);
     }
-    .hero-badge-dot {
+    .badge-dot {
       width: 6px; height: 6px; border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 0 2px rgba(45,139,86,.2);
-      animation: dot-pulse 2.5s ease-in-out infinite;
+      box-shadow: 0 0 0 2px rgba(27,107,58,.2);
+      animation: pulse 2.5s ease-in-out infinite;
     }
-    @keyframes dot-pulse {
-      0%,100% { box-shadow: 0 0 0 2px rgba(45,139,86,.2); }
-      50%      { box-shadow: 0 0 0 4px rgba(45,139,86,.07); }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 2px rgba(27,107,58,.2); }
+      50%      { box-shadow: 0 0 0 5px rgba(27,107,58,.06); }
     }
-    .hero-title { margin-bottom: 20px; max-width: 820px; }
-    .hero-title .line-script {
-      font-family: var(--script);
-      font-style: italic; font-weight: 500;
-      font-size: 1.18em;
-      letter-spacing: -0.01em;
-      line-height: 1.15;
-      color: var(--gold);
+
+    .hero-hl { margin-bottom: 28px; max-width: 860px; }
+    .hero-hl .script-line {
       display: block;
-    }
-    .hero-body { max-width: 580px; margin-bottom: 16px; }
-    .hero-callout {
-      max-width: 560px; margin-bottom: 40px; margin-top: 12px;
-      padding-left: 16px;
-      border-left: 2px solid var(--border-md);
-      font-size: 14px; color: var(--ink-3); line-height: 1.6;
-      font-style: italic;
-    }
-    .hero-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .hero-micro { font-size: 12px; color: var(--ink-3); margin-top: 14px; }
-
-    /* ── STATS ── */
-    .stats-row {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 0; background: var(--bg-2);
-      border: 1px solid var(--border-md); border-radius: 12px;
-      overflow: hidden; margin-top: 72px;
-    }
-    .stat-item {
-      background: var(--bg-2); padding: 40px 32px 36px;
-      display: flex; flex-direction: column; gap: 10px;
-      border-right: 1px solid var(--border);
-      transition: background .18s;
-    }
-    .stat-item:last-child { border-right: none; }
-    .stat-item:hover { background: var(--bg-3); }
-    .stat-num {
       font-family: var(--script); font-style: italic;
-      font-size: clamp(52px, 7vw, 80px); font-weight: 600;
-      letter-spacing: -0.03em; line-height: 1;
+      font-weight: 500; font-size: 1.18em;
+      letter-spacing: -.01em; line-height: 1.12;
       color: var(--gold);
     }
-    .stat-lbl {
-      font-size: 11px; color: var(--ink-3); font-weight: 500;
-      letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.55;
+
+    .hero-sub { max-width: 600px; }
+    .hero-sub p + p { margin-top: 14px; }
+
+    .hero-callout {
+      margin: 28px 0 40px;
+      max-width: 580px; padding: 18px 24px;
+      border-left: 3px solid var(--gold);
+      background: var(--gold-bg);
+      border-radius: 0 var(--r) var(--r) 0;
+      font-size: 15px; font-style: italic; color: var(--body); line-height: 1.6;
     }
 
-    /* ── CALLOUT STRIP ── */
-    .callout-strip {
-      padding: 64px 0; text-align: center;
-      background: var(--bg-dark);
-      border-top: none;
-    }
-    .callout-text {
-      font-family: var(--script); font-style: italic; font-weight: 500;
-      font-size: clamp(22px, 3vw, 40px);
-      line-height: 1.3; letter-spacing: -0.01em;
-      color: rgba(250,248,244,.55); max-width: 760px; margin: 0 auto;
-    }
-    .callout-text strong { color: var(--gold); font-weight: 500; }
+    .hero-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .hero-micro { font-size: 12px; color: var(--muted); margin-top: 16px; }
 
-    /* ── SECTION HEADER ── */
-    .section-header { max-width: 640px; margin-bottom: 56px; }
-    .section-header .h2 { margin: 8px 0 16px; }
-    .section-header .body-lg { max-width: 520px; }
-
-    /* ── PROOF LIST ── */
-    .proof-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
-    .proof-item {
-      display: flex; gap: 28px; align-items: flex-start;
-      padding: 24px 28px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--bg-2);
-      transition: border-color .18s ease, background .18s ease;
+    /* ─── STATS ─── */
+    .stats-band {
+      margin-top: 80px;
+      background: var(--dark);
+      border-radius: 12px; overflow: hidden;
+      display: grid; grid-template-columns: repeat(4,1fr);
     }
-    .proof-item:hover { border-color: var(--border-md); background: var(--bg-3); }
-    .proof-num {
+    .stat {
+      padding: 44px 36px 40px;
+      border-right: 1px solid rgba(255,255,255,.07);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .stat:last-child { border-right: none; }
+    .stat-n {
       font-family: var(--script); font-style: italic;
-      font-size: 22px; font-weight: 500; color: var(--gold);
-      min-width: 32px; padding-top: 0; flex-shrink: 0; line-height: 1.2;
+      font-size: clamp(56px, 8vw, 88px);
+      font-weight: 600; letter-spacing: -.03em; line-height: 1;
+      color: var(--gold);
     }
-    .proof-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--ink); }
-    .proof-item p  { font-size: 15px; color: var(--ink-2); line-height: 1.7; max-width: 560px; }
-    .proof-item strong { color: var(--ink); font-weight: 500; }
+    .stat-l {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: rgba(255,255,255,.38); line-height: 1.5;
+    }
 
-    /* ── ALERT CARD ── */
-    .alert-card {
-      margin-top: 48px;
-      border: 1px solid var(--border-gold);
-      border-radius: 12px; padding: 40px 44px;
-      background: var(--gold-pale);
+    /* ─── SECTION HEADER ─── */
+    .sh { max-width: 680px; margin-bottom: 60px; }
+    .sh .h2 { margin: 8px 0 18px; }
+    .sh .body-lg { max-width: 560px; }
+    .sh .body-lg + .body-lg { margin-top: 14px; }
+
+    /* ─── PROOF LIST ─── */
+    .proof { display: flex; flex-direction: column; gap: 0; }
+    .pi {
+      display: grid; grid-template-columns: 56px 1fr;
+      gap: 0 12px; align-items: start;
+      padding: 28px 0; border-bottom: 1px solid var(--line);
+    }
+    .pi:last-child { border-bottom: none; }
+    .pi-n {
+      font-family: var(--script); font-style: italic;
+      font-size: 36px; font-weight: 500; color: var(--gold);
+      line-height: 1; padding-top: 2px;
+    }
+    .pi-t { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--ink); }
+    .pi-b { font-size: 15px; color: var(--body); line-height: 1.68; }
+    .pi-b strong { color: var(--ink); font-weight: 500; }
+
+    /* ─── ALERT CARD ─── */
+    .alert {
+      margin-top: 56px; padding: 40px 44px;
+      border: 1px solid var(--gold-line);
+      background: var(--gold-bg); border-radius: 10px;
       position: relative; overflow: hidden;
     }
-    .alert-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    .alert::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
       background: linear-gradient(90deg, transparent, var(--gold), transparent);
     }
-    .alert-label {
-      font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--gold); margin-bottom: 14px;
+    .alert-tag {
+      font-size: 11px; font-weight: 600; letter-spacing: .09em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 16px;
     }
-    .alert-card h2 { font-size: clamp(20px, 2.8vw, 32px); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 16px; color: var(--ink); }
-    .alert-card p  { font-size: 15px; color: var(--ink-2); line-height: 1.7; max-width: 520px; margin-bottom: 12px; }
-    .alert-card strong { color: var(--ink); font-weight: 500; }
+    .alert .h3 { font-size: clamp(18px, 2.4vw, 26px); font-weight: 600; margin-bottom: 14px; letter-spacing: -.02em; }
+    .alert p { font-size: 15px; color: var(--body); line-height: 1.7; margin-bottom: 10px; }
+    .alert p strong { color: var(--ink); font-weight: 500; }
     .alert-warn {
-      display: inline-flex; align-items: center; gap: 8px; margin-top: 8px;
-      font-size: 13px; font-weight: 500; color: var(--red);
-      padding: 8px 14px; border-radius: 6px;
-      background: var(--red-soft); border: 1px solid rgba(192,57,43,.15);
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500; color: var(--red-text);
+      padding: 8px 14px; border-radius: 5px;
+      background: var(--red-bg); border: 1px solid var(--red-line);
+      margin-top: 4px;
     }
-    @media(max-width:680px) { .alert-card { padding: 28px 24px; } }
+    @media(max-width:680px){ .alert { padding: 28px 24px; } }
 
-    /* ── TIMELINE ── */
-    .timeline { position: relative; }
-    .timeline::before {
+    /* ─── TIMELINE ─── */
+    .tl { position: relative; padding-left: 0; }
+    .tl::before {
       content: ''; position: absolute;
-      left: 0; top: 20px; bottom: 20px; width: 1px;
-      background: linear-gradient(to bottom, var(--gold), var(--border));
+      left: 11px; top: 24px; bottom: 24px; width: 1px;
+      background: linear-gradient(to bottom, var(--gold), var(--line));
     }
-    .tl-item {
-      display: grid; grid-template-columns: 20px 1fr;
-      gap: 0 32px; padding: 24px 0;
-      border-bottom: 1px solid var(--border);
+    .tl-row {
+      display: grid; grid-template-columns: 24px 1fr;
+      gap: 0 28px; padding: 28px 0;
+      border-bottom: 1px solid var(--line);
     }
-    .tl-item:last-child { border-bottom: none; }
+    .tl-row:last-child { border-bottom: none; }
     .tl-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--bg); border: 1.5px solid var(--border-md);
-      margin-top: 6px; position: relative; z-index: 1;
-      transition: background .2s, border-color .2s, box-shadow .2s;
+      width: 10px; height: 10px; border-radius: 50%; margin-top: 5px;
+      background: var(--white); border: 2px solid var(--line-md);
+      position: relative; z-index: 1;
+      transition: background .18s, border-color .18s, box-shadow .18s;
+      flex-shrink: 0;
     }
-    .tl-item:hover .tl-dot {
-      background: var(--gold); border-color: var(--gold);
-      box-shadow: 0 0 0 3px var(--gold-soft);
-    }
+    .tl-row:hover .tl-dot { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-bg); }
     .tl-dot.done { background: var(--green); border-color: var(--green); }
-    .tl-when { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
-    .tl-when.green { color: var(--green); }
-    .tl-what h3  { font-size: 17px; font-weight: 600; margin-bottom: 6px; color: var(--ink); }
-    .tl-what p   { font-size: 15px; color: var(--ink-2); line-height: 1.7; max-width: 520px; }
-    .tl-what strong { color: var(--ink); font-weight: 500; }
-
-    /* ── WARNING BOX ── */
-    .warn-box {
-      margin-top: 36px; padding: 20px 24px;
-      border: 1px solid rgba(192,57,43,.15);
-      border-radius: var(--r); background: var(--red-soft);
-      font-size: 14px; color: var(--ink-2); line-height: 1.65;
+    .tl-when {
+      font-size: 10px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 5px;
     }
-    .warn-box strong { color: var(--ink); font-weight: 500; }
+    .tl-when.g { color: var(--green); }
+    .tl-row h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .tl-row p  { font-size: 14px; color: var(--body); line-height: 1.68; }
+    .tl-row p strong { color: var(--ink); font-weight: 500; }
 
-    /* ── CONTRAST TABLE ── */
-    .contrast-wrap { overflow-x: auto; margin-top: 48px; border: 1px solid var(--border-md); border-radius: var(--r); }
-    .contrast-table { width: 100%; border-collapse: collapse; }
-    .contrast-table th {
+    .warn {
+      margin-top: 40px; padding: 20px 24px;
+      border: 1px solid var(--red-line); border-radius: var(--r);
+      background: var(--red-bg); font-size: 14px; color: var(--body); line-height: 1.68;
+    }
+    .warn strong { color: var(--ink); font-weight: 500; }
+
+    /* ─── CONTRAST TABLE ─── */
+    .ct-wrap { margin-top: 52px; border: 1px solid var(--line-md); border-radius: var(--r); overflow-x: auto; }
+    .ct { width: 100%; border-collapse: collapse; }
+    .ct th {
       padding: 14px 20px; font-size: 11px; font-weight: 600;
       letter-spacing: .08em; text-transform: uppercase;
-      border-bottom: 1px solid var(--border-md); text-align: left;
-      color: var(--ink-3); background: var(--bg-2);
+      color: var(--muted); background: var(--off);
+      border-bottom: 1px solid var(--line-md); text-align: left;
     }
-    .contrast-table th.col-with { color: var(--green); }
-    .contrast-table td {
-      padding: 18px 20px; font-size: 15px; color: var(--ink-2);
-      border-bottom: 1px solid var(--border); vertical-align: top;
-      transition: background .12s ease;
+    .ct th.c-with { color: var(--green); }
+    .ct td {
+      padding: 18px 20px; font-size: 15px; color: var(--body);
+      border-bottom: 1px solid var(--line); vertical-align: top;
+      transition: background .1s;
     }
-    .contrast-table tr:last-child td { border-bottom: none; }
-    .contrast-table td:first-child {
-      font-size: 11px; font-weight: 600; letter-spacing: .07em;
-      text-transform: uppercase; color: var(--ink-3); width: 140px;
+    .ct tr:last-child td { border-bottom: none; }
+    .ct td:first-child {
+      font-size: 11px; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--muted); width: 140px;
     }
-    .contrast-table tbody tr:hover td { background: var(--bg-2); }
+    .ct tbody tr:hover td { background: var(--off); }
     .good { color: var(--ink) !important; }
-    .good .hl { color: var(--green); font-weight: 600; }
+    .hl { color: var(--green); font-weight: 600; }
 
-    /* ── CLOSE BOX ── */
-    .close-box {
+    .close-note {
       margin-top: 28px; padding: 20px 24px;
-      border: 1px solid var(--border-md); border-radius: var(--r);
-      background: var(--bg-2);
-      font-size: 14px; color: var(--ink-2); line-height: 1.7;
+      border: 1px solid var(--line-md); border-radius: var(--r);
+      background: var(--off); font-size: 15px; color: var(--body); line-height: 1.7;
     }
-    .close-box strong { color: var(--ink); font-weight: 500; }
+    .close-note strong { color: var(--ink); font-weight: 500; }
 
-    /* ── FOMO — única seção escura ── */
-    #fomo { background: var(--bg-dark); border-top: none; }
-    #fomo .label { color: rgba(250,248,244,.35); }
-    #fomo .h2 { color: #FAF8F4; margin: 8px 0 28px; }
-    .fomo-inner { max-width: 680px; }
-    .fomo-body { font-size: clamp(16px, 1.6vw, 18px); color: rgba(250,248,244,.6); line-height: 1.85; }
-    .fomo-body p { margin-bottom: 16px; }
-    .fomo-body strong { color: rgba(250,248,244,.9); font-weight: 500; }
+    /* ─── FOMO — dark section ─── */
+    #fomo {
+      background: var(--dark); border-top: none;
+      padding: 100px 0;
+    }
+    #fomo .label { color: rgba(255,255,255,.25); }
+    #fomo .h2    { color: #F5F3EE; }
+    .fomo-body {
+      max-width: 680px;
+      font-size: clamp(16px, 1.6vw, 18px); color: rgba(255,255,255,.5);
+      line-height: 1.85;
+    }
+    .fomo-body p { margin-bottom: 18px; }
+    .fomo-body p:last-child { margin-bottom: 0; }
+    .fomo-body strong { color: rgba(255,255,255,.85); font-weight: 500; }
     .fomo-quote {
-      margin-top: 32px; padding: 28px 32px;
-      border: 1px solid var(--border-gold); border-radius: var(--r);
-      background: rgba(196,151,58,.06);
-      font-family: var(--script); font-style: italic; font-weight: 500;
-      font-size: clamp(16px, 1.8vw, 20px); color: rgba(250,248,244,.6); line-height: 1.7;
+      margin-top: 40px; max-width: 680px;
+      padding: 28px 32px;
+      border: 1px solid var(--gold-line); border-radius: var(--r);
+      background: rgba(184,137,42,.06);
+      font-family: var(--script); font-style: italic;
+      font-size: clamp(17px, 1.9vw, 22px); color: rgba(255,255,255,.5); line-height: 1.65;
     }
-    .fomo-quote .accent { color: var(--gold); }
+    .fomo-quote .a { color: var(--gold); }
 
-    /* ── PRICING ── */
-    .pricing-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 16px; margin-top: 48px;
+    /* ─── PRICING ─── */
+    .plan-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px; margin-top: 52px;
     }
-    .plan-card {
-      border: 1px solid var(--border-md); border-radius: 12px;
-      padding: 28px 24px; background: var(--bg-2);
+    .plan {
+      border: 1px solid var(--line-md); border-radius: 10px;
+      padding: 28px 24px; background: var(--white);
       position: relative;
-      transition: border-color .2s ease, transform .2s cubic-bezier(0.16,1,0.3,1);
+      transition: border-color .18s, transform .2s cubic-bezier(.16,1,.3,1);
     }
-    .plan-card:hover { border-color: rgba(20,18,16,.2); transform: translateY(-2px); }
-    .plan-card.featured {
-      border-color: var(--border-gold);
-      background: var(--ink);
-    }
-    .plan-card.featured:hover { border-color: var(--gold); }
+    .plan:hover { border-color: rgba(26,25,22,.2); transform: translateY(-2px); }
+    .plan.f { background: var(--ink); border-color: var(--gold-line); }
+    .plan.f:hover { border-color: var(--gold); }
     .plan-badge {
-      position: absolute; top: -1px; right: 20px;
-      background: var(--gold); color: #FAF8F4;
-      font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+      position: absolute; top: -1px; right: 18px;
+      background: var(--gold); color: var(--white);
+      font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
       padding: 4px 12px; border-radius: 0 0 6px 6px;
     }
-    .plan-name { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
-    .plan-card.featured .plan-name { color: rgba(250,248,244,.4); }
-    .plan-tagline { font-size: 13px; color: var(--ink-2); margin-bottom: 20px; line-height: 1.45; }
-    .plan-card.featured .plan-tagline { color: rgba(250,248,244,.55); }
-    .plan-price { margin-bottom: 24px; }
-    .plan-price .per { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
-    .plan-card.featured .plan-price .per { color: rgba(250,248,244,.4); }
-    .plan-price .amount { font-size: 40px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; color: var(--ink); margin: 4px 0; }
-    .plan-card.featured .amount { color: #FAF8F4; }
-    .plan-price .recur { font-size: 12px; color: var(--ink-3); }
-    .plan-card.featured .plan-price .recur { color: rgba(250,248,244,.35); }
-    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-    .plan-features li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--ink-2); }
-    .plan-card.featured .plan-features li { color: rgba(250,248,244,.65); }
-    .plan-check { color: var(--green); flex-shrink: 0; margin-top: 1px; font-size: 12px; font-weight: 700; }
-    .plan-features strong { color: var(--ink); font-weight: 500; }
-    .plan-card.featured .plan-features strong { color: #FAF8F4; }
+    .plan-name {
+      font-size: 10px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+    }
+    .plan.f .plan-name { color: rgba(255,255,255,.35); }
+    .plan-tag { font-size: 13px; color: var(--body); margin-bottom: 20px; line-height: 1.45; }
+    .plan.f .plan-tag { color: rgba(255,255,255,.5); }
+    .plan-pr { margin-bottom: 24px; }
+    .plan-pr .per { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .plan.f .per { color: rgba(255,255,255,.3); }
+    .plan-pr .amt { font-size: 42px; font-weight: 700; letter-spacing: -.04em; line-height: 1; color: var(--ink); margin: 4px 0; }
+    .plan.f .amt { color: #F5F3EE; }
+    .plan-pr .rec { font-size: 12px; color: var(--muted); }
+    .plan.f .rec { color: rgba(255,255,255,.28); }
+    .plan-feat { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .plan-feat li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--body); }
+    .plan.f .plan-feat li { color: rgba(255,255,255,.6); }
+    .ck { color: var(--green); flex-shrink: 0; margin-top: 1px; font-size: 12px; font-weight: 700; }
+    .plan-feat strong { color: var(--ink); font-weight: 500; }
+    .plan.f .plan-feat strong { color: #F5F3EE; }
     .plan-cta { width: 100%; justify-content: center; }
-    .plan-footer { font-size: 11px; color: var(--ink-3); margin-top: 12px; text-align: center; font-style: italic; }
-    .plan-card.featured .plan-footer { color: rgba(250,248,244,.3); }
+    .plan-foot { font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center; font-style: italic; }
+    .plan.f .plan-foot { color: rgba(255,255,255,.25); }
 
-    /* ── CTA FINAL ── */
-    #cta-final {
+    /* ─── CTA FINAL ─── */
+    #cta {
       padding: 112px 0; text-align: center;
-      background: var(--bg-2);
+      background: var(--off); border-top: 1px solid var(--line);
     }
-    #cta-final .h2 { max-width: 680px; margin: 8px auto 16px; }
-    #cta-final .body-lg { max-width: 480px; margin: 0 auto 40px; text-align: center; }
+    #cta .h2 { max-width: 640px; margin: 8px auto 16px; }
+    #cta .body-lg { max-width: 460px; margin: 0 auto 44px; }
 
-    /* ── FOOTER ── */
+    /* ─── FOOTER ─── */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 28px 24px; text-align: center;
-      background: var(--bg);
+      border-top: 1px solid var(--line); padding: 28px;
+      text-align: center; background: var(--white);
     }
-    footer p { font-size: 12px; color: var(--ink-3); line-height: 1.7; }
+    footer p { font-size: 12px; color: var(--muted); line-height: 1.7; }
 
-    /* ── REVEAL ── */
+    /* ─── REVEAL ─── */
     .ri {
-      opacity: 0;
-      transform: translateY(10px);
-      filter: blur(3px);
+      opacity: 0; transform: translateY(10px); filter: blur(3px);
       transition:
-        opacity .5s cubic-bezier(0.16,1,0.3,1) calc(var(--d,0) * 1ms),
-        transform .5s cubic-bezier(0.16,1,0.3,1) calc(var(--d,0) * 1ms),
-        filter .4s cubic-bezier(0.16,1,0.3,1) calc(var(--d,0) * 1ms);
-      will-change: transform, opacity;
+        opacity .5s cubic-bezier(.16,1,.3,1) calc(var(--d,0)*1ms),
+        transform .5s cubic-bezier(.16,1,.3,1) calc(var(--d,0)*1ms),
+        filter .4s cubic-bezier(.16,1,.3,1) calc(var(--d,0)*1ms);
+      will-change: transform,opacity;
     }
-    .ri.in { opacity: 1; transform: translateY(0); filter: blur(0); }
+    .ri.in { opacity:1; transform:translateY(0); filter:blur(0); }
 
-    /* ── RESPONSIVE ── */
+    /* ─── RESPONSIVE ─── */
     @media(max-width:900px) {
-      .section, .section-sm { padding: 72px 0; }
-      .timeline::before { display: none; }
-      .tl-item { grid-template-columns: 1fr; gap: 8px; padding-left: 0; }
+      .section { padding: 72px 0; }
+      #hero { padding: 88px 0 72px; }
+      .tl::before { display: none; }
+      .tl-row { grid-template-columns: 1fr; gap: 8px; }
+      .tl-dot { display: none; }
     }
-    @media(max-width:600px) {
+    @media(max-width:640px) {
       .hero-actions { flex-direction: column; width: 100%; }
       .hero-actions .btn { width: 100%; justify-content: center; }
-      .pricing-grid { grid-template-columns: 1fr; }
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-      .stat-num { font-size: 52px; }
-      .stat-item { padding: 28px 20px; border-right: none; border-bottom: 1px solid var(--border); }
-      .stat-item:nth-child(odd) { border-right: 1px solid var(--border); }
+      .plan-grid { grid-template-columns: 1fr; }
+      .stats-band { grid-template-columns: repeat(2,1fr); }
+      .stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,.07); }
+      .stat:nth-child(odd) { border-right: 1px solid rgba(255,255,255,.07); }
+      .stat:nth-last-child(-n+2) { border-bottom: none; }
     }
 
-    /* ── REDUCED MOTION ── */
+    /* ─── REDUCED MOTION ─── */
     @media(prefers-reduced-motion:reduce) {
       .ri { opacity:1; transform:none; filter:none; transition:none; }
-      .dot-pulse { animation:none; }
-      .plan-card, .btn { transition: opacity .1s ease; }
+      .badge-dot { animation:none; }
     }
   </style>
 </head>
@@ -455,126 +423,105 @@
 
 <!-- NAV -->
 <nav>
-  <a href="/" class="nav-logo">firemode <span class="dim">signal</span></a>
-  <button onclick="openWpp('nav')" class="btn btn-primary" style="border:none;cursor:pointer;">
-    Começar agora
-  </button>
+  <a href="/" class="nav-brand">firemode <span class="s">signal</span></a>
+  <button onclick="openWpp('nav')" class="btn btn-dark" style="border:none;cursor:pointer;">Começar agora</button>
 </nav>
 
 <!-- SEÇÃO 1 — HERO -->
 <section id="hero">
-  <div class="container">
+  <div class="w">
 
-    <div class="hero-badge ri" style="--d:0">
-      <span class="hero-badge-dot"></span>
+    <div class="badge ri" style="--d:0">
+      <span class="badge-dot"></span>
       Fábrica de conteúdo · Via WhatsApp
     </div>
 
-    <h1 class="h1 hero-title ri" style="--d:60">
+    <h1 class="h1 hero-hl ri" style="--d:60">
       Você não contrata o Signal<br>
       para postar mais.<br>
-      <span class="line-script">Contrata para vender mais.</span>
+      <span class="script-line">Contrata para vender mais.</span>
     </h1>
 
-    <div class="ri" style="--d:140">
-      <p class="body-lg hero-body">
-        Seguidor não paga boleto. Curtida não fecha contrato.
-      </p>
-      <p class="body-lg hero-body" style="margin-top:10px;">
-        O conteúdo só importa quando ele move alguém de "nunca ouvi falar" para "quero comprar". É exatamente para isso que cada post é construído aqui — não para impressionar o algoritmo, mas para converter quem já está te acompanhando.
-      </p>
-      <p class="body-lg hero-body" style="margin-top:10px;">
-        Todo carrossel tem um papel no funil. Todo Reel tem um objetivo. Toda legenda tem um próximo passo. Sem isso, é só barulho bonito.
-      </p>
+    <div class="hero-sub ri" style="--d:140">
+      <p class="body-lg">Seguidor não paga boleto. Curtida não fecha contrato.</p>
+      <p class="body-lg">O conteúdo só importa quando ele move alguém de "nunca ouvi falar" para "quero comprar". É exatamente para isso que cada post é construído aqui — não para impressionar o algoritmo, mas para converter quem já está te acompanhando.</p>
+      <p class="body-lg">Todo carrossel tem um papel no funil. Todo Reel tem um objetivo. Toda legenda tem um próximo passo. Sem isso, é só barulho bonito.</p>
     </div>
 
-    <blockquote class="hero-callout ri" style="--d:200">
+    <blockquote class="hero-callout ri" style="--d:220">
       Conteúdo sem estratégia de conversão é entretenimento gratuito para o seu concorrente.
     </blockquote>
 
-    <div class="hero-actions ri" style="--d:240">
+    <div class="hero-actions ri" style="--d:280">
       <button onclick="openWpp('hero')" class="btn btn-wpp btn-lg" style="border:none;cursor:pointer;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Quero garantir meu espaço agora
       </button>
     </div>
-    <p class="hero-micro ri" style="--d:280">Primeira entrega em 24h &nbsp;·&nbsp; 14 posts prontos por semana &nbsp;·&nbsp; Cancela quando quiser</p>
+    <p class="hero-micro ri" style="--d:340">Primeira entrega em 24h &nbsp;·&nbsp; 14 posts prontos por semana &nbsp;·&nbsp; Cancela quando quiser</p>
 
     <!-- STATS -->
-    <div class="stats-row ri" style="--d:340">
-      <div class="stat-item">
-        <div class="stat-num" data-count="14" data-suffix="">14</div>
-        <div class="stat-lbl">posts prontos<br>por semana</div>
+    <div class="stats-band ri" style="--d:400">
+      <div class="stat">
+        <div class="stat-n" data-count="14" data-suffix="">14</div>
+        <div class="stat-l">posts prontos<br>por semana</div>
       </div>
-      <div class="stat-item">
-        <div class="stat-num">24h</div>
-        <div class="stat-lbl">para a<br>primeira entrega</div>
+      <div class="stat">
+        <div class="stat-n">24h</div>
+        <div class="stat-l">para a<br>primeira entrega</div>
       </div>
-      <div class="stat-item">
-        <div class="stat-num" data-count="0" data-suffix="">0</div>
-        <div class="stat-lbl">ideias suas<br>necessárias</div>
+      <div class="stat">
+        <div class="stat-n" data-count="0" data-suffix="">0</div>
+        <div class="stat-l">ideias suas<br>necessárias</div>
       </div>
-      <div class="stat-item">
-        <div class="stat-num" data-count="100" data-suffix="%">100%</div>
-        <div class="stat-lbl">baseado em dado<br>do nicho</div>
+      <div class="stat">
+        <div class="stat-n" data-count="100" data-suffix="%">100%</div>
+        <div class="stat-l">baseado em dado<br>do nicho</div>
       </div>
     </div>
 
   </div>
 </section>
 
-<!-- CALLOUT STRIP -->
-<div class="callout-strip">
-  <div class="container">
-    <p class="callout-text ri">
-      Pedir para a IA criar um post todo dia<br>
-      <strong>não é inteligente. É só artificial.</strong>
-    </p>
-  </div>
-</div>
-
 <!-- SEÇÃO 2 — POR QUE VAI FUNCIONAR -->
-<section class="section" id="why">
-  <div class="container">
-    <div class="section-header ri">
-      <span class="label label-accent">Por que vai funcionar para você</span>
+<section class="section section-alt" id="why">
+  <div class="w">
+    <div class="sh ri">
+      <span class="label label-gold">Por que vai funcionar para você</span>
       <h2 class="h2">Não é inspiração. É o que o seu mercado<br>já validou esta semana.</h2>
-      <p class="body-lg" style="margin-top:4px;">
-        Todo post entregue vem de um lugar específico: o que está funcionando agora no seu nicho. Não é o que achamos que funciona. É o que o comportamento real da sua audiência está pedindo.
-      </p>
-      <p class="body-lg" style="margin-top:12px; color:var(--ink); font-weight:500;">
-        Você não precisa acertar. O mercado já acertou por você.
-      </p>
+      <p class="body-lg">Todo post entregue vem de um lugar específico: o que está funcionando agora no seu nicho.</p>
+      <p class="body-lg">Não é o que achamos que funciona. É o que o comportamento real da sua audiência está pedindo. O que os perfis de maior crescimento do seu segmento estão publicando. Para onde as métricas do mercado estão apontando.</p>
+      <p class="body-lg" style="color:var(--ink);font-weight:500;">Você não precisa acertar. O mercado já acertou por você.</p>
     </div>
 
-    <div class="proof-list">
-      <div class="proof-item ri">
-        <span class="proof-num">01</span>
+    <div class="proof">
+      <div class="pi ri">
+        <div class="pi-n">01</div>
         <div>
-          <h3>Os dados do seu mercado</h3>
-          <p>Analisamos o que está viralizando no seu nicho <strong>nessa semana</strong>, não na semana passada. O conteúdo que chega para você já reflete o que está em alta agora — não o que estava.</p>
+          <div class="pi-t">Os dados do seu mercado</div>
+          <p class="pi-b">Analisamos o que está viralizando no seu nicho <strong>nessa semana</strong>, não na semana passada.</p>
         </div>
       </div>
-      <div class="proof-item ri" style="--d:70">
-        <span class="proof-num">02</span>
+      <div class="pi ri" style="--d:60">
+        <div class="pi-n">02</div>
         <div>
-          <h3>O comportamento da sua audiência</h3>
-          <p>O tipo de conteúdo que gera salvamento, compartilhamento e clique no perfil. <strong>Não o que gera curtida.</strong> Curtida não é intenção de compra. Salvamento é.</p>
+          <div class="pi-t">O comportamento da sua audiência</div>
+          <p class="pi-b">O tipo de conteúdo que gera salvamento, compartilhamento e clique no perfil. <strong>Não o que gera curtida.</strong></p>
         </div>
       </div>
-      <div class="proof-item ri" style="--d:140">
-        <span class="proof-num">03</span>
+      <div class="pi ri" style="--d:120">
+        <div class="pi-n">03</div>
         <div>
-          <h3>A estrutura que converte</h3>
-          <p>Cada semana tem posts de atração, de autoridade e de conversão. <strong>Na sequência certa</strong> para mover leads pelo funil — de desconhecido a cliente — sem forçar a venda.</p>
+          <div class="pi-t">A estrutura que converte</div>
+          <p class="pi-b">Cada semana tem posts de atração, de autoridade e de conversão. <strong>Na sequência certa</strong> para mover leads pelo funil.</p>
         </div>
       </div>
     </div>
 
     <!-- ALERT CARD -->
-    <div class="alert-card ri" style="--d:80">
-      <div class="alert-label">⚡ Recurso exclusivo · Alert Instantâneo</div>
-      <h2>Viu um conteúdo com potencial?<br>Manda o link.</h2>
+    <div class="alert ri" style="--d:80">
+      <div class="alert-tag">⚡ Recurso exclusivo · Alert Instantâneo</div>
+      <h3>Viu um conteúdo com potencial?<br>Manda o link.</h3>
       <p>Em minutos você recebe o <strong>roteiro completo feito para o seu tom de voz</strong>, para o seu posicionamento, para a sua audiência. Não é uma cópia. É a estrutura que funcionou, reescrita para quem você é.</p>
       <p>O mercado deu o sinal. Você publica a resposta.</p>
       <div class="alert-warn">
@@ -586,77 +533,77 @@
 </section>
 
 <!-- SEÇÃO 3 — TIMELINE -->
-<section class="section section-dark" id="timeline">
-  <div class="container">
-    <div class="section-header ri">
-      <span class="label label-accent">Da contratação ao resultado</span>
+<section class="section" id="timeline">
+  <div class="w">
+    <div class="sh ri">
+      <span class="label label-gold">Da contratação ao resultado</span>
       <h2 class="h2">Da contratação à primeira publicação:<br>48 horas.</h2>
     </div>
 
-    <div class="timeline">
-      <div class="tl-item ri">
+    <div class="tl">
+      <div class="tl-row ri">
         <div class="tl-dot"></div>
-        <div class="tl-what">
+        <div>
           <div class="tl-when">Hoje</div>
           <h3>Você entra, responde 3 perguntas</h3>
-          <p>Seu negócio, seu produto, seus concorrentes. É tudo que o sistema precisa para começar a trabalhar por você.</p>
+          <p>Seu negócio, seus concorrentes. É tudo que o sistema precisa para começar.</p>
         </div>
       </div>
-      <div class="tl-item ri" style="--d:60">
+      <div class="tl-row ri" style="--d:60">
         <div class="tl-dot"></div>
-        <div class="tl-what">
+        <div>
           <div class="tl-when">Em 24 horas</div>
           <h3>Primeiro pacote de conteúdo chega no seu WhatsApp</h3>
           <p>14 posts prontos para a semana. Você revisa, agenda, publica. <strong>Sem uma ideia saindo da sua cabeça.</strong></p>
         </div>
       </div>
-      <div class="tl-item ri" style="--d:120">
+      <div class="tl-row ri" style="--d:120">
         <div class="tl-dot"></div>
-        <div class="tl-what">
+        <div>
           <div class="tl-when">Em 48 horas</div>
           <h3>Você já está publicando com consistência</h3>
           <p>Pela primeira vez, você tem conteúdo para a semana inteira sem ter passado horas pensando no que postar.</p>
         </div>
       </div>
-      <div class="tl-item ri" style="--d:180">
+      <div class="tl-row ri" style="--d:180">
         <div class="tl-dot"></div>
-        <div class="tl-what">
+        <div>
           <div class="tl-when">Em 7 dias</div>
           <h3>Sua presença começa a mudar</h3>
           <p>Você aparece todo dia, com conteúdo certo, para a pessoa certa. <strong>O algoritmo percebe. A audiência percebe.</strong></p>
         </div>
       </div>
-      <div class="tl-item ri" style="--d:240">
+      <div class="tl-row ri" style="--d:240">
         <div class="tl-dot done"></div>
-        <div class="tl-what">
-          <div class="tl-when green">Em 30 dias</div>
+        <div>
+          <div class="tl-when g">Em 30 dias</div>
           <h3>O algoritmo te favorece. A audiência te reconhece como referência.</h3>
           <p>As perguntas no direct aumentam. <strong>Seu conteúdo para de ser barulho e começa a ser autoridade.</strong></p>
         </div>
       </div>
     </div>
 
-    <div class="warn-box ri">
+    <div class="warn ri">
       <strong>Cada semana sem consistência</strong> é uma semana que alguém do seu nicho ocupa o espaço que poderia ser seu. O Instagram não espera você estar pronto. Ele já está escolhendo quem aparece.
     </div>
   </div>
 </section>
 
-<!-- SEÇÃO 4 — ESFORÇO / CONTRASTE -->
-<section class="section" id="compare">
-  <div class="container">
-    <div class="section-header ri">
+<!-- SEÇÃO 4 — CONTRASTE -->
+<section class="section section-alt" id="compare">
+  <div class="w">
+    <div class="sh ri">
       <span class="label">O esforço sem e com o Signal</span>
       <h2 class="h2">O que você gasta hoje para tentar<br>resolver isso sozinho</h2>
     </div>
 
-    <div class="contrast-wrap ri">
-      <table class="contrast-table">
+    <div class="ct-wrap ri">
+      <table class="ct">
         <thead>
           <tr>
             <th></th>
             <th>Sem o Signal</th>
-            <th class="col-with">Com o Signal</th>
+            <th class="c-with">Com o Signal</th>
           </tr>
         </thead>
         <tbody>
@@ -694,7 +641,7 @@
       </table>
     </div>
 
-    <div class="close-box ri">
+    <div class="close-note ri">
       Você já está pagando para resolver esse problema. Em tempo, em dinheiro ou nos dois.<br>
       <strong>A diferença é que agora você pode parar de pagar caro para ter resultado ruim.</strong>
     </div>
@@ -702,98 +649,98 @@
 </section>
 
 <!-- SEÇÃO 5 — FOMO -->
-<section class="section section-dark" id="fomo">
-  <div class="container">
-    <div class="fomo-inner">
-      <span class="label ri">O espaço existe agora</span>
-      <h2 class="h2 ri" style="--d:60">O espaço que você não ocupa,<br>alguém vai ocupar.</h2>
-      <div class="fomo-body ri" style="--d:120">
-        <p>No seu nicho, agora mesmo, tem alguém que está aparecendo todo dia.<br>
-        Publicando o que a audiência quer ver.<br>
-        Construindo autoridade que leva semanas para ser derrubada.</p>
-        <p>Não porque ele é mais inteligente.<br>
-        Não porque ele tem mais talento.<br>
-        <strong>Porque ele tem sistema e você ainda está decidindo o que postar hoje.</strong></p>
-        <p>Toda semana que passa sem consistência, alguém avança no espaço que é seu por direito.<br>
-        Toda semana que você aparece, esse espaço fica menor para todo mundo que está tentando chegar onde você já está.</p>
-      </div>
-      <div class="fomo-quote ri" style="--d:200">
-        A posição de referência no seu nicho não fica vaga para sempre. Ela vai para quem aparece mais. Mais rápido. Com mais consistência.<br>
-        <span class="accent">Essa pessoa pode ser você — ou pode ser o concorrente que contratou o Signal antes.</span>
-      </div>
+<section id="fomo">
+  <div class="w">
+    <span class="label ri">O espaço existe agora</span>
+    <h2 class="h2 ri" style="--d:60">O espaço que você não ocupa,<br>alguém vai ocupar.</h2>
+
+    <div class="fomo-body ri" style="--d:120">
+      <p>No seu nicho, agora mesmo, tem alguém que está aparecendo todo dia.<br>
+      Publicando o que a audiência quer ver.<br>
+      Construindo autoridade que leva semanas para ser derrubada.</p>
+      <p>Não porque ele é mais inteligente.<br>
+      Não porque ele tem mais talento.<br>
+      <strong>Porque ele tem sistema e você ainda está decidindo o que postar hoje.</strong></p>
+      <p>Toda semana que passa sem consistência, alguém avança no espaço que é seu por direito.<br>
+      Toda semana que você aparece, esse espaço fica menor para todo mundo que está tentando chegar onde você já está.</p>
+    </div>
+
+    <div class="fomo-quote ri" style="--d:220">
+      A posição de referência no seu nicho não fica vaga para sempre. Ela vai para quem aparece mais. Mais rápido. Com mais consistência.<br>
+      <span class="a">Essa pessoa pode ser você — ou pode ser o concorrente que contratou o Signal antes.</span>
     </div>
   </div>
 </section>
 
 <!-- PREÇOS -->
 <section class="section" id="pricing">
-  <div class="container">
-    <div class="section-header ri" style="text-align:center;max-width:100%;margin-bottom:48px;">
+  <div class="w">
+    <div class="sh ri" style="text-align:center;max-width:100%;margin-bottom:52px;">
       <span class="label" style="display:block;text-align:center;">Planos</span>
       <h2 class="h2" style="text-align:center;">Você não paga para ter mais trabalho.<br>Paga para parar de perder terreno.</h2>
-      <p class="body-lg" style="text-align:center;margin:12px auto 0;max-width:440px;">
+      <p class="body-lg" style="text-align:center;margin:14px auto 0;max-width:420px;">
         Uma agência cobra R$5.000/mês para fazer parte disso. Aqui começa em R$197.
       </p>
     </div>
 
-    <div class="pricing-grid">
+    <div class="plan-grid">
 
-      <div class="plan-card ri" style="--d:0">
+      <div class="plan ri" style="--d:0">
         <div class="plan-name">Radar Mensal</div>
-        <div class="plan-tagline">Para quem quer estar sempre à frente do mercado.</div>
-        <div class="plan-price">
+        <div class="plan-tag">Para quem quer estar sempre à frente do mercado.</div>
+        <div class="plan-pr">
           <div class="per">Por mês</div>
-          <div class="amount">R$&nbsp;197</div>
-          <div class="recur">Recorrente · Cancela quando quiser</div>
+          <div class="amt">R$&nbsp;197</div>
+          <div class="rec">Recorrente · Cancela quando quiser</div>
         </div>
-        <ul class="plan-features">
-          <li><span class="plan-check">✓</span>Monitoramento de <strong>2 concorrentes</strong></li>
-          <li><span class="plan-check">✓</span>Alerta quando post viral aparecer no seu nicho</li>
-          <li><span class="plan-check">✓</span>Roteiro adaptado entregue via WhatsApp</li>
-          <li><span class="plan-check">✓</span>Análise semanal do que funciona no mercado</li>
+        <ul class="plan-feat">
+          <li><span class="ck">✓</span>Monitoramento de <strong>2 concorrentes</strong></li>
+          <li><span class="ck">✓</span>Alerta quando post viral aparecer no seu nicho</li>
+          <li><span class="ck">✓</span>Roteiro adaptado entregue via WhatsApp</li>
+          <li><span class="ck">✓</span>Análise semanal do que funciona no mercado</li>
         </ul>
-        <button onclick="openWpp('radar')" class="btn btn-outline plan-cta" style="cursor:pointer;">Ativar meu Radar</button>
-        <p class="plan-footer">Para quem quer parar de reagir e começar a antecipar.</p>
+        <button onclick="openWpp('radar')" class="btn btn-ghost plan-cta" style="cursor:pointer;">Ativar meu Radar</button>
+        <p class="plan-foot">Para quem quer parar de reagir e começar a antecipar.</p>
       </div>
 
-      <div class="plan-card featured ri" style="--d:100">
+      <div class="plan f ri" style="--d:100">
         <div class="plan-badge">Mais escolhido</div>
         <div class="plan-name">Fábrica de Conteúdo</div>
-        <div class="plan-tagline">Para quem quer volume com estratégia, toda semana.</div>
-        <div class="plan-price">
+        <div class="plan-tag">Para quem quer volume com estratégia, toda semana.</div>
+        <div class="plan-pr">
           <div class="per">Por mês</div>
-          <div class="amount">R$&nbsp;397</div>
-          <div class="recur">Recorrente · Cancela quando quiser</div>
+          <div class="amt">R$&nbsp;397</div>
+          <div class="rec">Recorrente · Cancela quando quiser</div>
         </div>
-        <ul class="plan-features">
-          <li><span class="plan-check">✓</span><strong>Tudo do Radar</strong>, mais:</li>
-          <li><span class="plan-check">✓</span><strong>14 posts prontos</strong> toda semana</li>
-          <li><span class="plan-check">✓</span><strong>Legendas com SEO</strong> e CTA integrado</li>
-          <li><span class="plan-check">✓</span><strong>Funil completo</strong> — atração, autoridade e conversão</li>
-          <li><span class="plan-check">✓</span><strong>Alert Instantâneo</strong> ilimitado</li>
-          <li><span class="plan-check">✓</span>Diretrizes de tom de voz calibradas</li>
+        <ul class="plan-feat">
+          <li><span class="ck">✓</span><strong>Tudo do Radar</strong>, mais:</li>
+          <li><span class="ck">✓</span><strong>14 posts prontos</strong> toda semana</li>
+          <li><span class="ck">✓</span><strong>Legendas com SEO</strong> e CTA integrado</li>
+          <li><span class="ck">✓</span><strong>Funil completo</strong> — atração, autoridade e conversão</li>
+          <li><span class="ck">✓</span><strong>Alert Instantâneo</strong> ilimitado</li>
+          <li><span class="ck">✓</span>Diretrizes de tom de voz calibradas</li>
         </ul>
-        <button onclick="openWpp('fabrica')" class="btn btn-primary plan-cta" style="border:none;cursor:pointer;">Quero minha fábrica</button>
-        <p class="plan-footer">Para quem cansa de improvisar e quer aparecer todo dia.</p>
+        <button onclick="openWpp('fabrica')" class="btn btn-wpp plan-cta" style="border:none;cursor:pointer;">Quero minha fábrica</button>
+        <p class="plan-foot">Para quem cansa de improvisar e quer aparecer todo dia.</p>
       </div>
 
-      <div class="plan-card ri" style="--d:200">
+      <div class="plan ri" style="--d:200">
         <div class="plan-name">Dominância</div>
-        <div class="plan-tagline">Para quem não aceita ser o segundo do nicho.</div>
-        <div class="plan-price">
+        <div class="plan-tag">Para quem não aceita ser o segundo do nicho.</div>
+        <div class="plan-pr">
           <div class="per">Por mês</div>
-          <div class="amount">R$&nbsp;697</div>
-          <div class="recur">Recorrente · Cancela quando quiser</div>
+          <div class="amt">R$&nbsp;697</div>
+          <div class="rec">Recorrente · Cancela quando quiser</div>
         </div>
-        <ul class="plan-features">
-          <li><span class="plan-check">✓</span><strong>Tudo da Fábrica</strong>, mais:</li>
-          <li><span class="plan-check">✓</span>Monitoramento de até <strong>5 concorrentes</strong></li>
-          <li><span class="plan-check">✓</span>Análise de mercado semanal detalhada</li>
-          <li><span class="plan-check">✓</span><strong>Plano 30/60/90 dias</strong> atualizado mensalmente</li>
-          <li><span class="plan-check">✓</span>Score de posicionamento vs. concorrentes</li>
+        <ul class="plan-feat">
+          <li><span class="ck">✓</span><strong>Tudo da Fábrica</strong>, mais:</li>
+          <li><span class="ck">✓</span>Monitoramento de até <strong>5 concorrentes</strong></li>
+          <li><span class="ck">✓</span>Análise de mercado semanal detalhada</li>
+          <li><span class="ck">✓</span><strong>Plano 30/60/90 dias</strong> atualizado mensalmente</li>
+          <li><span class="ck">✓</span>Score de posicionamento vs. concorrentes</li>
         </ul>
-        <button onclick="openWpp('dominancia')" class="btn btn-outline plan-cta" style="cursor:pointer;">Quero dominar meu nicho</button>
-        <p class="plan-footer">Para Mentores e Especialistas que querem o topo.</p>
+        <button onclick="openWpp('dominancia')" class="btn btn-ghost plan-cta" style="cursor:pointer;">Quero dominar meu nicho</button>
+        <p class="plan-foot">Para Mentores e Especialistas que querem o topo.</p>
       </div>
 
     </div>
@@ -801,14 +748,14 @@
 </section>
 
 <!-- CTA FINAL -->
-<section id="cta-final">
-  <div class="container">
+<section id="cta">
+  <div class="w">
     <span class="label ri" style="display:block;text-align:center;">Próximo passo</span>
     <h2 class="h2 ri" style="--d:60;text-align:center;">
       Seu próximo cliente já está no Instagram.<br>
       Quem ele vai encontrar primeiro?
     </h2>
-    <p class="body-lg ri" style="--d:120">
+    <p class="body-lg ri" style="--d:120;text-align:center;">
       Você ou o concorrente que começou a postar todo dia antes de você?
     </p>
     <div style="display:flex;justify-content:center;" class="ri" style="--d:180">
@@ -817,7 +764,7 @@
         Quero garantir meu espaço agora
       </button>
     </div>
-    <p style="text-align:center;font-size:12px;color:var(--ink-3);margin-top:14px;" class="ri">
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px;" class="ri">
       Primeira entrega em 24h &nbsp;·&nbsp; 14 posts prontos por semana &nbsp;·&nbsp; Cancela quando quiser
     </p>
   </div>
@@ -836,15 +783,15 @@
     window.open(`https://wa.me/${SIGNAL_WPP}?text=${encodeURIComponent(msg)}`, '_blank');
   }
 
-  /* ── REVEAL — Jakub recipe: opacity + translateY + blur ── */
+  /* ── REVEAL ── */
   const io = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
     });
-  }, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
+  }, { threshold: 0.07, rootMargin: '0px 0px -28px 0px' });
   document.querySelectorAll('.ri').forEach(el => io.observe(el));
 
-  /* ── COUNTER — ease-out cubic ─────────────────────────── */
+  /* ── COUNTER ── */
   function countUp(el, target, suffix) {
     const dur = 1000, t0 = performance.now();
     const ease = t => 1 - Math.pow(1 - t, 3);
@@ -863,14 +810,14 @@
       cio.unobserve(el);
     });
   }, { threshold: 0.6 });
-  document.querySelectorAll('.stat-num[data-count]').forEach(el => cio.observe(el));
+  document.querySelectorAll('.stat-n[data-count]').forEach(el => cio.observe(el));
 
-  /* ── NAV shadow on scroll (Emil: fast, 150ms) ─────────── */
-  const nav = document.querySelector('nav');
+  /* ── NAV shadow ── */
+  const navEl = document.querySelector('nav');
   window.addEventListener('scroll', () => {
-    nav.style.borderBottomColor = window.scrollY > 8
-      ? 'rgba(255,255,255,.11)'
-      : 'rgba(255,255,255,.07)';
+    navEl.style.boxShadow = window.scrollY > 8
+      ? '0 1px 0 rgba(26,25,22,.1), 0 2px 12px rgba(26,25,22,.06)'
+      : 'none';
   }, { passive: true });
 </script>
 </body>
