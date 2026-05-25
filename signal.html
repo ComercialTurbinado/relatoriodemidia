@@ -445,25 +445,8 @@
     .sh .h2 { margin: 10px 0 20px; }
     .sh .body-lg + .body-lg { margin-top: 14px; }
 
-    /* ── Why Section Background ── */
-    #why {
-      position: relative;
-      overflow: visible;
-    }
-    #why::before {
-      content: '';
-      position: absolute;
-      bottom: -100px;
-      right: -100px;
-      width: 900px;
-      height: 900px;
-      background:
-        radial-gradient(circle at 100% 100%, oklch(50% 0.2 148 / 0.35) 0%, transparent 38%),
-        radial-gradient(circle at 85% 90%, oklch(52% 0.18 148 / 0.28) 0%, transparent 45%);
-      pointer-events: none;
-      z-index: 0;
-    }
-    #why .w { position: relative; z-index: 1; }
+    /* ── Why Section ── */
+    #why { position: relative; }
 
     /* ── Why grid (2-col) ── */
     .why-grid {
