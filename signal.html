@@ -1135,13 +1135,19 @@
         plans.forEach(plan => {
           const amt = plan.querySelector('.amt');
           const per = plan.querySelector('.per');
+          const rec = plan.querySelector('.rec');
 
           if (mode === 'monthly') {
             amt.textContent = `R$ ${plan.dataset.monthly}`;
             per.textContent = 'Por mês';
+            rec.textContent = 'Recorrente · Cancela quando quiser';
           } else {
-            amt.textContent = `R$ ${plan.dataset.annual}`;
-            per.textContent = 'Por ano';
+            // Calculate monthly equivalent (annual divided by 12)
+            const annualPrice = parseFloat(plan.dataset.annual);
+            const monthlyEquivalent = (annualPrice / 12).toFixed(2);
+            amt.textContent = `R$ ${monthlyEquivalent}`;
+            per.textContent = 'Por mês';
+            rec.textContent = `Pagamento único anual: R$ ${annualPrice.toFixed(2)}`;
           }
         });
       });
