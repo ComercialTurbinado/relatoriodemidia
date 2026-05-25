@@ -417,16 +417,19 @@
     .why-grid .sh { max-width: none; margin-bottom: 0; }
 
     /* ── Proof list ── */
-    .proof { display: flex; flex-direction: column; }
+    .proof { display: flex; flex-direction: column; gap: 12px; }
     .pi {
       display: grid; grid-template-columns: 64px 1fr;
-      gap: 0; align-items: start;
-      padding: 28px 0; border-bottom: 1px solid var(--line);
+      gap: 16px; align-items: start;
+      margin: 10px;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 10px;
     }
-    .pi:last-child { border-bottom: none; }
     .pi-n {
       font-family: var(--sans-h); font-style: italic; font-weight: 700;
-      font-size: 44px; letter-spacing: -.03em; line-height: 1;
+      font-size: clamp(44px, 6vw, 56px); letter-spacing: -.03em; line-height: 1;
       color: var(--gold); padding-top: 2px;
     }
     .pi-body { font-size: 15px; color: var(--body); line-height: 1.72; padding-top: 6px; }
@@ -686,7 +689,8 @@
       .stat { margin: 6px; padding: 16px; }
       .stat-n { font-size: clamp(52px, 7vw, 72px); margin-bottom: 12px; }
       .stat-l { font-size: 12px; }
-      .pi { grid-template-columns: 52px 1fr; }
+      .pi { grid-template-columns: 52px 1fr; margin: 8px; padding: 16px; gap: 12px; }
+      .pi-n { font-size: clamp(36px, 5vw, 44px); }
     }
 
     /* ── Reduced motion ── */
