@@ -360,22 +360,30 @@
     .stats-band {
       background: var(--bg-dark);
       display: grid; grid-template-columns: repeat(4, 1fr);
+      padding: 40px 32px;
+      gap: 20px;
     }
     .stat {
-      padding: 52px 36px 48px;
-      border-right: 1px solid oklch(100% 0 0 / .06);
+      margin: 10px;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
-    .stat:last-child { border-right: none; }
     .stat-n {
       font-family: var(--sans-h); font-weight: 700;
-      font-size: clamp(60px, 8vw, 92px);
+      font-size: clamp(72px, 9.2vw, 108px);
       letter-spacing: -.03em; line-height: 1;
-      color: var(--gold); margin-bottom: 12px;
+      color: var(--gold); margin-bottom: 16px;
     }
     .stat-l {
-      font-size: 11px; font-weight: 600;
-      letter-spacing: .07em; text-transform: uppercase;
-      color: oklch(100% 0 0 / .35); line-height: 1.5;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: .05em;
+      color: var(--body); line-height: 1.5;
     }
 
     /* ── Callout Strip ── */
@@ -674,10 +682,10 @@
       .hero-actions { flex-direction: column; width: 100%; }
       .hero-actions .btn { width: 100%; justify-content: center; }
       .plan-grid { grid-template-columns: 1fr; }
-      .stats-band { grid-template-columns: repeat(2,1fr); }
-      .stat { border-right: none; border-bottom: 1px solid oklch(100% 0 0 / .06); padding: 36px 24px; }
-      .stat:nth-child(odd) { border-right: 1px solid oklch(100% 0 0 / .06); }
-      .stat:nth-last-child(-n+2) { border-bottom: none; }
+      .stats-band { grid-template-columns: repeat(2, 1fr); padding: 32px 12px; gap: 12px; }
+      .stat { margin: 6px; padding: 16px; }
+      .stat-n { font-size: clamp(52px, 7vw, 72px); margin-bottom: 12px; }
+      .stat-l { font-size: 12px; }
       .pi { grid-template-columns: 52px 1fr; }
     }
 
