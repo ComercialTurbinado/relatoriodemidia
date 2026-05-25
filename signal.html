@@ -142,8 +142,28 @@
     }
     .brand em { font-style: italic; color: var(--gold); }
 
+    /* ── Hero Background ── */
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 500px;
+      background:
+        radial-gradient(circle at 30% 50%, oklch(52% 0.18 148 / 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 70% 30%, oklch(50% 0.2 148 / 0.06) 0%, transparent 45%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
     /* ── Hero ── */
-    #hero { padding: 112px 0 96px; border: none; }
+    #hero {
+      padding: 112px 0 96px;
+      border: none;
+      position: relative;
+    }
+    #hero .w { position: relative; z-index: 1; }
     .hero-grid {
       display: grid;
       grid-template-columns: 1fr 420px;
