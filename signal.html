@@ -458,16 +458,27 @@
     }
     .why-grid .sh { max-width: none; margin-bottom: 0; }
 
+    /* ── Problem Alert ── */
+    .problem-alert {
+      padding: 40px;
+      background: #FEF9E7;
+      border: 2px solid #F4D76D;
+      border-radius: 12px;
+    }
+    .problem-alert .sh { max-width: none; margin-bottom: 0; }
+    .problem-alert .h2 { color: var(--ink); }
+    .problem-alert .body-lg { color: var(--body); }
+
     /* ── Proof list ── */
     .proof { display: flex; flex-direction: column; gap: 12px; }
     .pi {
       display: grid; grid-template-columns: 64px 1fr;
-      gap: 16px; align-items: start;
-      margin: 10px;
-      padding: 20px;
+      gap: 12px; align-items: start;
+      margin: 0;
+      padding: 14px;
       background: #fff;
       border: 1px solid #eee;
-      border-radius: 10px;
+      border-radius: 8px;
     }
     .pi-n {
       font-family: var(--sans-h); font-style: italic; font-weight: 700;
@@ -906,28 +917,30 @@
 <!-- SEÇÃO PROBLEMA -->
 <section class="sec" id="problem">
   <div class="w">
-    <div class="sh ri">
-      <h2 class="h2">Seu Instagram pode estar trabalhando <span class="accent-font">contra você</span> — e o prejuízo é silencioso.</h2>
-      <p class="body-lg">Postar sem diagnóstico é como dirigir no escuro. Você grava Reels, segue tendências e gasta horas editando, mas o resultado não aparece. O problema não é falta de esforço; é falta de dados.</p>
-      <p class="body-lg">Sem saber o que o seu mercado já validou e o que seus concorrentes fazem melhor, você está apenas queimando tempo.</p>
-    </div>
+    <div class="problem-alert ri">
+      <div class="sh">
+        <h2 class="h2">Seu Instagram pode estar trabalhando <span class="accent-font">contra você</span> — e o prejuízo é silencioso.</h2>
+        <p class="body-lg">Postar sem diagnóstico é como dirigir no escuro. Você grava Reels, segue tendências e gasta horas editando, mas o resultado não aparece. O problema não é falta de esforço; é falta de dados.</p>
+        <p class="body-lg">Sem saber o que o seu mercado já validou e o que seus concorrentes fazem melhor, você está apenas queimando tempo.</p>
+      </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-top: 56px;">
-      <div class="pi ri" style="--d:0">
-        <div class="pi-n">01</div>
-        <p class="pi-body">Você demora <strong>horas</strong> para decidir o que postar.</p>
-      </div>
-      <div class="pi ri" style="--d:60">
-        <div class="pi-n">02</div>
-        <p class="pi-body">Seus posts geram curtidas, mas <strong>zero DMs</strong> e vendas.</p>
-      </div>
-      <div class="pi ri" style="--d:120">
-        <div class="pi-n">03</div>
-        <p class="pi-body">Sua bio não deixa claro o <strong>valor</strong> do seu serviço.</p>
-      </div>
-      <div class="pi ri" style="--d:180">
-        <div class="pi-n">04</div>
-        <p class="pi-body">Você depende de <strong>inspiração</strong> para produzir.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 36px;">
+        <div class="pi ri" style="--d:0">
+          <div class="pi-n">01</div>
+          <p class="pi-body">Você demora <strong>horas</strong> para decidir o que postar.</p>
+        </div>
+        <div class="pi ri" style="--d:60">
+          <div class="pi-n">02</div>
+          <p class="pi-body">Seus posts geram curtidas, mas <strong>zero DMs</strong> e vendas.</p>
+        </div>
+        <div class="pi ri" style="--d:120">
+          <div class="pi-n">03</div>
+          <p class="pi-body">Sua bio não deixa claro o <strong>valor</strong> do seu serviço.</p>
+        </div>
+        <div class="pi ri" style="--d:180">
+          <div class="pi-n">04</div>
+          <p class="pi-body">Você depende de <strong>inspiração</strong> para produzir.</p>
+        </div>
       </div>
     </div>
   </div>
