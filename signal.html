@@ -73,11 +73,14 @@
       color: var(--ink);
     }
     .h1 .punch {
-      font-family: var(--display);
-      font-style: italic; font-weight: 800;
-      color: var(--gold);
+      font-family: var(--sans-h);
+      font-style: italic; font-weight: 700;
       display: block; letter-spacing: -.02em;
       font-size: 1.3em;
+      background: linear-gradient(135deg, oklch(60% 0.18 148), oklch(40% 0.15 148));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
     }
 
     .h2 {
@@ -88,7 +91,14 @@
     }
     .h2 .accent-font { font-family: var(--display); }
 
-    .accent-font { font-family: var(--display); font-style: italic; font-weight: 800; color: var(--gold); font-size: 1.3em; }
+    .accent-font {
+      font-style: italic; font-weight: 700;
+      font-size: 1.3em;
+      background: linear-gradient(135deg, oklch(60% 0.18 148), oklch(40% 0.15 148));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
 
     .body-lg { font-size: clamp(16px, 1.55vw, 18px); color: var(--body); line-height: 1.25; }
     .body-sm { font-size: 15px; color: var(--body); line-height: 1.25; }
