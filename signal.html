@@ -73,7 +73,7 @@
       color: var(--ink);
     }
     .h1 .punch {
-      font-family: var(--sans-h);
+      font-family: var(--display);
       font-style: italic; font-weight: 700;
       display: block; letter-spacing: -.02em;
       font-size: 1.3em;
@@ -81,6 +81,10 @@
       background-clip: text;
       -webkit-background-clip: text;
       color: transparent;
+    }
+    .h1 em .accent-font {
+      font-family: var(--sans-h);
+      font-weight: 700;
     }
 
     .h2 {
@@ -92,6 +96,7 @@
     .h2 .accent-font { font-family: var(--display); }
 
     .accent-font {
+      font-family: var(--display);
       font-style: italic; font-weight: 700;
       font-size: 1.3em;
       background: linear-gradient(135deg, oklch(60% 0.18 148), oklch(40% 0.15 148));
