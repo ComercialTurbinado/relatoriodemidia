@@ -42,7 +42,7 @@
       font-family: var(--sans);
       background: var(--bg);
       color: var(--ink);
-      line-height: 1.6;
+      line-height: 1.25;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -89,8 +89,8 @@
 
     .accent-font { font-family: var(--display); font-style: italic; font-weight: 400; color: var(--gold); }
 
-    .body-lg { font-size: clamp(16px, 1.55vw, 18px); color: var(--body); line-height: 1.78; }
-    .body-sm { font-size: 15px; color: var(--body); line-height: 1.72; }
+    .body-lg { font-size: clamp(16px, 1.55vw, 18px); color: var(--body); line-height: 1.25; }
+    .body-sm { font-size: 15px; color: var(--body); line-height: 1.25; }
 
     /* ── Buttons ── */
     .btn {
@@ -166,7 +166,7 @@
       border: 1px solid var(--gold-line);
       border-radius: 8px;
       font-size: 15px; font-style: italic;
-      color: var(--body); line-height: 1.65;
+      color: var(--body); line-height: 1.25;
     }
 
     .hero-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -256,7 +256,7 @@
       max-width: 82%;
       padding: 6px 8px 18px;
       border-radius: 8px;
-      font-family: var(--sans); font-size: 12px; line-height: 1.45;
+      font-family: var(--sans); font-size: 12px; line-height: 1.25;
       color: #111;
       position: relative;
       opacity: 0;
@@ -387,7 +387,7 @@
     .stat-l {
       font-size: 13px; font-weight: 600;
       letter-spacing: .05em;
-      color: var(--body); line-height: 1.5;
+      color: var(--body); line-height: 1.25;
     }
 
     /* ── Callout Strip ── */
@@ -436,7 +436,7 @@
       font-size: clamp(44px, 6vw, 56px); letter-spacing: -.03em; line-height: 1;
       color: var(--gold); padding-top: 2px;
     }
-    .pi-body { font-size: 15px; color: var(--body); line-height: 1.72; padding-top: 6px; }
+    .pi-body { font-size: 15px; color: var(--body); line-height: 1.25; padding-top: 6px; }
     .pi-body strong { color: var(--ink); font-weight: 600; }
 
     /* ── Alert card ── */
@@ -457,7 +457,7 @@
       font-weight: 700; letter-spacing: -.02em; line-height: 1.1;
       margin-bottom: 16px; color: var(--ink);
     }
-    .alert p  { font-size: 15px; color: var(--body); line-height: 1.72; margin-bottom: 12px; }
+    .alert p  { font-size: 15px; color: var(--body); line-height: 1.25; margin-bottom: 12px; }
     .alert p:last-of-type { margin-bottom: 0; }
     .alert p strong { color: var(--ink); font-weight: 600; }
     .alert-warn {
@@ -494,14 +494,14 @@
       text-transform: uppercase; color: var(--gold); margin-bottom: 6px;
     }
     .tl-when.g { color: var(--green); }
-    .tl-text { font-size: 16px; color: var(--body); line-height: 1.65; }
+    .tl-text { font-size: 16px; color: var(--body); line-height: 1.25; }
     .tl-text strong { color: var(--ink); font-weight: 600; }
 
     .warn-box {
       margin-top: 40px; padding: 20px 24px;
       background: var(--red-tint); border: 1px solid var(--red-line);
       border-radius: var(--r);
-      font-size: 15px; color: var(--body); line-height: 1.68;
+      font-size: 15px; color: var(--body); line-height: 1.25;
     }
     .warn-box strong { color: var(--ink); font-weight: 600; }
 
@@ -532,7 +532,7 @@
       margin-top: 28px; padding: 20px 24px;
       border: 1px solid var(--line-md); border-radius: var(--r);
       background: var(--bg-alt);
-      font-size: 15px; color: var(--body); line-height: 1.7;
+      font-size: 15px; color: var(--body); line-height: 1.25;
     }
     .close-note strong { color: var(--ink); font-weight: 600; }
 
@@ -542,7 +542,7 @@
     #fomo .h2 { color: oklch(97% 0.005 78); margin: 10px 0 36px; }
     .fomo-body {
       max-width: 660px;
-      font-size: clamp(16px, 1.6vw, 18px); line-height: 1.85;
+      font-size: clamp(16px, 1.6vw, 18px); line-height: 1.25;
       color: oklch(100% 0 0 / .48);
     }
     .fomo-body p + p { margin-top: 20px; }
@@ -555,7 +555,7 @@
       border-radius: 8px;
       font-family: var(--sans-h); font-style: italic; font-weight: 600;
       font-size: clamp(17px, 1.9vw, 22px);
-      color: oklch(100% 0 0 / .48); line-height: 1.6;
+      color: oklch(100% 0 0 / .48); line-height: 1.25;
     }
     .fomo-quote .accent { color: var(--gold); }
 
@@ -584,7 +584,7 @@
       text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
     }
     .plan.f .plan-name { color: oklch(100% 0 0 / .3); }
-    .plan-tag  { font-size: 13px; color: var(--body); margin-bottom: 24px; line-height: 1.45; }
+    .plan-tag  { font-size: 13px; color: var(--body); margin-bottom: 24px; line-height: 1.25; }
     .plan.f .plan-tag { color: oklch(100% 0 0 / .48); }
     .plan-pr   { margin-bottom: 28px; }
     .per { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
@@ -656,7 +656,7 @@
       border-top: 1px solid var(--line); padding: 32px;
       text-align: center; background: var(--bg);
     }
-    footer p { font-size: 12px; color: var(--muted); line-height: 1.7; }
+    footer p { font-size: 12px; color: var(--muted); line-height: 1.25; }
 
     /* ── Reveal animations (Jakub recipe) ── */
     .ri {
