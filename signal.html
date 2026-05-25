@@ -7,7 +7,7 @@
   <meta name="description" content="14 posts prontos toda semana. Criados com os dados do seu mercado. Você só publica." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=Barlow+Semi+Condensed:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=Barlow+Semi+Condensed:ital,wght@0,600;0,700;1,600;1,700&family=Gabriela&display=swap" rel="stylesheet" />
   <style>
     /* ── Reset ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,6 +31,7 @@
       --red-text:  oklch(38%   0.095 20);
       --sans-h:    'Barlow Semi Condensed', system-ui, sans-serif;
       --sans:      'Barlow', system-ui, sans-serif;
+      --display:   'Gabriela', serif;
       --wrap:      1100px;
       --r:         6px;
     }
@@ -84,6 +85,9 @@
       font-weight: 700; line-height: 1.05;
       letter-spacing: -.02em; color: var(--ink);
     }
+    .h2 .accent-font { font-family: var(--display); }
+
+    .accent-font { font-family: var(--display); font-style: italic; font-weight: 400; color: var(--gold); }
 
     .body-lg { font-size: clamp(16px, 1.55vw, 18px); color: var(--body); line-height: 1.78; }
     .body-sm { font-size: 15px; color: var(--body); line-height: 1.72; }
@@ -980,7 +984,7 @@
 <section id="fomo">
   <div class="w">
     <span class="eyebrow ri">O espaço existe agora</span>
-    <h2 class="h2 ri" style="--d:60">O espaço que você não ocupa,<br>alguém vai ocupar.</h2>
+    <h2 class="h2 ri" style="--d:60">O espaço que você não ocupa,<br><span class="accent-font">alguém vai ocupar.</span></h2>
 
     <div class="fomo-body ri" style="--d:120">
       <p>No seu nicho, agora mesmo, tem alguém que está aparecendo todo dia.<br>
