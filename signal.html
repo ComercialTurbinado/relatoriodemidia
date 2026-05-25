@@ -149,12 +149,8 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 600px;
-      background:
-        linear-gradient(to right, oklch(50% 0.2 148 / 0.12) 1px, transparent 1px),
-        linear-gradient(to bottom, oklch(50% 0.2 148 / 0.12) 1px, transparent 1px),
-        radial-gradient(circle at 20% 140%, oklch(52% 0.18 148 / 0.28) 0%, transparent 50%),
-        radial-gradient(circle at 80% 120%, oklch(50% 0.2 148 / 0.24) 0%, transparent 48%);
+      height: 100%;
+      background: linear-gradient(to right, oklch(0.5 0.2 148 / 0.05) 1px, #00000000 1px), linear-gradient(to bottom, oklch(0.5 0.2 148 / 0.08) 1px, transparent 1px), radial-gradient(circle at 20% 140%, oklch(0.52 0.18 148 / 0.42) 0%, transparent 50%), radial-gradient(circle at 80% 120%, oklch(0.5 0.2 148 / 0.3) 0%, #00000000 48%);
       background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
       pointer-events: none;
       z-index: 0;
@@ -756,6 +752,44 @@
       .pi-n { font-size: clamp(36px, 5vw, 44px); }
     }
 
+    /* ── Deliverables ── */
+    .deliver {
+      padding: 28px 24px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      transition: border-color .18s, transform .2s cubic-bezier(.16,1,.3,1);
+    }
+    .deliver:hover { border-color: var(--gold); transform: translateY(-2px); }
+
+    /* ── FAQ ── */
+    .faq-item {
+      background: transparent;
+      border: none;
+    }
+    .faq-item summary {
+      transition: background .18s, border-color .18s, color .18s;
+    }
+    .faq-item:hover summary {
+      background: var(--bg-alt) !important;
+      border-color: var(--gold) !important;
+    }
+    .faq-item[open] summary {
+      background: var(--bg-alt) !important;
+      border-color: var(--gold) !important;
+      color: var(--gold) !important;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::before {
+      content: '+';
+      display: inline-block;
+      margin-right: 12px;
+      font-weight: 700;
+      transition: transform .2s cubic-bezier(.16,1,.3,1);
+      width: 20px;
+    }
+    .faq-item[open] summary::before { transform: rotate(45deg); }
+
     /* ── Reduced motion ── */
     @media(prefers-reduced-motion:reduce) {
       .ri { opacity:1; transform:none; filter:none; transition:none; }
@@ -885,6 +919,36 @@
     </p>
   </div>
 </div>
+
+<!-- SEÇÃO PROBLEMA -->
+<section class="sec" id="problem">
+  <div class="w">
+    <div class="sh ri">
+      <h2 class="h2">Seu Instagram pode estar trabalhando <span class="accent-font">contra você</span> — e o prejuízo é silencioso.</h2>
+      <p class="body-lg">Postar sem diagnóstico é como dirigir no escuro. Você grava Reels, segue tendências e gasta horas editando, mas o resultado não aparece. O problema não é falta de esforço; é falta de dados.</p>
+      <p class="body-lg">Sem saber o que o seu mercado já validou e o que seus concorrentes fazem melhor, você está apenas queimando tempo.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-top: 56px;">
+      <div class="pi ri" style="--d:0">
+        <div class="pi-n">01</div>
+        <p class="pi-body">Você demora <strong>horas</strong> para decidir o que postar.</p>
+      </div>
+      <div class="pi ri" style="--d:60">
+        <div class="pi-n">02</div>
+        <p class="pi-body">Seus posts geram curtidas, mas <strong>zero DMs</strong> e vendas.</p>
+      </div>
+      <div class="pi ri" style="--d:120">
+        <div class="pi-n">03</div>
+        <p class="pi-body">Sua bio não deixa claro o <strong>valor</strong> do seu serviço.</p>
+      </div>
+      <div class="pi ri" style="--d:180">
+        <div class="pi-n">04</div>
+        <p class="pi-body">Você depende de <strong>inspiração</strong> para produzir.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- SEÇÃO 2 — POR QUE VAI FUNCIONAR -->
 <section class="sec" id="why">
@@ -1039,6 +1103,49 @@
   </div>
 </section>
 
+<!-- SEÇÃO 4.5 — O QUE VOCÊ RECEBE -->
+<section class="sec sec-alt" id="deliverables">
+  <div class="w">
+    <div class="sh ri" style="text-align: center; max-width: 100%; margin: 0 auto 60px;">
+      <span class="eyebrow" style="display: block; text-align: center;">A entrega de elite</span>
+      <h2 class="h2" style="text-align: center;">Tudo que você recebe no <span class="accent-font">Firemode Signal</span></h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px;">
+      <div class="deliver ri" style="--d:0">
+        <div style="font-family: var(--sans-h); font-size: 28px; font-weight: 700; color: var(--gold); margin-bottom: 12px;">📊</div>
+        <h3 style="font-family: var(--sans-h); font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 10px;">Diagnóstico de Posicionamento</h3>
+        <p style="font-size: 14px; color: var(--body); line-height: 1.4;">Análise profunda de Bio, promessa e clareza comercial</p>
+      </div>
+      <div class="deliver ri" style="--d:70">
+        <div style="font-family: var(--sans-h); font-size: 28px; font-weight: 700; color: var(--gold); margin-bottom: 12px;">🎯</div>
+        <h3 style="font-family: var(--sans-h); font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 10px;">Benchmark Competitivo</h3>
+        <p style="font-size: 14px; color: var(--body); line-height: 1.4;">Comparação visual com 2-5 concorrentes reais para diferenciar</p>
+      </div>
+      <div class="deliver ri" style="--d:140">
+        <div style="font-family: var(--sans-h); font-size: 28px; font-weight: 700; color: var(--gold); margin-bottom: 12px;">📈</div>
+        <h3 style="font-family: var(--sans-h); font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 10px;">Análise de Virais</h3>
+        <p style="font-size: 14px; color: var(--body); line-height: 1.4;">Leitura técnica dos conteúdos de maior performance do nicho</p>
+      </div>
+      <div class="deliver ri" style="--d:210">
+        <div style="font-family: var(--sans-h); font-size: 28px; font-weight: 700; color: var(--gold); margin-bottom: 12px;">📋</div>
+        <h3 style="font-family: var(--sans-h); font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 10px;">Roteiros Prontos</h3>
+        <p style="font-size: 14px; color: var(--body); line-height: 1.4;">Roteiros com ganchos, estrutura e CTAs baseados em dados reais</p>
+      </div>
+      <div class="deliver ri" style="--d:280">
+        <div style="font-family: var(--sans-h); font-size: 28px; font-weight: 700; color: var(--gold); margin-bottom: 12px;">🎬</div>
+        <h3 style="font-family: var(--sans-h); font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 10px;">Edição Done-For-You</h3>
+        <p style="font-size: 14px; color: var(--body); line-height: 1.4;">Cortes automáticos, legendas dinâmicas e capas otimizadas</p>
+      </div>
+      <div class="deliver ri" style="--d:350">
+        <div style="font-family: var(--sans-h); font-size: 28px; font-weight: 700; color: var(--gold); margin-bottom: 12px;">⚡</div>
+        <h3 style="font-family: var(--sans-h); font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 10px;">Alert Instantâneo</h3>
+        <p style="font-size: 14px; color: var(--body); line-height: 1.4;">Envie um link de viral e receba o roteiro pronto em minutos</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- SEÇÃO 5 — FOMO -->
 <section id="fomo">
   <div class="w">
@@ -1165,6 +1272,72 @@
     <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px;" class="ri">
       Primeira entrega em 24h &nbsp;·&nbsp; 14 posts prontos por semana &nbsp;·&nbsp; Cancela quando quiser
     </p>
+  </div>
+</section>
+
+<!-- SEÇÃO FAQ -->
+<section class="sec sec-alt" id="faq">
+  <div class="w">
+    <div class="sh ri" style="text-align: center; max-width: 100%; margin: 0 auto 60px;">
+      <h2 class="h2" style="text-align: center;">Dúvidas frequentes</h2>
+      <p class="body-lg" style="text-align: center;">Matando as últimas objeções antes de você decidir.</p>
+    </div>
+
+    <div style="max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+      <details class="faq-item ri" style="--d:0">
+        <summary style="cursor: pointer; font-family: var(--sans-h); font-size: 16px; font-weight: 700; color: var(--ink); padding: 18px 24px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; user-select: none;">
+          O que é exatamente o Radar Instagram?
+        </summary>
+        <div style="padding: 0 24px 20px; background: var(--bg); border: 1px solid var(--line); border-top: none; border-radius: 0 0 8px 8px; margin-top: -1px;">
+          <p style="font-size: 14px; color: var(--body); line-height: 1.5;">O Radar Instagram não é uma ferramenta de agendamento ou um gerador de posts genéricos. É uma infraestrutura de inteligência competitiva que espiona anúncios ativos (Meta/LinkedIn), transcreve vídeos virais dos seus concorrentes e transforma esses dados em roteiros prontos e vídeos editados. Fim do achismo estratégico para quem busca escala.</p>
+        </div>
+      </details>
+
+      <details class="faq-item ri" style="--d:70">
+        <summary style="cursor: pointer; font-family: var(--sans-h); font-size: 16px; font-weight: 700; color: var(--ink); padding: 18px 24px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; user-select: none;">
+          Por que 100% via WhatsApp?
+        </summary>
+        <div style="padding: 0 24px 20px; background: var(--bg); border: 1px solid var(--line); border-top: none; border-radius: 0 0 8px 8px; margin-top: -1px;">
+          <p style="font-size: 14px; color: var(--body); line-height: 1.5;">Empreendedores de alto valor não têm tempo para aprender dashboards complexos ou memorizar senhas. O Radar foi desenvolvido para ter fricção zero: você recebe diagnósticos, envia vídeos brutos e recebe material finalizado tudo em uma conversa no WhatsApp. Se sabe encaminhar mensagem, sabe operar nosso sistema.</p>
+        </div>
+      </details>
+
+      <details class="faq-item ri" style="--d:140">
+        <summary style="cursor: pointer; font-family: var(--sans-h); font-size: 16px; font-weight: 700; color: var(--ink); padding: 18px 24px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; user-select: none;">
+          Como funciona a edição de vídeo automática?
+        </summary>
+        <div style="padding: 0 24px 20px; background: var(--bg); border: 1px solid var(--line); border-top: none; border-radius: 0 0 8px 8px; margin-top: -1px;">
+          <p style="font-size: 14px; color: var(--body); line-height: 1.5;">Após receber o roteiro estratégico, você grava pelo celular e nos envia o bruto. Nosso sistema aplica cortes automáticos de respiro, insere legendas dinâmicas de alta retenção e gera capa (thumbnail) com título impactante. Foco total em performance algorítmica e velocidade de postagem.</p>
+        </div>
+      </details>
+
+      <details class="faq-item ri" style="--d:210">
+        <summary style="cursor: pointer; font-family: var(--sans-h); font-size: 16px; font-weight: 700; color: var(--ink); padding: 18px 24px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; user-select: none;">
+          O Radar garante crescimento do meu perfil?
+        </summary>
+        <div style="padding: 0 24px 20px; background: var(--bg); border: 1px solid var(--line); border-top: none; border-radius: 0 0 8px 8px; margin-top: -1px;">
+          <p style="font-size: 14px; color: var(--body); line-height: 1.5;">Nenhuma inteligência séria garante resultados sem execução do cliente. O Radar entrega diagnóstico preciso e plano pronto, mas resultado final depende da sua consistência em gravar e publicar. <strong>Garantimos que você parará de quebrar cabeça sobre o que postar</strong> e usará o que o mercado já validou como lucrativo.</p>
+        </div>
+      </details>
+
+      <details class="faq-item ri" style="--d:280">
+        <summary style="cursor: pointer; font-family: var(--sans-h); font-size: 16px; font-weight: 700; color: var(--ink); padding: 18px 24px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; user-select: none;">
+          Eu preciso saber quem são meus concorrentes?
+        </summary>
+        <div style="padding: 0 24px 20px; background: var(--bg); border: 1px solid var(--line); border-top: none; border-radius: 0 0 8px 8px; margin-top: -1px;">
+          <p style="font-size: 14px; color: var(--body); line-height: 1.5;">Se já os conhece, análise será ainda mais cirúrgica. Caso contrário, nossas APIs identificam líderes do seu nicho através de anúncios ativos e volumes de engajamento para realizar benchmark competitivo automático.</p>
+        </div>
+      </details>
+
+      <details class="faq-item ri" style="--d:350">
+        <summary style="cursor: pointer; font-family: var(--sans-h); font-size: 16px; font-weight: 700; color: var(--ink); padding: 18px 24px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; user-select: none;">
+          É tudo feito por IA?
+        </summary>
+        <div style="padding: 0 24px 20px; background: var(--bg); border: 1px solid var(--line); border-top: none; border-radius: 0 0 8px 8px; margin-top: -1px;">
+          <p style="font-size: 14px; color: var(--body); line-height: 1.5;">Usamos tecnologia de ponta e análise assistida por dados para capturar o invisível (tags de anúncios, métricas de retenção), mas toda entrega é estruturada sob lógica de negócio e conversão para garantir conteúdo que gera autoridade e lucro, não apenas curtidas.</p>
+        </div>
+      </details>
+    </div>
   </div>
 </section>
 
