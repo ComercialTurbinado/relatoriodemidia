@@ -393,20 +393,30 @@
     .sh .h2 { margin: 10px 0 20px; }
     .sh .body-lg + .body-lg { margin-top: 14px; }
 
+    /* ── Why grid (2-col) ── */
+    .why-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+      margin-bottom: 60px;
+    }
+    .why-grid .sh { max-width: none; margin-bottom: 0; }
+
     /* ── Proof list ── */
     .proof { display: flex; flex-direction: column; }
     .pi {
-      display: grid; grid-template-columns: 72px 1fr;
+      display: grid; grid-template-columns: 64px 1fr;
       gap: 0; align-items: start;
-      padding: 32px 0; border-bottom: 1px solid var(--line);
+      padding: 28px 0; border-bottom: 1px solid var(--line);
     }
     .pi:last-child { border-bottom: none; }
     .pi-n {
       font-family: var(--sans-h); font-style: italic; font-weight: 700;
-      font-size: 48px; letter-spacing: -.03em; line-height: 1;
+      font-size: 44px; letter-spacing: -.03em; line-height: 1;
       color: var(--gold); padding-top: 2px;
     }
-    .pi-body { font-size: 16px; color: var(--body); line-height: 1.72; padding-top: 8px; }
+    .pi-body { font-size: 15px; color: var(--body); line-height: 1.72; padding-top: 6px; }
     .pi-body strong { color: var(--ink); font-weight: 600; }
 
     /* ── Alert card ── */
@@ -610,6 +620,8 @@
     @media(max-width:900px) {
       .sec { padding: 72px 0; }
       #hero { padding: 80px 0 64px; }
+      .why-grid { grid-template-columns: 1fr; gap: 44px; }
+      .why-grid .sh { margin-bottom: 0; }
       .tl::before { display: none; }
       .tl-row { grid-template-columns: 1fr; gap: 8px; }
       .tl-dot { display: none; }
@@ -761,26 +773,29 @@
 <!-- SEÇÃO 2 — POR QUE VAI FUNCIONAR -->
 <section class="sec" id="why">
   <div class="w">
-    <div class="sh ri">
-      <span class="eyebrow eyebrow-gold">Por que vai funcionar para você</span>
-      <h2 class="h2">Não é inspiração. É o que o seu mercado já validou esta semana.</h2>
-      <p class="body-lg">Todo post entregue vem de um lugar específico: o que está funcionando agora no seu nicho.</p>
-      <p class="body-lg">Não é o que achamos que funciona. É o que o comportamento real da sua audiência está pedindo. O que os perfis de maior crescimento do seu segmento estão publicando. Para onde as métricas do mercado estão apontando.</p>
-      <p class="body-lg" style="color:var(--ink);font-weight:600;">Você não precisa acertar. O mercado já acertou por você.</p>
-    </div>
 
-    <div class="proof">
-      <div class="pi ri">
-        <div class="pi-n">01</div>
-        <p class="pi-body"><strong>Os dados do seu mercado</strong> — analisamos o que está viralizando no seu nicho nessa semana, não na semana passada.</p>
+    <div class="why-grid">
+      <div class="sh ri">
+        <span class="eyebrow eyebrow-gold">Por que vai funcionar para você</span>
+        <h2 class="h2">Não é inspiração. É o que o seu mercado já validou esta semana.</h2>
+        <p class="body-lg">Todo post entregue vem de um lugar específico: o que está funcionando agora no seu nicho.</p>
+        <p class="body-lg">Não é o que achamos que funciona. É o que o comportamento real da sua audiência está pedindo. O que os perfis de maior crescimento do seu segmento estão publicando. Para onde as métricas do mercado estão apontando.</p>
+        <p class="body-lg" style="color:var(--ink);font-weight:600;">Você não precisa acertar. O mercado já acertou por você.</p>
       </div>
-      <div class="pi ri" style="--d:70">
-        <div class="pi-n">02</div>
-        <p class="pi-body"><strong>O comportamento da sua audiência</strong> — o tipo de conteúdo que gera salvamento, compartilhamento e clique no perfil. Não o que gera curtida.</p>
-      </div>
-      <div class="pi ri" style="--d:140">
-        <div class="pi-n">03</div>
-        <p class="pi-body"><strong>A estrutura que converte</strong> — cada semana tem posts de atração, de autoridade e de conversão. Na sequência certa para mover leads pelo funil.</p>
+
+      <div class="proof">
+        <div class="pi ri">
+          <div class="pi-n">01</div>
+          <p class="pi-body"><strong>Os dados do seu mercado</strong> — analisamos o que está viralizando no seu nicho nessa semana, não na semana passada.</p>
+        </div>
+        <div class="pi ri" style="--d:70">
+          <div class="pi-n">02</div>
+          <p class="pi-body"><strong>O comportamento da sua audiência</strong> — o tipo de conteúdo que gera salvamento, compartilhamento e clique no perfil. Não o que gera curtida.</p>
+        </div>
+        <div class="pi ri" style="--d:140">
+          <div class="pi-n">03</div>
+          <p class="pi-body"><strong>A estrutura que converte</strong> — cada semana tem posts de atração, de autoridade e de conversão. Na sequência certa para mover leads pelo funil.</p>
+        </div>
       </div>
     </div>
 
