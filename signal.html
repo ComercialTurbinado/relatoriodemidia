@@ -149,10 +149,13 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 500px;
+      height: 600px;
       background:
-        radial-gradient(circle at 30% 50%, oklch(52% 0.18 148 / 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 70% 30%, oklch(50% 0.2 148 / 0.06) 0%, transparent 45%);
+        linear-gradient(to right, oklch(50% 0.2 148 / 0.12) 1px, transparent 1px),
+        linear-gradient(to bottom, oklch(50% 0.2 148 / 0.12) 1px, transparent 1px),
+        radial-gradient(circle at 20% 140%, oklch(52% 0.18 148 / 0.28) 0%, transparent 50%),
+        radial-gradient(circle at 80% 120%, oklch(50% 0.2 148 / 0.24) 0%, transparent 48%);
+      background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
       pointer-events: none;
       z-index: 0;
     }
