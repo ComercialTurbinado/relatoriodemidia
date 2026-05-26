@@ -858,12 +858,30 @@
       max-width: 500px;
       width: 100%;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      animation: slideUp 0.3s cubic-bezier(.16,1,.3,1);
     }
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* Animações em cascata para o modal */
+    .modal-content.reveal-animation .modal-badge,
+    .modal-content.reveal-animation .modal-title,
+    .modal-content.reveal-animation .modal-subtitle {
+      animation: slideUp 0.5s cubic-bezier(.16,1,.3,1) 0s forwards;
+      opacity: 0;
+    }
+
+    .modal-content.reveal-animation .modal-coupon {
+      animation: slideUp 0.5s cubic-bezier(.16,1,.3,1) 0.3s forwards;
+      opacity: 0;
+    }
+
+    .modal-content.reveal-animation #leadForm {
+      animation: slideUp 0.5s cubic-bezier(.16,1,.3,1) 0.6s forwards;
+      opacity: 0;
+    }
+
     .modal-badge {
       display: inline-block;
       background: #10B981;
@@ -1445,7 +1463,7 @@
 <div id="discountModal">
   <div class="modal-content">
     <span class="modal-badge">🎁 Oferta exclusiva</span>
-    <h2 class="modal-title">Você é diferenciado!</h2>
+    <h2 class="modal-title">Você é diferenciado! Esse desconto é para poucos!</h2>
     <p class="modal-subtitle">Clicou e ganhou <strong>40% de desconto</strong> em qualquer plano. Digite o cupom abaixo para usar.</p>
 
     <div class="modal-coupon">
@@ -1849,12 +1867,21 @@
 
   document.querySelector('.wpp-input-wrap')?.addEventListener('click', () => {
     const modal = document.getElementById('discountModal');
+    const modalContent = modal.querySelector('.modal-content');
     modal.classList.add('show');
+    // Remover classe anterior se existir
+    modalContent.classList.remove('reveal-animation');
+    // Trigger reflow para resetar a animação
+    void modalContent.offsetWidth;
+    // Adicionar classe para iniciar animação em cascata
+    modalContent.classList.add('reveal-animation');
     updateCouponDisplay();
   });
 
   document.getElementById('discountModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'discountModal') {
+      const modalContent = e.target.querySelector('.modal-content');
+      modalContent.classList.remove('reveal-animation');
       e.target.classList.remove('show');
     }
   });
