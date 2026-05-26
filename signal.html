@@ -159,7 +159,7 @@
     /* ── Hero ── */
     #hero {
       background-color: rgba(255, 255, 255, 1);
-      background: linear-gradient(45deg, rgba(255, 255, 255, 1) 0%, rgba(105, 105, 105, 1) 81%);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(247, 248, 247, 1) 100%);
       border: 1px solid rgba(0, 0, 0, 1);
       box-shadow: inset 0px 0px 0px 2px rgba(0, 0, 0, 0.15);
       padding: 112px 0 96px;
@@ -456,9 +456,9 @@
       color: var(--gold); margin-bottom: 16px;
     }
     .stat-l {
-      font-size: 13px; font-weight: 600;
+      font-size: 16px; font-weight: 600;
       letter-spacing: .05em;
-      color: var(--body); line-height: 1.25;
+      color: var(--body); line-height: 15px;
     }
 
     /* ── Callout Strip ── */
@@ -787,7 +787,7 @@
       .stat-n { font-size: clamp(52px, 7vw, 72px); margin-bottom: 12px; }
       .stat-l {
         font-size: 16px;
-        line-height: 14px;
+        line-height: 15px;
         letter-spacing: 0px;
       }
       .callout-strip { padding: 16px 0 40px; }
@@ -1637,6 +1637,105 @@
       ? '0 1px 0 oklch(91% .006 78), 0 2px 16px oklch(14% .01 78 / .06)'
       : 'none';
   }, { passive: true });
+
+  /* ── Discount Coupon System ── */
+  const SUPABASE_URL = 'https://mblntoimrkfoocbztozb.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ibG50b2ltcmtmb29jYnp0b3piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDE3MzYsImV4cCI6MjA5NDA3NzczNn0.SOhorLxV8GDBMaWEwhnGhaVfvENgdP_RleaAl5o92Tw';
+
+  function generateHourlyCoupon() {
+    const now = new Date();
+    const dateStr = String(now.getFullYear()).slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    return `DESCONTO${dateStr}${hour}`;
+  }
+
+  function getCachedCoupon() {
+    const cached = localStorage.getItem('signal_coupon');
+    if (!cached) return null;
+    const { code, expiresAt } = JSON.parse(cached);
+    if (new Date() > new Date(expiresAt)) {
+      localStorage.removeItem('signal_coupon');
+      return null;
+    }
+    return code;
+  }
+
+  function setCachedCoupon(code) {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 60 * 60 * 1000);
+    localStorage.setItem('signal_coupon', JSON.stringify({ code, expiresAt: expiresAt.toISOString() }));
+    return code;
+  }
+
+  function getCurrentCoupon() {
+    let cached = getCachedCoupon();
+    if (cached) return cached;
+    const generated = generateHourlyCoupon();
+    return setCachedCoupon(generated);
+  }
+
+  function updateCouponDisplay() {
+    const coupon = getCurrentCoupon();
+    const couponEl = document.getElementById('couponCode');
+    const timerEl = document.getElementById('couponTimer');
+
+    if (couponEl) couponEl.textContent = coupon;
+
+    const now = new Date();
+    const nextHour = new Date(now.getHours() + 1, 0, 0, 0);
+    const remaining = Math.ceil((nextHour - now) / 1000 / 60);
+    if (timerEl) timerEl.textContent = `Válido por ${remaining} minuto${remaining !== 1 ? 's' : ''}`;
+  }
+
+  document.querySelector('.wpp-input-wrap')?.addEventListener('click', () => {
+    const modal = document.getElementById('discountModal');
+    modal.classList.add('show');
+    updateCouponDisplay();
+  });
+
+  document.getElementById('discountModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'discountModal') {
+      e.target.classList.remove('show');
+    }
+  });
+
+  document.getElementById('leadForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = {
+      nome: e.target.nome.value,
+      empresa: e.target.empresa.value,
+      whatsapp: e.target.whatsapp.value,
+      instagram: e.target.instagram.value,
+      cupom_utilizado: getCurrentCoupon(),
+      data_criacao: new Date().toISOString(),
+    };
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        sessionStorage.setItem('signal_discount_coupon', getCurrentCoupon());
+        sessionStorage.setItem('signal_lead_name', formData.nome);
+        window.location.href = '/checkout?coupon=' + encodeURIComponent(getCurrentCoupon());
+      } else {
+        alert('Erro ao salvar dados. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      alert('Erro ao processar. Tente novamente.');
+    }
+  });
+
+  setInterval(updateCouponDisplay, 60000);
 </script>
 </body>
 </html>
