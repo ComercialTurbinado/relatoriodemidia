@@ -158,8 +158,11 @@
 
     /* ── Hero ── */
     #hero {
+      background-color: rgba(255, 255, 255, 1);
+      background: linear-gradient(45deg, rgba(255, 255, 255, 1) 0%, rgba(105, 105, 105, 1) 81%);
+      border: 1px solid rgba(0, 0, 0, 1);
+      box-shadow: inset 0px 0px 0px 2px rgba(0, 0, 0, 0.15);
       padding: 112px 0 96px;
-      border: none;
       position: relative;
     }
     #hero .w { position: relative; z-index: 1; }
@@ -395,18 +398,51 @@
       transition: transform .15s;
     }
 
+    /* ── Stats + Callout Section ── */
+    .stats-callout-section {
+      --glow-x: 92%;
+      --glow-y: 88%;
+      position: relative;
+      background: #000000;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .stats-callout-section > * {
+      position: relative;
+      z-index: 2;
+    }
+    .stats-callout-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle 720px at var(--glow-x) var(--glow-y),
+          oklch(0.72 0.23 148 / 0.22) 0%,
+          oklch(0.62 0.2 148 / 0.12) 42%,
+          transparent 72%),
+        radial-gradient(circle 1380px at var(--glow-x) var(--glow-y),
+          oklch(0.56 0.17 148 / 0.24) 0%,
+          oklch(0.5 0.14 148 / 0.09) 38%,
+          transparent 72%);
+      opacity: 1;
+      filter: blur(36px);
+      transition: opacity .25s ease;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     /* ── Stats Band ── */
     .stats-band {
-      background: var(--bg-dark);
+      background: transparent;
       display: grid; grid-template-columns: repeat(4, 1fr);
-      padding: 40px 32px;
+      padding: 60px 32px 20px;
       gap: 20px;
     }
     .stat {
       margin: 10px;
       padding: 20px;
-      background: #fff;
-      border: 1px solid #eee;
+      background: linear-gradient(150.8deg, rgba(255, 255, 255, 1) 43%, rgba(222, 222, 222, 1) 100%);
+      border: 2px solid rgba(232, 232, 232, 0.99);
       border-radius: 10px;
       display: flex;
       flex-direction: column;
@@ -427,8 +463,8 @@
 
     /* ── Callout Strip ── */
     .callout-strip {
-      padding: 72px 0;
-      background: var(--bg-dark);
+      padding: 20px 0 60px;
+      background: transparent;
       text-align: center;
     }
     .callout-text {
@@ -746,10 +782,15 @@
       .hero-actions { flex-direction: column; width: 100%; }
       .hero-actions .btn { width: 100%; justify-content: center; }
       .plan-grid { grid-template-columns: 1fr; }
-      .stats-band { grid-template-columns: repeat(2, 1fr); padding: 32px 12px; gap: 12px; }
+      .stats-band { grid-template-columns: repeat(2, 1fr); padding: 40px 12px 16px; gap: 12px; }
       .stat { margin: 6px; padding: 16px; }
       .stat-n { font-size: clamp(52px, 7vw, 72px); margin-bottom: 12px; }
-      .stat-l { font-size: 12px; }
+      .stat-l {
+        font-size: 16px;
+        line-height: 14px;
+        letter-spacing: 0px;
+      }
+      .callout-strip { padding: 16px 0 40px; }
       .pi { grid-template-columns: 52px 1fr; margin: 8px; padding: 16px; gap: 12px; }
       .pi-n { font-size: clamp(36px, 5vw, 44px); }
     }
@@ -892,35 +933,36 @@
   </div>
 </section>
 
-<!-- STATS BAND -->
-<div class="stats-band" role="region" aria-label="Números do Signal">
-  <div class="stat ri" style="--d:0">
-    <div class="stat-n" data-count="14" data-suffix="">14</div>
-    <div class="stat-l">posts prontos<br>por semana</div>
+<!-- STATS + CALLOUT -->
+<section class="stats-callout-section" aria-label="Números e posicionamento do Signal">
+  <div class="stats-band" role="region" aria-label="Números do Signal">
+    <div class="stat ri" style="--d:0">
+      <div class="stat-n" data-count="14" data-suffix="">14</div>
+      <div class="stat-l">entregas<br>por semana</div>
+    </div>
+    <div class="stat ri" style="--d:80">
+      <div class="stat-n">24h</div>
+      <div class="stat-l">para a<br>primeira entrega</div>
+    </div>
+    <div class="stat ri" style="--d:160">
+      <div class="stat-n" data-count="0" data-suffix="">0</div>
+      <div class="stat-l">ideias suas<br>necessárias</div>
+    </div>
+    <div class="stat ri" style="--d:240">
+      <div class="stat-n" data-count="100" data-suffix="%">100%</div>
+      <div class="stat-l">baseado em dado<br>do nicho</div>
+    </div>
   </div>
-  <div class="stat ri" style="--d:80">
-    <div class="stat-n">24h</div>
-    <div class="stat-l">para a<br>primeira entrega</div>
-  </div>
-  <div class="stat ri" style="--d:160">
-    <div class="stat-n" data-count="0" data-suffix="">0</div>
-    <div class="stat-l">ideias suas<br>necessárias</div>
-  </div>
-  <div class="stat ri" style="--d:240">
-    <div class="stat-n" data-count="100" data-suffix="%">100%</div>
-    <div class="stat-l">baseado em dado<br>do nicho</div>
-  </div>
-</div>
 
-<!-- CALLOUT STRIP -->
-<div class="callout-strip">
-  <div class="w">
-    <p class="callout-text ri">
-      Pedir para a IA criar um post todo dia<br>
-      <strong><span class="accent-font">não é inteligente. É só artificial.</span></strong>
-    </p>
+  <div class="callout-strip">
+    <div class="w">
+      <p class="callout-text ri">
+        Pedir para a IA criar um post todo dia<br>
+        <strong><span class="accent-font">não é inteligente. É só artificial.</span></strong>
+      </p>
+    </div>
   </div>
-</div>
+</section>
 
 <!-- SEÇÃO PROBLEMA -->
 <section class="sec" id="problem">
@@ -1053,7 +1095,7 @@
   <div class="w">
     <div class="sh ri">
       <span class="eyebrow">O esforço sem e com o Signal</span>
-      <h2 class="h2">O que você gasta hoje para tentar resolver isso sozinho</h2>
+      <h2 class="h2">O que você gasta hoje para <span class="accent-font">tentar resolver isso sozinho</span></h2>
     </div>
 
     <div class="ct-wrap ri">
@@ -1426,6 +1468,29 @@
     });
   }, { threshold: 0.6 });
   document.querySelectorAll('.stat-n[data-count]').forEach(el => cio.observe(el));
+
+  /* ── Stats section glow ── */
+  const statsGlowEl = document.querySelector('.stats-callout-section');
+  if (statsGlowEl && window.matchMedia('(pointer: fine)').matches) {
+    const resetStatsGlow = () => {
+      statsGlowEl.style.setProperty('--glow-x', '92%');
+      statsGlowEl.style.setProperty('--glow-y', '88%');
+    };
+    const updateStatsGlow = event => {
+      const rect = statsGlowEl.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      statsGlowEl.style.setProperty('--glow-x', `${x}px`);
+      statsGlowEl.style.setProperty('--glow-y', `${y}px`);
+    };
+
+    statsGlowEl.addEventListener('mouseenter', event => {
+      updateStatsGlow(event);
+    });
+    statsGlowEl.addEventListener('mousemove', updateStatsGlow, { passive: true });
+    statsGlowEl.addEventListener('mouseleave', resetStatsGlow);
+    resetStatsGlow();
+  }
 
   /* ── WhatsApp conversation animation ── */
   (function() {
