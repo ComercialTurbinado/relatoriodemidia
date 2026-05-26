@@ -1321,6 +1321,45 @@
   </div>
 </section>
 
+<!-- DISCOUNT MODAL -->
+<div id="discountModal">
+  <div class="modal-content">
+    <span class="modal-badge">🎁 Oferta exclusiva</span>
+    <h2 class="modal-title">Você é diferenciado!</h2>
+    <p class="modal-subtitle">Clicou e ganhou <strong>40% de desconto</strong> em qualquer plano. Digite o cupom abaixo para usar.</p>
+
+    <div class="modal-coupon">
+      <div class="coupon-label">Seu cupom:</div>
+      <div class="coupon-code" id="couponCode">CARREGANDO...</div>
+      <div class="coupon-timer" id="couponTimer">Válido por 1 hora</div>
+    </div>
+
+    <form id="leadForm" style="margin-bottom: 0;">
+      <div class="form-group">
+        <label class="form-label">Seu nome</label>
+        <input type="text" class="form-input" name="nome" placeholder="João Silva" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sua empresa</label>
+        <input type="text" class="form-input" name="empresa" placeholder="Minha Agência" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">WhatsApp</label>
+        <input type="tel" class="form-input" name="whatsapp" placeholder="(11) 98765-4321" required>
+      </div>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="form-label">Instagram</label>
+        <input type="text" class="form-input" name="instagram" placeholder="@seu_instagram" required>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" onclick="document.getElementById('discountModal').classList.remove('show')" class="btn btn-ghost">Cancelar</button>
+        <button type="submit" class="btn btn-wpp" style="border:none;cursor:pointer;">Enviar e ir ao pagamento</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- SEÇÃO FAQ -->
 <section class="sec sec-alt" id="faq">
   <div class="w">
