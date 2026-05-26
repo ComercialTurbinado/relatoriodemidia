@@ -1841,8 +1841,9 @@
     if (couponEl) couponEl.textContent = coupon;
 
     const now = new Date();
-    const nextHour = new Date(now.getHours() + 1, 0, 0, 0);
-    const remaining = Math.ceil((nextHour - now) / 1000 / 60);
+    const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
+    nextHour.setMinutes(0, 0, 0);
+    const remaining = Math.max(1, Math.ceil((nextHour - now) / 1000 / 60));
     if (timerEl) timerEl.textContent = `Válido por ${remaining} minuto${remaining !== 1 ? 's' : ''}`;
   }
 
