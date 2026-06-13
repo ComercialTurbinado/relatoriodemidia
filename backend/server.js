@@ -1,5 +1,5 @@
 /**
- * Auditoria Expressa IA — Backend Orchestrator
+ * Auditoria Expressa IA — Backend Orchestrator v2
  * Node.js + Express
  *
  * Endpoints chamados pelo Typebot:
