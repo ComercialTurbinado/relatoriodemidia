@@ -23,6 +23,7 @@ const path        = require('path');
 const crypto      = require('crypto');
 const { exec }    = require('child_process');
 const os          = require('os');
+const multer      = require('multer');
 // ─── Supabase REST (sem SDK — usa axios direto) ───────────────────────────────
 const SUPA_URL  = process.env.SUPABASE_URL  || 'https://mblntoimrkfoocbztozb.supabase.co';
 const SUPA_KEY  = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ibG50b2ltcmtmb29jYnp0b3piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDE3MzYsImV4cCI6MjA5NDA3NzczNn0.SOhorLxV8GDBMaWEwhnGhaVfvENgdP_RleaAl5o92Tw';
@@ -1815,6 +1816,118 @@ app.post('/api/save-analise', async (req, res) => {
   }
 });
 
+// ═════════════════════════════════════════════════════════════════════════════
+//  POST /api/save-roteiros
+//  x-api-key: <API_SECRET>
+//  Body: { handle_cliente, nicho, roteiros_virais_10: [...] }
+//
+//  Salva os 10 roteiros virais gerados pelo pipeline de auditoria.
+//  Busca o analise_id mais recente do cliente para linkar.
+//  Retorna: { ok, roteiro_id }
+// ═════════════════════════════════════════════════════════════════════════════
+app.post('/api/save-roteiros', async (req, res) => {
+  const body = Array.isArray(req.body) ? req.body[0] : req.body;
+  const handle = (body.handle_cliente || '').replace('@', '').toLowerCase().trim();
+  const roteiros = body.roteiros_virais_10 || [];
+
+  if (!handle) return res.status(400).json({ ok: false, motivo: 'handle_cliente ausente' });
+  if (!roteiros.length) return res.status(400).json({ ok: false, motivo: 'roteiros_virais_10 vazio' });
+
+  try {
+    // Busca analise_id mais recente para linkar (pode ser null se save-analise ainda não rodou)
+    let analise_id = null;
+    try {
+      const r = await axios.get(
+        `${SUPA_URL}/rest/v1/analises?cliente_handle=eq.${handle}&order=criado_em.desc&limit=1&select=id`,
+        { headers: supaHeaders() }
+      );
+      analise_id = r.data?.[0]?.id || null;
+    } catch (_) {}
+
+    const [row] = await supaPost('roteiros_virais', {
+      analise_id,
+      cliente_handle: handle,
+      nicho:          body.nicho || '',
+      roteiros:       roteiros,
+    }, '?select=id');
+
+    console.log(`[save-roteiros] @${handle} — ${roteiros.length} roteiros salvos, id: ${row?.id}`);
+    return res.json({ ok: true, roteiro_id: row?.id, handle, qtd: roteiros.length });
+
+  } catch (err) {
+    const detail = err.response?.data || err.message;
+    console.error('[save-roteiros] Erro:', detail);
+    return res.status(500).json({ ok: false, motivo: 'erro_ao_salvar_roteiros', detalhe: detail });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  GET /api/contexto-cliente/:identificador
+//  Aceita handle (@conta ou conta) OU número WhatsApp (ex: 5511999999999).
+//  Retorna posicionamento, tom de voz, ganchos, CTAs, pilares e últimos
+//  roteiros do cliente — para usar como contexto na geração de novos conteúdos.
+// ═════════════════════════════════════════════════════════════════════════════
+app.get('/api/contexto-cliente/:identificador', async (req, res) => {
+  const raw = (req.params.identificador || '').trim();
+  if (!raw) return res.status(400).json({ ok: false, motivo: 'identificador ausente' });
+
+  // Detecta se é WhatsApp (só dígitos, pode ter + no início) ou handle Instagram
+  const isWhatsapp = /^\+?\d{8,15}$/.test(raw);
+  const whatsapp   = isWhatsapp ? raw.replace(/\D/g, '') : null;
+  const handle     = isWhatsapp ? null : raw.replace('@', '').toLowerCase();
+
+  try {
+    // Resolve o cliente — por whatsapp OU handle
+    const clienteFilter = isWhatsapp
+      ? `whatsapp=eq.${whatsapp}`
+      : `handle=eq.${handle}`;
+
+    const clienteR = await axios.get(
+      `${SUPA_URL}/rest/v1/clientes?${clienteFilter}&limit=1`,
+      { headers: supaHeaders() }
+    );
+
+    const cliente = clienteR.data?.[0] || null;
+    if (!cliente) return res.status(404).json({ ok: false, motivo: 'cliente_nao_encontrado' });
+
+    const resolvedHandle = cliente.handle;
+
+    const [planoR, roteirosR] = await Promise.all([
+      axios.get(`${SUPA_URL}/rest/v1/planos_diretores?cliente_handle=eq.${resolvedHandle}&order=criado_em.desc&limit=1&select=posicionamento_atual,diagnostico_identidade,tom_de_voz,pilares_conteudo,ganchos_modelo,ctas_recomendados,hashtags_estrategicas,seo_instagram,briefing_redatores,assuntos_quentes,ideias_titulos,identidade_visual`, { headers: supaHeaders() }),
+      axios.get(`${SUPA_URL}/rest/v1/roteiros_virais?cliente_handle=eq.${resolvedHandle}&order=criado_em.desc&limit=2&select=roteiros,criado_em`, { headers: supaHeaders() }),
+    ]);
+
+    const plano    = planoR.data?.[0]   || null;
+    const roteiros = roteirosR.data     || [];
+
+    return res.json({
+      ok: true,
+      handle,
+      nicho:            cliente.nicho,
+      posicionamento:   plano?.posicionamento_atual   || null,
+      diagnostico:      plano?.diagnostico_identidade || null,
+      tom_de_voz:       plano?.tom_de_voz             || null,
+      pilares:          plano?.pilares_conteudo        || [],
+      ganchos:          plano?.ganchos_modelo          || [],
+      ctas:             plano?.ctas_recomendados       || [],
+      hashtags:         plano?.hashtags_estrategicas   || {},
+      seo:              plano?.seo_instagram            || {},
+      assuntos_quentes: plano?.assuntos_quentes         || [],
+      ideias_titulos:   plano?.ideias_titulos           || [],
+      identidade_visual:plano?.identidade_visual        || {},
+      briefing_redator: plano?.briefing_redatores       || '',
+      roteiros_anteriores: roteiros.map(r => ({
+        criado_em: r.criado_em,
+        temas: (r.roteiros || []).map(x => x.titulo_interno || x.tema || '').filter(Boolean),
+      })),
+    });
+
+  } catch (err) {
+    const detail = err.response?.data || err.message;
+    console.error('[contexto-cliente] Erro:', detail);
+    return res.status(500).json({ ok: false, motivo: 'erro_interno', detalhe: detail });
+  }
+});
 
 // ═════════════════════════════════════════════════════════════════════════════
 // AGENTE SOFIA — Endpoints de suporte ao WhatsApp AI Agent
@@ -2131,6 +2244,160 @@ app.post('/api/debitar-credito', async (req, res) => {
   } catch (err) {
     console.error('[debitar-credito]', err.response?.data || err.message);
     return res.status(500).json({ ok: false, motivo: err.response?.data || err.message });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// VIDEO EDITOR — Upload, Transcrição + Agente Editor + Agente Motion Designer
+// ═════════════════════════════════════════════════════════════════════════════
+
+const veStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, 'uploads');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `ve_${Date.now()}_${Math.random().toString(36).slice(2)}${ext}`);
+  },
+});
+
+const videoUpload = multer({
+  storage: veStorage,
+  limits: { fileSize: 500 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/\.(mp4|mov|webm|avi|mkv|m4v)$/i.test(file.originalname)) cb(null, true);
+    else cb(new Error('Formato não suportado. Use MP4, MOV, WebM, AVI ou MKV.'));
+  },
+});
+
+function ffmpegExtractAudioFromFile(filePath, maxSeconds = 3600) {
+  return new Promise((resolve, reject) => {
+    const tmpPath = path.join(os.tmpdir(), `ve_audio_${Date.now()}.mp3`);
+    const cmd = `ffmpeg -y -i "${filePath}" -vn -ar 16000 -ac 1 -b:a 64k -t ${maxSeconds} "${tmpPath}"`;
+    exec(cmd, { timeout: 300000 }, (err, _stdout, stderr) => {
+      if (err) return reject(new Error(stderr || err.message));
+      resolve(tmpPath);
+    });
+  });
+}
+
+const PROMPT_EDITOR = `Você é um Agente de IA Especialista em Edição e Decupagem de Vídeo com mais de 20 anos de experiência em pós-produção audiovisual. Analise a transcrição bruta enviada pelo usuário e identifique cirurgicamente o que deve ser mantido, cortado e onde a edição deve intervir.
+
+Entregue a resposta EXATAMENTE neste formato com os três marcadores abaixo:
+
+===SESSÃO 1: VEREDITO===
+[Um parágrafo descrevendo o estado geral do áudio: ritmo, clareza, problemas predominantes]
+
+===SESSÃO 2: TABELA DE CORTES===
+| Trecho Original | Problema Detectado | Ação Recomendada | Nota para o Editor |
+|---|---|---|---|
+[linhas da tabela aqui]
+
+===SESSÃO 3: TRANSCRIÇÃO LIMPA===
+[O texto limpo, fluido, sem vícios, pronto para legenda ou teleprompter]
+
+DIRETRIZES:
+- Corte: Filler words (hãã, éee, tipo assim, né), Falsos começos, Arrependimentos explícitos, Redundâncias, Frases inconclusas
+- Se o corte quebrar continuidade visual, indique "Inserir B-roll" na Nota para o Editor
+- Seja direto. Pense como um editor com a timeline aberta.`;
+
+const PROMPT_MOTION = `Você é um Diretor de Arte e Especialista em Motion Graphics Sênior com mais de 20 anos de experiência. Analise a transcrição limpa enviada e crie o Briefing Visual de Motion para o Remotion.
+
+Entregue a resposta EXATAMENTE neste formato com os três marcadores abaixo:
+
+===SESSÃO 1: IDENTIDADE VISUAL===
+[Tom visual recomendado: tipografia, paleta de cores, estilo de animação geral, clima do vídeo]
+
+===SESSÃO 2: ROTEIRO DE MOTION GRAPHICS===
+| Trecho do Áudio (Gatilho) | O que vai na Tela | Estilo de Animação | SFX Recomendado |
+|---|---|---|---|
+[linhas da tabela aqui]
+
+===SESSÃO 3: SUGESTÕES DE B-ROLL===
+[De 2 a 4 momentos onde inserir vídeo de cobertura ou fundo abstrato, com descrição do que mostrar]
+
+DIRETRIZES ESTÉTICAS:
+- Minimalismo estratégico: não polua o vídeo
+- Priorize blocos de texto limpos com hierarquia tipográfica
+- Ganchos de retenção nos primeiros 15 segundos
+- Marque palavras-chave em CAIXA ALTA ou *asteriscos*
+- Funcionalidade antes de estética: cada elemento deve explicar ou dar ritmo`;
+
+// Serve o frontend do video editor
+app.get('/video-editor', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'video-editor', 'index.html'));
+});
+
+// Pipeline completo: upload → transcrição → agente editor → agente motion
+app.post('/api/video-editor/process', videoUpload.single('video'), async (req, res) => {
+  const videoPath = req.file?.path;
+  if (!videoPath) return res.status(400).json({ ok: false, motivo: 'Nenhum vídeo recebido.' });
+
+  let audioPath = null;
+
+  try {
+    // 1. Extrair áudio com FFmpeg
+    audioPath = await ffmpegExtractAudioFromFile(videoPath);
+
+    // 2. Transcrever com Whisper
+    let transcricao;
+    try {
+      transcricao = await transcreveAudio(audioPath);
+      audioPath = null;
+    } catch (e) {
+      if (audioPath) try { fs.unlinkSync(audioPath); } catch (_) {}
+      throw new Error(`Whisper falhou: ${e.message}`);
+    }
+
+    if (!transcricao || transcricao.trim().length < 10) {
+      throw new Error('Transcrição vazia. Verifique se o vídeo tem áudio audível.');
+    }
+
+    // 3. Agente 1: Editor de Vídeo
+    const editorRes = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: PROMPT_EDITOR },
+        { role: 'user', content: `TRANSCRIÇÃO BRUTA:\n\n${transcricao}` },
+      ],
+      max_tokens: 4000,
+      temperature: 0.3,
+    });
+    const editorOutput = editorRes.choices[0].message.content;
+
+    // Extrai transcrição limpa para passar ao Agente 2
+    const cleanMatch = editorOutput.match(/===SESSÃO 3: TRANSCRIÇÃO LIMPA===([\s\S]*?)(?:===|$)/);
+    const transcricaoLimpa = cleanMatch ? cleanMatch[1].trim() : transcricao;
+
+    // 4. Agente 2: Motion Designer
+    const motionRes = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: PROMPT_MOTION },
+        { role: 'user', content: `TRANSCRIÇÃO LIMPA:\n\n${transcricaoLimpa}` },
+      ],
+      max_tokens: 4000,
+      temperature: 0.4,
+    });
+    const motionOutput = motionRes.choices[0].message.content;
+
+    // Limpa vídeo original
+    try { fs.unlinkSync(videoPath); } catch (_) {}
+
+    return res.json({
+      ok: true,
+      transcricao_bruta: transcricao,
+      editor: editorOutput,
+      motion: motionOutput,
+    });
+
+  } catch (err) {
+    if (videoPath) try { fs.unlinkSync(videoPath); } catch (_) {}
+    if (audioPath) try { fs.unlinkSync(audioPath); } catch (_) {}
+    console.error('[video-editor/process]', err.message);
+    return res.status(500).json({ ok: false, motivo: err.message });
   }
 });
 

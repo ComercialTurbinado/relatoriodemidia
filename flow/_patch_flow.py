@@ -454,7 +454,7 @@ nodes["Expandir Handles"]["parameters"]["jsCode"] = EXPAND
 
 rap = nodes["RapidAPI — Buscar Perfil Instagram"]
 rap["parameters"]["headerParameters"]["parameters"][0]["value"] = (
-    "={{ $env.RAPIDAPI_KEY || '0127634a29msh4a303edef58f6dbp1430c6jsnd00af7a6bc1e' }}"
+    "={{ $env.RAPIDAPI_KEY }}"
 )
 rap["parameters"]["jsonBody"] = (
     "={{ JSON.stringify({ username: String($json.handle || '').replace(/^@/, '').trim(), maxId: '' }) }}"
@@ -468,7 +468,7 @@ fb["parameters"]["sendBody"] = False
 for k in ("jsonBody", "specifyBody"):
     fb["parameters"].pop(k, None)
 fb["parameters"]["headerParameters"]["parameters"][0]["value"] = (
-    "={{ $env.RAPIDAPI_KEY || '0127634a29msh4a303edef58f6dbp1430c6jsnd00af7a6bc1e' }}"
+    "={{ $env.RAPIDAPI_KEY }}"
 )
 
 for name in ("Montar Payload GPT-4o", "Montar Payload GPT-4o (sem vídeos)"):

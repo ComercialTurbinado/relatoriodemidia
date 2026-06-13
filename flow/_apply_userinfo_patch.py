@@ -29,7 +29,7 @@ def ensure_userinfo_instagram_node(flow):
                 "sendHeaders": True,
                 "headerParameters": {
                     "parameters": [
-                        {"name": "X-Rapidapi-Key", "value": "={{ $env.RAPIDAPI_KEY || '0127634a29msh4a303edef58f6dbp1430c6jsnd00af7a6bc1e' }}"},
+                        {"name": "X-Rapidapi-Key", "value": "={{ $env.RAPIDAPI_KEY }}"},
                         {"name": "X-Rapidapi-Host", "value": "instagram120.p.rapidapi.com"},
                         {"name": "Content-Type", "value": "application/json"},
                     ]
