@@ -1902,7 +1902,7 @@ app.get('/api/contexto-cliente/:identificador', async (req, res) => {
 
     return res.json({
       ok: true,
-      handle,
+      handle: resolvedHandle,
       nicho:            cliente.nicho,
       posicionamento:   plano?.posicionamento_atual   || null,
       diagnostico:      plano?.diagnostico_identidade || null,
