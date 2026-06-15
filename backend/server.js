@@ -1862,6 +1862,108 @@ app.post('/api/save-roteiros', async (req, res) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
+//  POST /api/salvar-analise-pendente
+//  Salva análise de vídeo aguardando aprovação do cliente.
+//  Campos: phone, handle, nome_cliente, analise_texto, titulo_video
+// ═════════════════════════════════════════════════════════════════════════════
+app.post('/api/salvar-analise-pendente', requireApiKey, async (req, res) => {
+  const body = Array.isArray(req.body) ? req.body[0] : req.body;
+  const phone       = (body.phone        || '').replace(/\D/g, '').trim();
+  const handle      = (body.handle       || '').replace('@', '').toLowerCase().trim();
+  const nome        = (body.nome_cliente || body.nome || '').trim();
+  const analise     = (body.analise_texto || '').trim();
+  const titulo      = (body.titulo_video  || 'Análise de Vídeo').trim();
+
+  if (!phone)   return res.status(400).json({ ok: false, motivo: 'phone ausente' });
+  if (!analise) return res.status(400).json({ ok: false, motivo: 'analise_texto ausente' });
+
+  try {
+    await axios.post(
+      `${SUPA_URL}/rest/v1/aprovacoes_pendentes`,
+      { phone, handle, nome_cliente: nome, analise_texto: analise, titulo },
+      {
+        headers: {
+          ...supaHeaders(),
+          'Prefer': 'resolution=merge-duplicates',
+        },
+        params: { on_conflict: 'phone' }
+      }
+    );
+    console.log(`[salvar-analise-pendente] @${handle} (${phone}) — análise salva`);
+    return res.json({ ok: true, phone, handle });
+  } catch (err) {
+    const detail = err.response?.data || err.message;
+    console.error('[salvar-analise-pendente] Erro:', detail);
+    return res.status(500).json({ ok: false, motivo: 'erro_ao_salvar', detalhe: detail });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  POST /api/aprovar-roteiro
+//  Busca análise pendente pelo phone, envia ao painel Teleprompter Firemode.
+//  Campos: phone, nome_cliente (opcional), titulo (opcional)
+// ═════════════════════════════════════════════════════════════════════════════
+app.post('/api/aprovar-roteiro', requireApiKey, async (req, res) => {
+  const body  = Array.isArray(req.body) ? req.body[0] : req.body;
+  const phone = (body.phone || '').replace(/\D/g, '').trim();
+
+  if (!phone) return res.status(400).json({ ok: false, motivo: 'phone ausente' });
+
+  try {
+    // Busca análise pendente no Supabase
+    const { data: rows } = await axios.get(
+      `${SUPA_URL}/rest/v1/aprovacoes_pendentes?phone=eq.${phone}&limit=1`,
+      { headers: supaHeaders() }
+    );
+    const pendente = rows?.[0];
+    if (!pendente) {
+      return res.status(404).json({ ok: false, motivo: 'nenhuma_analise_pendente' });
+    }
+
+    const titulo      = body.titulo       || pendente.titulo       || 'Análise de Vídeo';
+    const nomeCLiente = body.nome_cliente || pendente.nome_cliente || '';
+    const handle      = pendente.handle   || '';
+
+    // Chama Teleprompter Firemode
+    const tpResp = await axios.post(
+      'https://tp.firemode.com.br/api/integrations/sessions',
+      {
+        script: pendente.analise_texto,
+        title:  titulo,
+        client: {
+          name:         nomeCLiente,
+          phone:        `55${phone}`,
+          external_ref: handle || `wa-${phone}`,
+        },
+      },
+      {
+        headers: {
+          'Authorization': 'Bearer tp_int_3a3fb641b9a9d706f7f40b0483c7182f7acbc8c3b5cfc7e9',
+          'Content-Type': 'application/json',
+        },
+        timeout: 15000,
+      }
+    );
+
+    const { client_url, record_url, client_id } = tpResp.data || {};
+
+    // Remove do pendente após aprovação
+    await axios.delete(
+      `${SUPA_URL}/rest/v1/aprovacoes_pendentes?phone=eq.${phone}`,
+      { headers: supaHeaders() }
+    ).catch(() => {});
+
+    console.log(`[aprovar-roteiro] @${handle} (${phone}) → ${client_url}`);
+    return res.json({ ok: true, client_url, record_url, client_id, handle, phone });
+
+  } catch (err) {
+    const detail = err.response?.data || err.message;
+    console.error('[aprovar-roteiro] Erro:', detail);
+    return res.status(500).json({ ok: false, motivo: 'erro_ao_aprovar', detalhe: detail });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
 //  GET /api/contexto-cliente/:identificador
 //  Aceita handle (@conta ou conta) OU número WhatsApp (ex: 5511999999999).
 //  Retorna posicionamento, tom de voz, ganchos, CTAs, pilares e últimos
