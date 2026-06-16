@@ -1866,7 +1866,7 @@ app.post('/api/save-roteiros', async (req, res) => {
 //  Salva análise de vídeo aguardando aprovação do cliente.
 //  Campos: phone, handle, nome_cliente, analise_texto, titulo_video
 // ═════════════════════════════════════════════════════════════════════════════
-app.post('/api/salvar-analise-pendente', requireApiKey, async (req, res) => {
+app.post('/api/salvar-analise-pendente', async (req, res) => {
   const body = Array.isArray(req.body) ? req.body[0] : req.body;
   const phone       = (body.phone        || '').replace(/\D/g, '').trim();
   const handle      = (body.handle       || '').replace('@', '').toLowerCase().trim();
@@ -1903,7 +1903,7 @@ app.post('/api/salvar-analise-pendente', requireApiKey, async (req, res) => {
 //  Busca análise pendente pelo phone, envia ao painel Teleprompter Firemode.
 //  Campos: phone, nome_cliente (opcional), titulo (opcional)
 // ═════════════════════════════════════════════════════════════════════════════
-app.post('/api/aprovar-roteiro', requireApiKey, async (req, res) => {
+app.post('/api/aprovar-roteiro', async (req, res) => {
   const body  = Array.isArray(req.body) ? req.body[0] : req.body;
   const phone = (body.phone || '').replace(/\D/g, '').trim();
 
