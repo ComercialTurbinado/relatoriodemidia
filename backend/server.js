@@ -1875,13 +1875,20 @@ app.post('/api/salvar-analise-pendente', async (req, res) => {
   const roteiroFalas  = (body.roteiro_falas || '').trim();
   const titulo        = (body.titulo || body.titulo_video || 'Análise de Vídeo').trim();
 
+  let roteiroEstruturado = null;
+  if (body.roteiro_estruturado) {
+    roteiroEstruturado = typeof body.roteiro_estruturado === 'string'
+      ? (() => { try { return JSON.parse(body.roteiro_estruturado); } catch (_) { return null; } })()
+      : body.roteiro_estruturado;
+  }
+
   if (!phone)   return res.status(400).json({ ok: false, motivo: 'phone ausente' });
   if (!analise) return res.status(400).json({ ok: false, motivo: 'analise_texto ausente' });
 
   try {
     await axios.post(
       `${SUPA_URL}/rest/v1/aprovacoes_pendentes`,
-      { phone, handle, nome_cliente: nome, analise_texto: analise, roteiro_falas: roteiroFalas, titulo },
+      { phone, handle, nome_cliente: nome, analise_texto: analise, roteiro_falas: roteiroFalas, roteiro_estruturado: roteiroEstruturado, titulo },
       {
         headers: {
           ...supaHeaders(),
@@ -1926,17 +1933,28 @@ app.post('/api/aprovar-roteiro', async (req, res) => {
     const handle      = pendente.handle   || '';
 
     // Chama Teleprompter Firemode
+    // roteiro_estruturado (quando presente) traz os hooks como opções separadas
+    // para o cliente escolher/gravar individualmente no painel.
+    const estrut = pendente.roteiro_estruturado || null;
+    const tpPayload = {
+      script: pendente.roteiro_falas || pendente.analise_texto,
+      title:  titulo,
+      client: {
+        name:         nomeCLiente,
+        phone:        `55${phone}`,
+        external_ref: handle || `wa-${phone}`,
+      },
+    };
+    if (estrut) {
+      tpPayload.hooks               = estrut.hooks || [];               // [{ index, texto, recomendado }]
+      tpPayload.hook_recomendado_index = estrut.hook_recomendado_index || 1;
+      tpPayload.corpo               = estrut.corpo || '';                // roteiro principal, sem o hook
+      tpPayload.cta                 = estrut.cta || '';                  // fala de encerramento
+    }
+
     const tpResp = await axios.post(
       'https://tp.firemode.com.br/api/integrations/sessions',
-      {
-        script: pendente.roteiro_falas || pendente.analise_texto,
-        title:  titulo,
-        client: {
-          name:         nomeCLiente,
-          phone:        `55${phone}`,
-          external_ref: handle || `wa-${phone}`,
-        },
-      },
+      tpPayload,
       {
         headers: {
           'Authorization': 'Bearer tp_int_3a3fb641b9a9d706f7f40b0483c7182f7acbc8c3b5cfc7e9',
@@ -1947,6 +1965,21 @@ app.post('/api/aprovar-roteiro', async (req, res) => {
     );
 
     const { client_url, record_url, client_id } = tpResp.data || {};
+
+    // Persiste a legenda separadamente — vai ser enviada só quando o vídeo
+    // editado estiver pronto (webhook /api/video-editado), por isso não pode
+    // ser perdida quando o pendente abaixo é removido.
+    if (estrut?.legenda_post) {
+      await axios.post(
+        `${SUPA_URL}/rest/v1/legendas_pendentes`,
+        {
+          phone, handle, nome_cliente: nomeCLiente, titulo,
+          legenda_post: estrut.legenda_post,
+          headline_thumbnail: estrut.headline_thumbnail || '',
+        },
+        { headers: supaHeaders() }
+      ).catch(e => console.warn('[aprovar-roteiro] legenda não salva:', e.response?.data || e.message));
+    }
 
     // Remove do pendente após aprovação
     await axios.delete(
@@ -1961,6 +1994,55 @@ app.post('/api/aprovar-roteiro', async (req, res) => {
     const detail = err.response?.data || err.message;
     console.error('[aprovar-roteiro] Erro:', detail);
     return res.status(500).json({ ok: false, motivo: 'erro_ao_aprovar', detalhe: detail });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  GET /api/legenda-pendente/:identificador
+//  Busca a legenda salva (aguardando vídeo editado) por phone ou handle.
+//  Usado pelo n8n quando o webhook de vídeo editado dispara.
+// ═════════════════════════════════════════════════════════════════════════════
+app.get('/api/legenda-pendente/:identificador', async (req, res) => {
+  const id = (req.params.identificador || '').replace('@', '').trim();
+  const isPhone = /^\d+$/.test(id);
+  const filtro = isPhone ? `phone=eq.${id}` : `handle=eq.${id.toLowerCase()}`;
+
+  try {
+    const { data: rows } = await axios.get(
+      `${SUPA_URL}/rest/v1/legendas_pendentes?${filtro}&enviada=eq.false&order=criado_em.desc&limit=1`,
+      { headers: supaHeaders() }
+    );
+    const pendente = rows?.[0];
+    if (!pendente) return res.status(404).json({ ok: false, motivo: 'nenhuma_legenda_pendente' });
+    return res.json({ ok: true, ...pendente });
+  } catch (err) {
+    const detail = err.response?.data || err.message;
+    console.error('[legenda-pendente] Erro:', detail);
+    return res.status(500).json({ ok: false, motivo: 'erro_ao_buscar', detalhe: detail });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  POST /api/marcar-legenda-enviada
+//  Marca a legenda como enviada após o n8n disparar a mensagem com o vídeo editado.
+//  Campos: phone
+// ═════════════════════════════════════════════════════════════════════════════
+app.post('/api/marcar-legenda-enviada', async (req, res) => {
+  const body  = Array.isArray(req.body) ? req.body[0] : req.body;
+  const phone = (body.phone || '').replace(/\D/g, '').trim();
+  if (!phone) return res.status(400).json({ ok: false, motivo: 'phone ausente' });
+
+  try {
+    await axios.patch(
+      `${SUPA_URL}/rest/v1/legendas_pendentes?phone=eq.${phone}&enviada=eq.false`,
+      { enviada: true, enviada_em: new Date().toISOString() },
+      { headers: supaHeaders() }
+    );
+    return res.json({ ok: true, phone });
+  } catch (err) {
+    const detail = err.response?.data || err.message;
+    console.error('[marcar-legenda-enviada] Erro:', detail);
+    return res.status(500).json({ ok: false, motivo: 'erro_ao_marcar', detalhe: detail });
   }
 });
 
