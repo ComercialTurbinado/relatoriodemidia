@@ -1868,11 +1868,12 @@ app.post('/api/save-roteiros', async (req, res) => {
 // ═════════════════════════════════════════════════════════════════════════════
 app.post('/api/salvar-analise-pendente', async (req, res) => {
   const body = Array.isArray(req.body) ? req.body[0] : req.body;
-  const phone       = (body.phone        || '').replace(/\D/g, '').trim();
-  const handle      = (body.handle       || '').replace('@', '').toLowerCase().trim();
-  const nome        = (body.nome_cliente || body.nome || '').trim();
-  const analise     = (body.analise_texto || '').trim();
-  const titulo      = (body.titulo_video  || 'Análise de Vídeo').trim();
+  const phone         = (body.phone        || '').replace(/\D/g, '').trim();
+  const handle        = (body.handle       || '').replace('@', '').toLowerCase().trim();
+  const nome          = (body.nome_cliente || body.nome || '').trim();
+  const analise       = (body.analise_texto || '').trim();
+  const roteiroFalas  = (body.roteiro_falas || '').trim();
+  const titulo        = (body.titulo || body.titulo_video || 'Análise de Vídeo').trim();
 
   if (!phone)   return res.status(400).json({ ok: false, motivo: 'phone ausente' });
   if (!analise) return res.status(400).json({ ok: false, motivo: 'analise_texto ausente' });
@@ -1880,7 +1881,7 @@ app.post('/api/salvar-analise-pendente', async (req, res) => {
   try {
     await axios.post(
       `${SUPA_URL}/rest/v1/aprovacoes_pendentes`,
-      { phone, handle, nome_cliente: nome, analise_texto: analise, titulo },
+      { phone, handle, nome_cliente: nome, analise_texto: analise, roteiro_falas: roteiroFalas, titulo },
       {
         headers: {
           ...supaHeaders(),
@@ -1928,7 +1929,7 @@ app.post('/api/aprovar-roteiro', async (req, res) => {
     const tpResp = await axios.post(
       'https://tp.firemode.com.br/api/integrations/sessions',
       {
-        script: pendente.analise_texto,
+        script: pendente.roteiro_falas || pendente.analise_texto,
         title:  titulo,
         client: {
           name:         nomeCLiente,
