@@ -1950,6 +1950,8 @@ app.post('/api/aprovar-roteiro', async (req, res) => {
       tpPayload.hook_recomendado_index = estrut.hook_recomendado_index || 1;
       tpPayload.corpo               = estrut.corpo || '';                // roteiro principal, sem o hook
       tpPayload.cta                 = estrut.cta || '';                  // fala de encerramento
+      tpPayload.legenda_post        = estrut.legenda_post || '';         // não usado na gravação — viaja junto pra referência
+      tpPayload.headline_thumbnail  = estrut.headline_thumbnail || '';
     }
 
     const tpResp = await axios.post(
@@ -1964,11 +1966,13 @@ app.post('/api/aprovar-roteiro', async (req, res) => {
       }
     );
 
-    const { client_url, record_url, client_id } = tpResp.data || {};
+    const { client_url, record_url, client_id, record_id } = tpResp.data || {};
 
-    // Persiste a legenda separadamente — vai ser enviada só quando o vídeo
-    // editado estiver pronto (webhook /api/video-editado), por isso não pode
-    // ser perdida quando o pendente abaixo é removido.
+    // Persiste a legenda separadamente, vinculada ao ID que o Teleprompter
+    // devolveu pra essa sessão de gravação — é esse ID que o sistema de edição
+    // deve mandar de volta quando o vídeo editado estiver pronto, pra buscar
+    // e enviar a legenda certa (evita ambiguidade se o cliente tiver múltiplos
+    // roteiros pendentes ao mesmo tempo).
     if (estrut?.legenda_post) {
       await axios.post(
         `${SUPA_URL}/rest/v1/legendas_pendentes`,
@@ -1976,6 +1980,8 @@ app.post('/api/aprovar-roteiro', async (req, res) => {
           phone, handle, nome_cliente: nomeCLiente, titulo,
           legenda_post: estrut.legenda_post,
           headline_thumbnail: estrut.headline_thumbnail || '',
+          record_id: record_id || record_url || null,
+          client_id: client_id || null,
         },
         { headers: supaHeaders() }
       ).catch(e => console.warn('[aprovar-roteiro] legenda não salva:', e.response?.data || e.message));
@@ -1999,13 +2005,17 @@ app.post('/api/aprovar-roteiro', async (req, res) => {
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  GET /api/legenda-pendente/:identificador
-//  Busca a legenda salva (aguardando vídeo editado) por phone ou handle.
+//  Busca a legenda salva (aguardando vídeo editado).
+//  Aceita: record_id/client_id do Teleprompter (preferível — sem ambiguidade),
+//  ou phone/handle como fallback (pega a mais recente não enviada).
 //  Usado pelo n8n quando o webhook de vídeo editado dispara.
 // ═════════════════════════════════════════════════════════════════════════════
 app.get('/api/legenda-pendente/:identificador', async (req, res) => {
   const id = (req.params.identificador || '').replace('@', '').trim();
   const isPhone = /^\d+$/.test(id);
-  const filtro = isPhone ? `phone=eq.${id}` : `handle=eq.${id.toLowerCase()}`;
+  const filtro = isPhone
+    ? `phone=eq.${id}`
+    : `or=(record_id.eq.${id},client_id.eq.${id},handle.eq.${id.toLowerCase()})`;
 
   try {
     const { data: rows } = await axios.get(
