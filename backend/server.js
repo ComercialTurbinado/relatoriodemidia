@@ -2057,6 +2057,61 @@ app.post('/api/marcar-legenda-enviada', async (req, res) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
+//  POST /api/video-editado
+//  Chamado pelo bridge do video-editor quando o vídeo final (já editado) fica pronto.
+//  Busca a legenda pendente pelo record_id (ou client_id) do Teleprompter, dispara
+//  o envio pro cliente via n8n (que tem as credenciais da Evolution API) e marca
+//  a legenda como enviada.
+//  Campos: record_id, video_url
+// ═════════════════════════════════════════════════════════════════════════════
+const N8N_WEBHOOK_BASE_URL = process.env.N8N_WEBHOOK_BASE_URL || 'https://n8n-srcleads-n8n.dtna1d.easypanel.host';
+
+app.post('/api/video-editado', async (req, res) => {
+  const body     = Array.isArray(req.body) ? req.body[0] : req.body;
+  const recordId = (body.record_id || '').trim();
+  const videoUrl = (body.video_url || '').trim();
+  if (!recordId || !videoUrl) {
+    return res.status(400).json({ ok: false, motivo: 'record_id ou video_url ausente' });
+  }
+
+  try {
+    const { data: rows } = await axios.get(
+      `${SUPA_URL}/rest/v1/legendas_pendentes?or=(record_id.eq.${recordId},client_id.eq.${recordId})&enviada=eq.false&order=criado_em.desc&limit=1`,
+      { headers: supaHeaders() }
+    );
+    const pendente = rows?.[0];
+    if (!pendente) {
+      return res.status(404).json({ ok: false, motivo: 'nenhuma_legenda_pendente_para_esse_record_id' });
+    }
+
+    await axios.post(
+      `${N8N_WEBHOOK_BASE_URL}/webhook/enviar-video-editado`,
+      {
+        phone:              pendente.phone,
+        video_url:          videoUrl,
+        legenda_post:       pendente.legenda_post || '',
+        headline_thumbnail: pendente.headline_thumbnail || '',
+        titulo:             pendente.titulo || '',
+      },
+      { timeout: 20000 }
+    );
+
+    await axios.patch(
+      `${SUPA_URL}/rest/v1/legendas_pendentes?id=eq.${pendente.id}`,
+      { enviada: true, enviada_em: new Date().toISOString(), video_url: videoUrl },
+      { headers: supaHeaders() }
+    );
+
+    console.log(`[video-editado] record_id=${recordId} → enviado pro WhatsApp de ${pendente.phone}`);
+    return res.json({ ok: true, phone: pendente.phone, record_id: recordId });
+  } catch (err) {
+    const detail = err.response?.data || err.message;
+    console.error('[video-editado] Erro:', detail);
+    return res.status(500).json({ ok: false, motivo: 'erro_ao_processar_video_editado', detalhe: detail });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
 //  GET /api/contexto-cliente/:identificador
 //  Aceita handle (@conta ou conta) OU número WhatsApp (ex: 5511999999999).
 //  Retorna posicionamento, tom de voz, ganchos, CTAs, pilares e últimos
