@@ -43,6 +43,7 @@ const PUPPETEER_ARGS = [
   '--disable-dev-shm-usage',
   '--disable-gpu',
   '--no-zygote',
+  '--single-process',               // evita fork de subprocessos (seccomp no Easypanel envia SIGTRAP)
   '--disable-features=VizDisplayCompositor',
 ];
 
