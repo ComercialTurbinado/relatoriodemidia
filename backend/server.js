@@ -124,26 +124,33 @@ async function chromeOneShotPdf(htmlPath) {
 
 // Gera PDF via Playwright: screenshot de cada slide (via tecla ArrowRight),
 // combinados com pdf-lib. Funciona com React SPAs onde page.pdf() falha.
-// htmlPath deve ser um arquivo local existente.
-async function playwrightScreenshotPdf(htmlPath, { width = 1920, height = 1080 } = {}) {
-  const PLAYWRIGHT_ARGS = [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
-  ];
-  const browser = await chromium.launch({
-    headless: true,
-    executablePath: CHROME_PATH,
-    args: PLAYWRIGHT_ARGS,
-  });
+//
+// Se BROWSERLESS_TOKEN estiver definido, conecta a wss://production-sfo.browserless.io
+// (Chrome externo — não sofre bloqueio do seccomp do Easypanel).
+// Caso contrário lança Chrome local (funciona em dev/Mac, falha no Easypanel).
+async function playwrightScreenshotPdf(htmlContent, { width = 1920, height = 1080 } = {}) {
+  const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
+
+  let browser;
+  if (BROWSERLESS_TOKEN) {
+    const wsEndpoint = `wss://production-sfo.browserless.io?token=${BROWSERLESS_TOKEN}`;
+    browser = await chromium.connectOverCDP(wsEndpoint);
+  } else {
+    browser = await chromium.launch({
+      headless: true,
+      executablePath: CHROME_PATH,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+    });
+  }
+
   try {
     const page = await browser.newPage();
     await page.setViewportSize({ width, height });
-    await page.goto(`file://${htmlPath}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+    // Usa setContent para evitar restrições de file:// no Chrome remoto
+    await page.setContent(htmlContent, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(2500);
 
-    // Lê total de slides do DOM
     const total = await page.evaluate(() => {
       const dots = document.querySelectorAll('[style*="border-radius: 50%"]');
       return dots.length || 1;
@@ -905,29 +912,15 @@ app.post('/api/slides/pdf', async (req, res) => {
   const anchor    = template.includes('</head>') ? '</head>' : '<style>';
   const html      = template.replace(anchor, injection + anchor);
 
-  const tmpPath = path.join(os.tmpdir(), `slides_${Date.now()}.html`);
-  fs.writeFileSync(tmpPath, html, 'utf8');
   try {
-    // Usa Playwright (screenshots por slide) — mais confiável para SPAs React
-    // page.pdf() falha com "Printing failed" nessa app; screenshots + pdf-lib funcionam.
-    const pdfBuf = await playwrightScreenshotPdf(tmpPath,
+    const pdfBuf = await playwrightScreenshotPdf(html,
       isLandscape ? { width: 1920, height: 1080 } : { width: 1080, height: 1920 });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="radar-marketing.pdf"');
     res.send(pdfBuf);
   } catch (err) {
-    console.error('[slides/pdf] Playwright falhou, tentando --print-to-pdf:', err.message);
-    try {
-      const pdfBuf = await chromeOneShotPdf(tmpPath);
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename="radar-marketing.pdf"');
-      res.send(pdfBuf);
-    } catch (err2) {
-      console.error('[slides/pdf]', err2.message);
-      res.status(500).json({ error: 'Falha ao gerar PDF', detail: err2.message });
-    }
-  } finally {
-    try { fs.unlinkSync(tmpPath); } catch (_) {}
+    console.error('[slides/pdf]', err.message);
+    res.status(500).json({ error: 'Falha ao gerar PDF', detail: err.message });
   }
 });
 
