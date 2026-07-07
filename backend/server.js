@@ -34,7 +34,16 @@ const supaHeaders = () => ({
   'Prefer': 'return=representation',
 });
 
-const CHROME_PATH = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME_PATH = process.env.CHROME_PATH
+  || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : '/usr/bin/google-chrome');
+
+const PUPPETEER_ARGS = [
+  '--no-sandbox',
+  '--disable-setuid-sandbox',
+  '--disable-dev-shm-usage',
+  '--disable-gpu',
+  '--no-zygote',
+];
 
 const app  = express();
 app.use(express.json({ limit: '10mb' }));
@@ -745,7 +754,7 @@ app.post('/api/slides/pdf', async (req, res) => {
     browser = await puppeteer.launch({
       executablePath: CHROME_PATH,
       headless: 'shell',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: PUPPETEER_ARGS,
     });
 
     const page = await browser.newPage();
@@ -868,7 +877,7 @@ app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }),
     browser = await puppeteer.launch({
       executablePath: CHROME_PATH,
       headless: 'shell',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: PUPPETEER_ARGS,
     });
     const page = await browser.newPage();
     await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
@@ -947,7 +956,7 @@ app.post('/api/lp/analyze', async (req, res) => {
     browser = await puppeteer.launch({
       executablePath: CHROME_PATH,
       headless: 'shell',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: PUPPETEER_ARGS,
     });
 
     const page = await browser.newPage();
@@ -1468,14 +1477,8 @@ app.post('/api/page-text', async (req, res) => {
   let browser;
   try {
     browser = await puppeteer.launch({
-      executablePath: process.env.CHROME_PATH || '/usr/bin/chromium',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--window-size=1280,800',
-      ],
+      executablePath: CHROME_PATH,
+      args: [...PUPPETEER_ARGS, '--window-size=1280,800'],
       headless: true,
     });
 
