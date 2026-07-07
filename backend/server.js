@@ -21,7 +21,7 @@ const puppeteer   = require('puppeteer-core');
 const fs          = require('fs');
 const path        = require('path');
 const crypto      = require('crypto');
-const { exec }    = require('child_process');
+const { exec, spawn } = require('child_process');
 const os          = require('os');
 const multer      = require('multer');
 // ─── Supabase REST (sem SDK — usa axios direto) ───────────────────────────────
@@ -77,6 +77,28 @@ app.use('/api', (req, res, next) => {
   const key = req.headers['x-api-key'];
   if (key !== process.env.API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
   next();
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// DIAGNÓSTICO: testa se o Chrome consegue iniciar via child_process
+// GET /api/test-chrome — retorna stdout/stderr do Chrome nos primeiros 3s
+// ═════════════════════════════════════════════════════════════════════════════
+app.get('/api/test-chrome', async (req, res) => {
+  const port = 19222;
+  const args = [...PUPPETEER_ARGS, `--remote-debugging-port=${port}`, '--headless=shell'];
+  let stdout = '', stderr = '';
+  const proc = spawn(CHROME_PATH, args);
+  proc.stdout.on('data', d => { stdout += d; });
+  proc.stderr.on('data', d => { stderr += d; });
+  proc.on('exit', (code, signal) => {
+    res.json({ status: 'exited', code, signal, chromePath: CHROME_PATH, args, stderr: stderr.slice(0, 2000), stdout: stdout.slice(0, 500) });
+  });
+  setTimeout(() => {
+    if (!proc.killed) {
+      proc.kill();
+      res.json({ status: 'running_ok', chromePath: CHROME_PATH, args, stderr: stderr.slice(0, 2000), stdout: stdout.slice(0, 500) });
+    }
+  }, 3000);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
