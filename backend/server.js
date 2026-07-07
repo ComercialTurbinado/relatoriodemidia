@@ -757,6 +757,7 @@ app.post('/api/slides/pdf', async (req, res) => {
     browser = await puppeteer.launch({
       executablePath: CHROME_PATH,
       headless: 'shell',
+      pipe: false,
       args: PUPPETEER_ARGS,
     });
 
@@ -880,6 +881,7 @@ app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }),
     browser = await puppeteer.launch({
       executablePath: CHROME_PATH,
       headless: 'shell',
+      pipe: false,
       args: PUPPETEER_ARGS,
     });
     const page = await browser.newPage();
@@ -959,6 +961,7 @@ app.post('/api/lp/analyze', async (req, res) => {
     browser = await puppeteer.launch({
       executablePath: CHROME_PATH,
       headless: 'shell',
+      pipe: false,
       args: PUPPETEER_ARGS,
     });
 
