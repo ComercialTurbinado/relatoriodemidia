@@ -14,7 +14,7 @@
     "multer": "^2.1.1",
     "openai": "^4.52.7",
     "pdfkit": "^0.15.0",
-    "puppeteer-core": "^24.42.0",
+    "puppeteer-core": "21.11.0",
     "stripe": "^16.2.0"
   },
   "devDependencies": {
