@@ -43,9 +43,7 @@ const PUPPETEER_ARGS = [
   '--disable-dev-shm-usage',
   '--disable-gpu',
   '--no-zygote',
-  '--single-process',
   '--disable-features=VizDisplayCompositor',
-  '--remote-debugging-port=0',  // força porta TCP em vez de pipe (mais compatível com containers)
 ];
 
 const app  = express();
@@ -758,6 +756,7 @@ app.post('/api/slides/pdf', async (req, res) => {
       executablePath: CHROME_PATH,
       headless: 'shell',
       pipe: false,
+      protocol: 'cdp',
       args: PUPPETEER_ARGS,
     });
 
@@ -882,6 +881,7 @@ app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }),
       executablePath: CHROME_PATH,
       headless: 'shell',
       pipe: false,
+      protocol: 'cdp',
       args: PUPPETEER_ARGS,
     });
     const page = await browser.newPage();
@@ -962,6 +962,7 @@ app.post('/api/lp/analyze', async (req, res) => {
       executablePath: CHROME_PATH,
       headless: 'shell',
       pipe: false,
+      protocol: 'cdp',
       args: PUPPETEER_ARGS,
     });
 
