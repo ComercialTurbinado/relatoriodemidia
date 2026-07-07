@@ -37,14 +37,17 @@ const supaHeaders = () => ({
 const CHROME_PATH = process.env.CHROME_PATH
   || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : '/usr/bin/chromium');
 
+// Flags testados e confirmados no container Easypanel (Chromium 150 / Debian Bookworm)
+// Seccomp bloqueia fork com SIGTRAP → --single-process obrigatório
+// --headless=shell obrigatório (headless new crasha em single-process)
 const PUPPETEER_ARGS = [
   '--no-sandbox',
   '--disable-setuid-sandbox',
   '--disable-dev-shm-usage',
   '--disable-gpu',
   '--no-zygote',
-  '--single-process',               // evita fork de subprocessos (seccomp no Easypanel envia SIGTRAP)
-  '--disable-features=VizDisplayCompositor',
+  '--single-process',
+  '--headless=shell',
 ];
 
 const app  = express();
@@ -777,7 +780,7 @@ app.post('/api/slides/pdf', async (req, res) => {
   try {
     browser = await chromium.launch({
       executablePath: CHROME_PATH,
-      headless: true,
+      headless: false,
       args: PUPPETEER_ARGS,
     });
 
@@ -900,7 +903,7 @@ app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }),
   try {
     browser = await chromium.launch({
       executablePath: CHROME_PATH,
-      headless: true,
+      headless: false,
       args: PUPPETEER_ARGS,
     });
     const page = await browser.newPage();
@@ -977,7 +980,7 @@ app.post('/api/lp/analyze', async (req, res) => {
   try {
     browser = await chromium.launch({
       executablePath: CHROME_PATH,
-      headless: true,
+      headless: false,
       args: PUPPETEER_ARGS,
     });
 
@@ -1499,7 +1502,7 @@ app.post('/api/page-text', async (req, res) => {
     browser = await chromium.launch({
       executablePath: CHROME_PATH,
       args: [...PUPPETEER_ARGS, '--window-size=1280,800'],
-      headless: true,
+      headless: false,
     });
 
     const page = await browser.newPage();
