@@ -2117,17 +2117,15 @@ export default function App() {
       el.id = '__pdf_css__';
       document.head.appendChild(el);
     }
-    const scale = 0.585;
-    const pageW = isLandscape ? '297mm' : '210mm';
-    const pageH = isLandscape ? '210mm' : '297mm';
-    const orient = isLandscape ? 'landscape' : 'portrait';
+    // Usa dimensões nativas do slide (sem scale) para evitar barra preta no PDF.
+    // @page size em px garante que cada slide ocupe uma página exata.
     el.textContent = `
       @media print {
-        @page { size: A4 ${orient}; margin: 0; }
+        @page { size: ${W}px ${H}px; margin: 0; }
         #__screen_ui__ { display: none !important; }
         #__print_pages__ { display: block !important; }
-        .pp { width: ${pageW}; height: ${pageH}; overflow: hidden; break-after: page; page-break-after: always; background: #000; position: relative; }
-        .ppi { width: ${W}px; height: ${H}px; transform: scale(${scale}); transform-origin: top left; }
+        .pp { width: ${W}px; height: ${H}px; overflow: hidden; break-after: page; page-break-after: always; position: relative; }
+        .ppi { width: ${W}px; height: ${H}px; transform: none; }
       }
       #__print_pages__ { display: none; }
     `;

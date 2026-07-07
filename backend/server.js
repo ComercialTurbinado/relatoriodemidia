@@ -133,7 +133,8 @@ async function playwrightScreenshotPdf(htmlContent, { width = 1920, height = 108
 
   let browser;
   if (BROWSERLESS_TOKEN) {
-    const wsEndpoint = `wss://production-sfo.browserless.io?token=${BROWSERLESS_TOKEN}`;
+    const browserlessHost = process.env.BROWSERLESS_HOST || 'n8n-srcleads-browserless.dtna1d.easypanel.host';
+    const wsEndpoint = `wss://${browserlessHost}?token=${BROWSERLESS_TOKEN}&timeout=180000`;
     browser = await chromium.connectOverCDP(wsEndpoint);
   } else {
     browser = await chromium.launch({
@@ -147,33 +148,59 @@ async function playwrightScreenshotPdf(htmlContent, { width = 1920, height = 108
     const page = await browser.newPage();
     await page.setViewportSize({ width, height });
 
-    // Usa setContent para evitar restrições de file:// no Chrome remoto
-    await page.setContent(htmlContent, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(2500);
+    // Bloqueia Google Fonts para evitar espera de rede (usa fontes fallback do sistema)
+    await page.route('**fonts.googleapis.com**', r => r.abort());
+    await page.route('**fonts.gstatic.com**', r => r.abort());
+
+    await page.setContent(htmlContent, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForTimeout(3000);
 
     const total = await page.evaluate(() => {
       const dots = document.querySelectorAll('[style*="border-radius: 50%"]');
       return dots.length || 1;
     });
 
-    const pngBuffers = [];
+    // Com Chrome remoto (browserless) usa page.pdf() — uma única chamada, ~2s
+    // Com Chrome local, page.pdf() falha ("Printing failed") → usa screenshots por slide
+    if (BROWSERLESS_TOKEN) {
+      await page.emulateMedia({ media: 'print' });
+      await page.waitForTimeout(500);
+      const pdfBuf = await page.pdf({ printBackground: true, width: `${width}px`, height: `${height}px` });
+      await browser.close();
+      return Buffer.from(pdfBuf);
+    }
+
+    // Fallback local: oculta nav/footer e tira screenshot de cada slide
+    await page.evaluate(() => {
+      const ui = document.getElementById('__screen_ui__');
+      if (ui?.firstElementChild) ui.firstElementChild.style.display = 'none';
+      if (ui?.lastElementChild)  ui.lastElementChild.style.display  = 'none';
+      const inner = document.getElementById('slide-inner');
+      if (inner) {
+        inner.style.position  = 'fixed';
+        inner.style.top       = '0';
+        inner.style.left      = '0';
+        inner.style.zIndex    = '9999';
+        inner.style.transform = 'none';
+      }
+    });
+    await page.waitForTimeout(300);
+
+    const jpegBuffers = [];
     for (let i = 0; i < total; i++) {
       if (i > 0) {
         await page.keyboard.press('ArrowRight');
         await page.waitForTimeout(120);
       }
-      const slideEl = await page.$('#slide-inner');
-      const shot = slideEl
-        ? await slideEl.screenshot({ type: 'png' })
-        : await page.screenshot({ type: 'png' });
-      pngBuffers.push(shot);
+      const shot = await page.screenshot({ type: 'jpeg', quality: 85, clip: { x: 0, y: 0, width, height } });
+      jpegBuffers.push(shot);
     }
 
     await browser.close();
 
     const pdfDoc = await PDFLib.create();
-    for (const png of pngBuffers) {
-      const img = await pdfDoc.embedPng(png);
+    for (const jpeg of jpegBuffers) {
+      const img = await pdfDoc.embedJpg(jpeg);
       const { width: w, height: h } = img.scale(1);
       const p = pdfDoc.addPage([w, h]);
       p.drawImage(img, { x: 0, y: 0, width: w, height: h });
