@@ -37,61 +37,49 @@ const supaHeaders = () => ({
 const CHROME_PATH = process.env.CHROME_PATH
   || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : '/usr/bin/chromium');
 
-// Flags validados no container Easypanel (Chromium 150 / Debian Bookworm).
-// Seccomp bloqueia fork (SIGTRAP) → --single-process obrigatório.
-// --remote-debugging-pipe (padrão do playwright/puppeteer) também
-// dispara SIGTRAP — por isso usamos TCP via launchBrowser().
-const CHROME_ARGS = [
+// Flags para comandos one-shot do Chrome (sem CDP).
+// Seccomp do Easypanel bloqueia qualquer servidor de debugging (SIGTRAP),
+// mas --print-to-pdf e --dump-dom funcionam normalmente com --single-process.
+const CHROME_ONE_SHOT_ARGS = [
+  '--headless=shell',
   '--no-sandbox',
   '--disable-setuid-sandbox',
   '--disable-dev-shm-usage',
   '--disable-gpu',
   '--no-zygote',
   '--single-process',
-  '--headless=shell',
-  '--no-startup-window',
 ];
 
-// Lança o Chrome manualmente via spawn com porta TCP (sem --remote-debugging-pipe)
-// e conecta via playwright CDP. Evita o SIGTRAP que o seccomp do Easypanel
-// dispara ao usar o pipe interno do playwright/puppeteer.
-async function launchBrowser(extraArgs = []) {
-  const port = 9200 + Math.floor(Math.random() * 800);
-  const args = [...CHROME_ARGS, `--remote-debugging-port=${port}`, ...extraArgs];
-
-  const proc = spawn(CHROME_PATH, args);
-  let stderr = '';
-
-  await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      proc.kill();
-      reject(new Error(`Chrome startup timeout\nstderr: ${stderr.slice(0, 500)}`));
-    }, 12000);
-
-    proc.stderr.on('data', d => {
-      stderr += d.toString();
-      if (stderr.includes('DevTools listening')) {
-        clearTimeout(timeout);
-        resolve();
+// Gera PDF via Chrome --print-to-pdf (one-shot, sem CDP, sem SIGTRAP).
+// O HTML deve ter @page CSS configurado para tamanho e orientação corretos.
+// Requer que htmlPath seja um arquivo existente; tmpPdf é limpo ao final.
+async function chromeOneShotPdf(htmlPath) {
+  const tmpPdf = htmlPath.replace(/\.html$/, '.pdf');
+  return new Promise((resolve, reject) => {
+    const args = [
+      ...CHROME_ONE_SHOT_ARGS,
+      '--print-to-pdf-no-header',
+      `--print-to-pdf=${tmpPdf}`,
+      `file://${htmlPath}`,
+    ];
+    const proc = spawn(CHROME_PATH, args);
+    let stderr = '';
+    proc.stderr.on('data', d => { stderr += d.toString(); });
+    const timer = setTimeout(() => { proc.kill(); reject(new Error('Chrome --print-to-pdf timeout (30s)')); }, 30000);
+    proc.on('exit', (code, signal) => {
+      clearTimeout(timer);
+      if (signal === 'SIGTRAP') {
+        return reject(new Error(`Chrome SIGTRAP (seccomp)\nstderr: ${stderr.slice(0, 500)}`));
+      }
+      try {
+        const buf = fs.readFileSync(tmpPdf);
+        try { fs.unlinkSync(tmpPdf); } catch (_) {}
+        resolve(buf);
+      } catch {
+        reject(new Error(`PDF não gerado: code=${code} signal=${signal}\nstderr: ${stderr.slice(0, 500)}`));
       }
     });
-    proc.on('exit', (code, signal) => {
-      clearTimeout(timeout);
-      reject(new Error(`Chrome exited: code=${code} signal=${signal}\nstderr: ${stderr.slice(0, 500)}`));
-    });
   });
-
-  await new Promise(r => setTimeout(r, 300));
-  const browser = await chromium.connectOverCDP(`http://localhost:${port}`);
-
-  // Monkey-patch close para também matar o processo do Chrome
-  const origClose = browser.close.bind(browser);
-  browser.close = async () => {
-    await origClose().catch(() => {});
-    if (!proc.killed) proc.kill('SIGKILL');
-  };
-
-  return browser;
 }
 
 const app  = express();
@@ -820,86 +808,18 @@ app.post('/api/slides/pdf', async (req, res) => {
   const anchor    = template.includes('</head>') ? '</head>' : '<style>';
   const html      = template.replace(anchor, injection + anchor);
 
-  let browser;
+  const tmpPath = path.join(os.tmpdir(), `slides_${Date.now()}.html`);
+  fs.writeFileSync(tmpPath, html, 'utf8');
   try {
-    browser = await launchBrowser();
-
-    const page = await browser.newPage();
-    const W = isLandscape ? 1920 : 1080;
-    const H = isLandscape ? 1080 : 1920;
-
-    await page.setViewportSize({ width: W, height: H });
-
-    const tmpPath = path.join(__dirname, `_slides_tmp_${Date.now()}.html`);
-    fs.writeFileSync(tmpPath, html, 'utf8');
-    try {
-      await page.goto(`file://${tmpPath}`, { waitUntil: 'load', timeout: 15000 });
-    } finally {
-      fs.unlinkSync(tmpPath);
-    }
-
-    // Aguarda React montar + fontes
-    await new Promise(r => setTimeout(r, 2500));
-
-    // Ativa orientação correta
-    if (!isLandscape) {
-      await page.evaluate(() => {
-        const btn = Array.from(document.querySelectorAll('button'))
-          .find(b => b.textContent.trim() === '9:16');
-        if (btn) btn.click();
-      });
-      await new Promise(r => setTimeout(r, 600));
-    }
-
-    // Conta slides e tira screenshot de cada um
-    const total = await page.evaluate(() =>
-      document.querySelectorAll('button[style*="border-radius: 50%"]').length
-    );
-
-    const slideEl  = await page.$('#slide-inner');
-    const screenshots = [];
-
-    for (let i = 0; i < total; i++) {
-      await page.evaluate((idx) => {
-        const dots = document.querySelectorAll('button[style*="border-radius: 50%"]');
-        dots[idx]?.click();
-      }, i);
-      await new Promise(r => setTimeout(r, 180));
-      const img = await slideEl.screenshot({ type: 'png' });
-      screenshots.push(img);
-    }
-
-    await browser.close();
-    browser = null;
-
-    // Monta PDF com pdfkit: cada screenshot ocupa uma página
-    const pdfBuf = await new Promise((resolve, reject) => {
-      const chunks = [];
-      // Página na proporção exata do slide
-      const doc = new PDFDocument({
-        autoFirstPage: false,
-        margin: 0,
-        size: [W, H],
-      });
-      doc.on('data', c => chunks.push(c));
-      doc.on('end',  () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
-
-      for (const img of screenshots) {
-        doc.addPage({ size: [W, H], margin: 0 });
-        doc.image(img, 0, 0, { width: W, height: H });
-      }
-      doc.end();
-    });
-
+    const pdfBuf = await chromeOneShotPdf(tmpPath);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="radar-marketing.pdf"');
     res.send(pdfBuf);
-
   } catch (err) {
-    if (browser) await browser.close().catch(() => {});
     console.error('[slides/pdf]', err.message);
     res.status(500).json({ error: 'Falha ao gerar PDF', detail: err.message });
+  } finally {
+    try { fs.unlinkSync(tmpPath); } catch (_) {}
   }
 });
 
@@ -926,68 +846,46 @@ app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }),
 
   const orientation = req.query.orientation === 'portrait' ? 'portrait' : 'landscape';
   const isLandscape = orientation === 'landscape';
-  const useA4       = req.query.format === 'A4'; // ?format=A4 → usa papel A4 real (respeita mm e @page)
-  const fullPage    = req.query.full_page === 'true'; // captura página inteira sem limite de altura
+  const useA4       = req.query.format === 'A4';
 
-  // Dimensões do viewport:
-  //   A4 portrait  → 794×1123 px (96 dpi)  |  A4 landscape → 1123×794 px
-  //   Padrão        → 1080×1920 (portrait)  |  1920×1080 (landscape)
-  const W = useA4
-    ? (isLandscape ? 1123 : 794)
-    : (isLandscape ? 1920 : 1080);
-  const H = useA4
-    ? (isLandscape ? 794  : 1123)
-    : (isLandscape ? 1080 : 1920);
+  // Para URLs externas: baixa o HTML antes de converter
+  let finalHtml = html;
+  if (externalUrl) {
+    try {
+      const resp = await axios.get(externalUrl, { responseType: 'text', timeout: 30000 });
+      finalHtml = resp.data;
+    } catch (e) {
+      return res.status(400).json({ error: 'Falha ao buscar URL', detail: e.message });
+    }
+  }
 
-  let browser;
+  // Injeta @page CSS se não houver: controla tamanho e orientação
+  if (!finalHtml.includes('@page')) {
+    const pageSize = useA4
+      ? `A4 ${isLandscape ? 'landscape' : 'portrait'}`
+      : (isLandscape ? '1920px 1080px' : '1080px 1920px');
+    const pageStyle = `<style>@page{size:${pageSize};margin:0}body{margin:0}</style>`;
+    finalHtml = finalHtml.replace(/<head>|<html>/, m => m + pageStyle);
+    if (!finalHtml.includes(pageStyle)) finalHtml = pageStyle + finalHtml;
+  }
+
+  let fileName = 'documento';
+  if (externalUrl) {
+    try { fileName = new URL(externalUrl).hostname.replace(/\./g, '_'); } catch (_) {}
+  }
+
+  const tmpPath = path.join(os.tmpdir(), `html2pdf_${Date.now()}.html`);
+  fs.writeFileSync(tmpPath, finalHtml, 'utf8');
   try {
-    browser = await launchBrowser();
-    const page = await browser.newPage();
-    await page.setViewportSize({ width: W, height: H });
-
-    // Simula um navegador real para evitar bloqueios de bot
-    await page.setExtraHTTPHeaders({ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' });
-
-    if (externalUrl) {
-      await page.goto(externalUrl, { waitUntil: 'networkidle', timeout: 60000 });
-    } else {
-      await page.setContent(html, { waitUntil: 'networkidle', timeout: 60000 });
-    }
-
-    // Opções do PDF:
-    //   ?format=A4  → formato de papel A4, margens controladas pelo CSS @page
-    //   padrão      → dimensões em px (comportamento original)
-    const pdfOptions = useA4
-      ? {
-          format: isLandscape ? 'A4' : 'A4',
-          landscape: isLandscape,
-          printBackground: true,
-          margin: { top: 0, bottom: 0, left: 0, right: 0 },
-        }
-      : {
-          width: `${W}px`,
-          height: fullPage ? undefined : `${H}px`,
-          printBackground: true,
-          margin: { top: 0, bottom: 0, left: 0, right: 0 },
-        };
-
-    const pdfBuf = await page.pdf(pdfOptions);
-
-    await browser.close(); browser = null;
-
-    // Nome do arquivo: domínio da URL ou "documento"
-    let fileName = 'documento';
-    if (externalUrl) {
-      try { fileName = new URL(externalUrl).hostname.replace(/\./g, '_'); } catch (_) {}
-    }
-
+    const pdfBuf = await chromeOneShotPdf(tmpPath);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}.pdf"`);
-    res.end(Buffer.from(pdfBuf));
+    res.end(pdfBuf);
   } catch (err) {
-    if (browser) await browser.close().catch(() => {});
     console.error('[html-to-pdf]', err.message);
     res.status(500).json({ error: 'Falha ao gerar PDF', detail: err.message });
+  } finally {
+    try { fs.unlinkSync(tmpPath); } catch (_) {}
   }
 });
 
