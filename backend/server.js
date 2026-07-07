@@ -37,27 +37,47 @@ const supaHeaders = () => ({
 const CHROME_PATH = process.env.CHROME_PATH
   || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : '/usr/bin/chromium');
 
-// Flags para comandos one-shot do Chrome (sem CDP).
-// Seccomp do Easypanel bloqueia qualquer servidor de debugging (SIGTRAP),
-// mas --print-to-pdf e --dump-dom funcionam normalmente com --single-process.
-const CHROME_ONE_SHOT_ARGS = [
-  '--headless=shell',
-  '--no-sandbox',
-  '--disable-setuid-sandbox',
-  '--disable-dev-shm-usage',
-  '--disable-gpu',
-  '--no-zygote',
-  '--single-process',
+// Flags para --print-to-pdf one-shot (sem CDP).
+// Combinações testadas em ordem de preferência — chromeOneShotPdf tenta
+// cada variante até uma funcionar ou todas falharem.
+const CHROME_FLAG_VARIANTS = [
+  // Variant A: headless clássico sem single-process (Docker padrão)
+  [
+    '--headless',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+  ],
+  // Variant B: headless=new (Chrome 112+) sem single-process
+  [
+    '--headless=new',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+  ],
+  // Variant C: headless=shell com single-process (anterior)
+  [
+    '--headless=shell',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--no-zygote',
+    '--single-process',
+  ],
 ];
 
-// Gera PDF via Chrome --print-to-pdf (one-shot, sem CDP, sem SIGTRAP).
-// O HTML deve ter @page CSS configurado para tamanho e orientação corretos.
-// Requer que htmlPath seja um arquivo existente; tmpPdf é limpo ao final.
-async function chromeOneShotPdf(htmlPath) {
-  const tmpPdf = htmlPath.replace(/\.html$/, '.pdf');
+const CHROME_ONE_SHOT_ARGS = CHROME_FLAG_VARIANTS[0];
+
+// Tenta uma variante de flags do Chrome com --print-to-pdf.
+// Resolve com Buffer do PDF ou rejeita com { sigtrap: true } para sinalizar seccomp.
+function tryChromePdf(htmlPath, flags) {
+  const tmpPdf = htmlPath.replace(/\.html$/, `_${Date.now()}.pdf`);
   return new Promise((resolve, reject) => {
     const args = [
-      ...CHROME_ONE_SHOT_ARGS,
+      ...flags,
       '--print-to-pdf-no-header',
       `--print-to-pdf=${tmpPdf}`,
       `file://${htmlPath}`,
@@ -65,21 +85,40 @@ async function chromeOneShotPdf(htmlPath) {
     const proc = spawn(CHROME_PATH, args);
     let stderr = '';
     proc.stderr.on('data', d => { stderr += d.toString(); });
-    const timer = setTimeout(() => { proc.kill(); reject(new Error('Chrome --print-to-pdf timeout (30s)')); }, 30000);
+    const timer = setTimeout(() => {
+      proc.kill();
+      reject(new Error('timeout'));
+    }, 30000);
     proc.on('exit', (code, signal) => {
       clearTimeout(timer);
       if (signal === 'SIGTRAP') {
-        return reject(new Error(`Chrome SIGTRAP (seccomp)\nstderr: ${stderr.slice(0, 500)}`));
+        const err = new Error(`SIGTRAP`);
+        err.sigtrap = true;
+        return reject(err);
       }
       try {
         const buf = fs.readFileSync(tmpPdf);
         try { fs.unlinkSync(tmpPdf); } catch (_) {}
         resolve(buf);
       } catch {
-        reject(new Error(`PDF não gerado: code=${code} signal=${signal}\nstderr: ${stderr.slice(0, 500)}`));
+        reject(new Error(`PDF não gerado: code=${code} signal=${signal}\nstderr: ${stderr.slice(0, 300)}`));
       }
     });
   });
+}
+
+// Tenta cada variante de flags em sequência até uma funcionar.
+async function chromeOneShotPdf(htmlPath) {
+  let lastErr;
+  for (const flags of CHROME_FLAG_VARIANTS) {
+    try {
+      return await tryChromePdf(htmlPath, flags);
+    } catch (err) {
+      lastErr = err;
+      if (!err.sigtrap) break; // só tenta próxima se for seccomp
+    }
+  }
+  throw lastErr || new Error('Chrome falhou em todas as variantes de flags');
 }
 
 const app  = express();
@@ -116,25 +155,26 @@ app.use('/api', (req, res, next) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-// DIAGNÓSTICO: testa se o Chrome consegue iniciar via child_process
-// GET /api/test-chrome — retorna stdout/stderr do Chrome nos primeiros 3s
+// DIAGNÓSTICO: testa cada variante de flags do Chrome com --print-to-pdf
+// GET /api/test-chrome — não requer auth, retorna resultado de cada variante
 // ═════════════════════════════════════════════════════════════════════════════
 app.get('/api/test-chrome', async (req, res) => {
-  const port = 19222;
-  const args = [...CHROME_ARGS, `--remote-debugging-port=${port}`];
-  let stdout = '', stderr = '';
-  const proc = spawn(CHROME_PATH, args);
-  proc.stdout.on('data', d => { stdout += d; });
-  proc.stderr.on('data', d => { stderr += d; });
-  proc.on('exit', (code, signal) => {
-    res.json({ status: 'exited', code, signal, chromePath: CHROME_PATH, args, stderr: stderr.slice(0, 2000), stdout: stdout.slice(0, 500) });
-  });
-  setTimeout(() => {
-    if (!proc.killed) {
-      proc.kill();
-      res.json({ status: 'running_ok', chromePath: CHROME_PATH, args, stderr: stderr.slice(0, 2000), stdout: stdout.slice(0, 500) });
+  const tmpHtml = path.join(os.tmpdir(), `chrome_test_${Date.now()}.html`);
+  fs.writeFileSync(tmpHtml, '<html><body><h1>Chrome PDF test</h1></body></html>', 'utf8');
+  const results = [];
+  for (let i = 0; i < CHROME_FLAG_VARIANTS.length; i++) {
+    const flags = CHROME_FLAG_VARIANTS[i];
+    const start = Date.now();
+    try {
+      const buf = await tryChromePdf(tmpHtml, flags);
+      results.push({ variant: i, flags, ok: true, bytes: buf.length, ms: Date.now() - start });
+      break; // primeiro que funcionar é suficiente
+    } catch (err) {
+      results.push({ variant: i, flags, ok: false, sigtrap: !!err.sigtrap, error: err.message, ms: Date.now() - start });
     }
-  }, 3000);
+  }
+  try { fs.unlinkSync(tmpHtml); } catch (_) {}
+  res.json({ chromePath: CHROME_PATH, results });
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
