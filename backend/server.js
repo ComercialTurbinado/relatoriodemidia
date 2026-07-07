@@ -45,6 +45,7 @@ const PUPPETEER_ARGS = [
   '--no-zygote',
   '--single-process',
   '--disable-features=VizDisplayCompositor',
+  '--remote-debugging-port=0',  // força porta TCP em vez de pipe (mais compatível com containers)
 ];
 
 const app  = express();
