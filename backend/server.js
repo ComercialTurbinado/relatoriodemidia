@@ -43,6 +43,8 @@ const PUPPETEER_ARGS = [
   '--disable-dev-shm-usage',
   '--disable-gpu',
   '--no-zygote',
+  '--single-process',
+  '--disable-features=VizDisplayCompositor',
 ];
 
 const app  = express();
