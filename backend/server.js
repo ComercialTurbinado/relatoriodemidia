@@ -17,7 +17,7 @@ const express     = require('express');
 const axios       = require('axios');
 const OpenAI      = require('openai');
 const PDFDocument = require('pdfkit');
-const puppeteer   = require('puppeteer-core');
+const { chromium } = require('playwright-core');
 const fs          = require('fs');
 const path        = require('path');
 const crypto      = require('crypto');
@@ -775,11 +775,9 @@ app.post('/api/slides/pdf', async (req, res) => {
 
   let browser;
   try {
-    browser = await puppeteer.launch({
+    browser = await chromium.launch({
       executablePath: CHROME_PATH,
-      headless: 'shell',
-      pipe: false,
-      protocol: 'cdp',
+      headless: true,
       args: PUPPETEER_ARGS,
     });
 
@@ -787,7 +785,7 @@ app.post('/api/slides/pdf', async (req, res) => {
     const W = isLandscape ? 1920 : 1080;
     const H = isLandscape ? 1080 : 1920;
 
-    await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
+    await page.setViewportSize({ width: W, height: H });
 
     const tmpPath = path.join(__dirname, `_slides_tmp_${Date.now()}.html`);
     fs.writeFileSync(tmpPath, html, 'utf8');
@@ -900,25 +898,21 @@ app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }),
 
   let browser;
   try {
-    browser = await puppeteer.launch({
+    browser = await chromium.launch({
       executablePath: CHROME_PATH,
-      headless: 'shell',
-      pipe: false,
-      protocol: 'cdp',
+      headless: true,
       args: PUPPETEER_ARGS,
     });
     const page = await browser.newPage();
-    await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
+    await page.setViewportSize({ width: W, height: H });
 
     // Simula um navegador real para evitar bloqueios de bot
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-    );
+    await page.setExtraHTTPHeaders({ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' });
 
     if (externalUrl) {
-      await page.goto(externalUrl, { waitUntil: 'networkidle0', timeout: 60000 });
+      await page.goto(externalUrl, { waitUntil: 'networkidle', timeout: 60000 });
     } else {
-      await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+      await page.setContent(html, { waitUntil: 'networkidle', timeout: 60000 });
     }
 
     // Opções do PDF:
@@ -981,19 +975,15 @@ app.post('/api/lp/analyze', async (req, res) => {
 
   let browser;
   try {
-    browser = await puppeteer.launch({
+    browser = await chromium.launch({
       executablePath: CHROME_PATH,
-      headless: 'shell',
-      pipe: false,
-      protocol: 'cdp',
+      headless: true,
       args: PUPPETEER_ARGS,
     });
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-    );
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setExtraHTTPHeaders({ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' });
 
     // Bloqueia recursos pesados desnecessários (fontes, imagens grandes)
     await page.setRequestInterception(true);
@@ -1004,7 +994,7 @@ app.post('/api/lp/analyze', async (req, res) => {
     });
 
     const t0 = Date.now();
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 });
+    await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
     const load_time_ms = Date.now() - t0;
     const url_final = page.url();
 
@@ -1506,7 +1496,7 @@ app.post('/api/page-text', async (req, res) => {
 
   let browser;
   try {
-    browser = await puppeteer.launch({
+    browser = await chromium.launch({
       executablePath: CHROME_PATH,
       args: [...PUPPETEER_ARGS, '--window-size=1280,800'],
       headless: true,
@@ -1515,10 +1505,8 @@ app.post('/api/page-text', async (req, res) => {
     const page = await browser.newPage();
 
     // User-agent de browser real para contornar bloqueios básicos
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-    );
-    await page.setViewport({ width: 1280, height: 800 });
+    await page.setExtraHTTPHeaders({ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' });
+    await page.setViewportSize({ width: 1280, height: 800 });
 
     // Bloqueia imagens, fontes e CSS para carregar mais rápido
     await page.setRequestInterception(true);
