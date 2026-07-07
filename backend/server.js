@@ -37,10 +37,11 @@ const supaHeaders = () => ({
 const CHROME_PATH = process.env.CHROME_PATH
   || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : '/usr/bin/chromium');
 
-// Flags testados e confirmados no container Easypanel (Chromium 150 / Debian Bookworm)
-// Seccomp bloqueia fork com SIGTRAP → --single-process obrigatório
-// --headless=shell obrigatório (headless new crasha em single-process)
-const PUPPETEER_ARGS = [
+// Flags validados no container Easypanel (Chromium 150 / Debian Bookworm).
+// Seccomp bloqueia fork (SIGTRAP) → --single-process obrigatório.
+// --remote-debugging-pipe (padrão do playwright/puppeteer) também
+// dispara SIGTRAP — por isso usamos TCP via launchBrowser().
+const CHROME_ARGS = [
   '--no-sandbox',
   '--disable-setuid-sandbox',
   '--disable-dev-shm-usage',
@@ -48,7 +49,50 @@ const PUPPETEER_ARGS = [
   '--no-zygote',
   '--single-process',
   '--headless=shell',
+  '--no-startup-window',
 ];
+
+// Lança o Chrome manualmente via spawn com porta TCP (sem --remote-debugging-pipe)
+// e conecta via playwright CDP. Evita o SIGTRAP que o seccomp do Easypanel
+// dispara ao usar o pipe interno do playwright/puppeteer.
+async function launchBrowser(extraArgs = []) {
+  const port = 9200 + Math.floor(Math.random() * 800);
+  const args = [...CHROME_ARGS, `--remote-debugging-port=${port}`, ...extraArgs];
+
+  const proc = spawn(CHROME_PATH, args);
+  let stderr = '';
+
+  await new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      proc.kill();
+      reject(new Error(`Chrome startup timeout\nstderr: ${stderr.slice(0, 500)}`));
+    }, 12000);
+
+    proc.stderr.on('data', d => {
+      stderr += d.toString();
+      if (stderr.includes('DevTools listening')) {
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
+    proc.on('exit', (code, signal) => {
+      clearTimeout(timeout);
+      reject(new Error(`Chrome exited: code=${code} signal=${signal}\nstderr: ${stderr.slice(0, 500)}`));
+    });
+  });
+
+  await new Promise(r => setTimeout(r, 300));
+  const browser = await chromium.connectOverCDP(`http://localhost:${port}`);
+
+  // Monkey-patch close para também matar o processo do Chrome
+  const origClose = browser.close.bind(browser);
+  browser.close = async () => {
+    await origClose().catch(() => {});
+    if (!proc.killed) proc.kill('SIGKILL');
+  };
+
+  return browser;
+}
 
 const app  = express();
 app.use(express.json({ limit: '10mb' }));
@@ -89,7 +133,7 @@ app.use('/api', (req, res, next) => {
 // ═════════════════════════════════════════════════════════════════════════════
 app.get('/api/test-chrome', async (req, res) => {
   const port = 19222;
-  const args = [...PUPPETEER_ARGS, `--remote-debugging-port=${port}`, '--headless=shell'];
+  const args = [...CHROME_ARGS, `--remote-debugging-port=${port}`];
   let stdout = '', stderr = '';
   const proc = spawn(CHROME_PATH, args);
   proc.stdout.on('data', d => { stdout += d; });
@@ -778,11 +822,7 @@ app.post('/api/slides/pdf', async (req, res) => {
 
   let browser;
   try {
-    browser = await chromium.launch({
-      executablePath: CHROME_PATH,
-      headless: false,
-      args: PUPPETEER_ARGS,
-    });
+    browser = await launchBrowser();
 
     const page = await browser.newPage();
     const W = isLandscape ? 1920 : 1080;
@@ -901,11 +941,7 @@ app.post('/api/html-to-pdf', express.text({ type: 'text/html', limit: '20mb' }),
 
   let browser;
   try {
-    browser = await chromium.launch({
-      executablePath: CHROME_PATH,
-      headless: false,
-      args: PUPPETEER_ARGS,
-    });
+    browser = await launchBrowser();
     const page = await browser.newPage();
     await page.setViewportSize({ width: W, height: H });
 
@@ -978,22 +1014,17 @@ app.post('/api/lp/analyze', async (req, res) => {
 
   let browser;
   try {
-    browser = await chromium.launch({
-      executablePath: CHROME_PATH,
-      headless: false,
-      args: PUPPETEER_ARGS,
-    });
+    browser = await launchBrowser();
 
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.setExtraHTTPHeaders({ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' });
 
     // Bloqueia recursos pesados desnecessários (fontes, imagens grandes)
-    await page.setRequestInterception(true);
-    page.on('request', (req) => {
-      const type = req.resourceType();
-      if (['font', 'media'].includes(type)) req.abort();
-      else req.continue();
+    await page.route('**/*', (route) => {
+      const type = route.request().resourceType();
+      if (['font', 'media'].includes(type)) route.abort();
+      else route.continue();
     });
 
     const t0 = Date.now();
@@ -1499,11 +1530,7 @@ app.post('/api/page-text', async (req, res) => {
 
   let browser;
   try {
-    browser = await chromium.launch({
-      executablePath: CHROME_PATH,
-      args: [...PUPPETEER_ARGS, '--window-size=1280,800'],
-      headless: false,
-    });
+    browser = await launchBrowser(['--window-size=1280,800']);
 
     const page = await browser.newPage();
 
@@ -1512,12 +1539,11 @@ app.post('/api/page-text', async (req, res) => {
     await page.setViewportSize({ width: 1280, height: 800 });
 
     // Bloqueia imagens, fontes e CSS para carregar mais rápido
-    await page.setRequestInterception(true);
-    page.on('request', req => {
-      if (['image', 'font', 'stylesheet', 'media'].includes(req.resourceType())) {
-        req.abort();
+    await page.route('**/*', (route) => {
+      if (['image', 'font', 'stylesheet', 'media'].includes(route.request().resourceType())) {
+        route.abort();
       } else {
-        req.continue();
+        route.continue();
       }
     });
 
