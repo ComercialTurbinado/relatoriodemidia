@@ -2369,22 +2369,31 @@ app.post('/api/historico-analises', async (req, res) => {
  * Suporta: 'proprio' (só perfil do cliente), 'concorrente' (só concorrente), 'misto' (ambos).
  */
 app.post('/api/iniciar-auditoria', async (req, res) => {
-  const {
-    whatsapp_solicitante,
-    cliente_handle,
-    handle_principal,
-    concorrentes = [],
-    tipo_auditoria = 'misto',
-  } = req.body || {};
+  const body = req.body || {};
 
-  if (!handle_principal || !whatsapp_solicitante) {
-    return res.status(400).json({ ok: false, motivo: 'handle_principal_e_whatsapp_obrigatorios' });
+  // Compatibilidade com campos enviados pelo nó n8n (nomes alternativos)
+  const whatsapp_solicitante = body.whatsapp_solicitante || body.whatsapp || null;
+  const cliente_handle       = body.cliente_handle || null;
+  const handle_principal     = body.handle_principal || body.cliente_handle || null;
+
+  // Aceita tipo ou tipo_auditoria; normaliza 'mista' → 'misto'
+  const tipo_raw     = body.tipo_auditoria || body.tipo || 'misto';
+  const tipo_auditoria = tipo_raw === 'mista' ? 'misto' : tipo_raw;
+
+  // Aceita concorrentes (array) ou handle_concorrente (string separada por vírgula)
+  let concorrentes = body.concorrentes || [];
+  if (!concorrentes.length && body.handle_concorrente) {
+    concorrentes = body.handle_concorrente.split(',').map(h => h.trim()).filter(Boolean);
+  }
+
+  if (!handle_principal) {
+    return res.status(400).json({ ok: false, motivo: 'handle_principal_obrigatorio' });
   }
 
   // Valida tipo
   const tiposValidos = ['proprio', 'concorrente', 'misto'];
   if (!tiposValidos.includes(tipo_auditoria)) {
-    return res.status(400).json({ ok: false, motivo: 'tipo_auditoria_invalido' });
+    return res.status(400).json({ ok: false, motivo: 'tipo_auditoria_invalido', tipo_recebido: tipo_auditoria });
   }
 
   try {
