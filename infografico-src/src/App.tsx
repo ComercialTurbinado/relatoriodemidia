@@ -1981,10 +1981,10 @@ function buildSlides(section: Section, f: Fscale, isP: boolean) {
           </div>
         ),
         renderPrint: () => (
-          <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 48, overflow: 'hidden' }}>
-            <div style={{ marginBottom: 16, fontFamily: 'Playfair Display, Georgia, serif', fontWeight: 900, fontSize: 32, color: C.white, textTransform: 'uppercase' }}>{calTitle}</div>
-            <div style={{ display: 'flex', gap: 16, flex: 1, overflow: 'hidden' }}>
-              {pageItems.map((item, i) => renderCalCard(item, pgCopy * perPage + i, true))}
+          <div style={{ width: '100%', height: '100%', background: C.secondary, display: 'flex', flexDirection: 'column', padding: 56, overflow: 'hidden' }}>
+            <div style={{ marginBottom: f(20), fontFamily: 'Playfair Display, Georgia, serif', fontWeight: 900, fontSize: 36, color: C.white, textTransform: 'uppercase' }}>{calTitle}</div>
+            <div style={{ display: 'flex', flexDirection: isP ? 'column' : 'row', gap: f(20), flex: 1, overflow: 'hidden' }}>
+              {pageItems.map((item, i) => renderCalCard(item, pgCopy * perPage + i, false))}
             </div>
           </div>
         ),

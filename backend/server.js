@@ -122,26 +122,60 @@ async function chromeOneShotPdf(htmlPath) {
   throw lastErr || new Error('Chrome falhou em todas as variantes de flags');
 }
 
+function browserlessWsEndpoint() {
+  const host = process.env.BROWSERLESS_HOST || 'n8n-srcleads-browserless.dtna1d.easypanel.host';
+  return `wss://${host}?token=${process.env.BROWSERLESS_TOKEN}&timeout=180000`;
+}
+
+// Playwright local ou Browserless remoto (evita SIGTRAP do Chromium no Docker/Easypanel).
+async function launchBrowser(extraArgs = []) {
+  if (process.env.BROWSERLESS_TOKEN) {
+    return chromium.connectOverCDP(browserlessWsEndpoint());
+  }
+  return chromium.launch({
+    headless: true,
+    executablePath: CHROME_PATH,
+    args: [...CHROME_FLAG_VARIANTS[0], ...extraArgs],
+  });
+}
+
+async function chromeOneShotPdfFromHtml(htmlContent) {
+  const tmpHtml = path.join(os.tmpdir(), `slides_${Date.now()}_${crypto.randomBytes(4).toString('hex')}.html`);
+  fs.writeFileSync(tmpHtml, htmlContent, 'utf8');
+  try {
+    return await chromeOneShotPdf(tmpHtml);
+  } finally {
+    try { fs.unlinkSync(tmpHtml); } catch (_) {}
+  }
+}
+
 // Gera PDF via Playwright: screenshot de cada slide (via tecla ArrowRight),
 // combinados com pdf-lib. Funciona com React SPAs onde page.pdf() falha.
 //
-// Se BROWSERLESS_TOKEN estiver definido, conecta a wss://production-sfo.browserless.io
-// (Chrome externo — não sofre bloqueio do seccomp do Easypanel).
-// Caso contrário lança Chrome local (funciona em dev/Mac, falha no Easypanel).
+// Com BROWSERLESS_TOKEN conecta ao serviço Browserless (recomendado no Easypanel).
+// Sem token: tenta Playwright local; se falhar (SIGTRAP/seccomp), usa chrome --print-to-pdf.
 async function playwrightScreenshotPdf(htmlContent, { width = 1920, height = 1080 } = {}) {
   const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
 
   let browser;
-  if (BROWSERLESS_TOKEN) {
-    const browserlessHost = process.env.BROWSERLESS_HOST || 'n8n-srcleads-browserless.dtna1d.easypanel.host';
-    const wsEndpoint = `wss://${browserlessHost}?token=${BROWSERLESS_TOKEN}&timeout=180000`;
-    browser = await chromium.connectOverCDP(wsEndpoint);
-  } else {
-    browser = await chromium.launch({
-      headless: true,
-      executablePath: CHROME_PATH,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-    });
+  try {
+    browser = await launchBrowser();
+  } catch (launchErr) {
+    if (BROWSERLESS_TOKEN) {
+      throw new Error(
+        `Falha ao conectar ao Browserless (${process.env.BROWSERLESS_HOST || 'n8n-srcleads-browserless.dtna1d.easypanel.host'}): ${launchErr.message}`
+      );
+    }
+    console.warn('[slides/pdf] Playwright launch falhou, tentando chrome --print-to-pdf:', launchErr.message);
+    try {
+      return await chromeOneShotPdfFromHtml(htmlContent);
+    } catch (chromeErr) {
+      throw new Error(
+        `Chromium indisponível no container (${launchErr.message}). ` +
+        `Configure BROWSERLESS_TOKEN no Easypanel ou use o serviço Browserless. ` +
+        `Fallback chrome: ${chromeErr.message}`
+      );
+    }
   }
 
   try {
@@ -208,6 +242,17 @@ async function playwrightScreenshotPdf(htmlContent, { width = 1920, height = 108
     return Buffer.from(await pdfDoc.save());
   } catch (err) {
     try { await browser.close(); } catch (_) {}
+    if (!BROWSERLESS_TOKEN) {
+      console.warn('[slides/pdf] Playwright render falhou, tentando chrome --print-to-pdf:', err.message);
+      try {
+        return await chromeOneShotPdfFromHtml(htmlContent);
+      } catch (chromeErr) {
+        throw new Error(
+          `${err.message}. Fallback chrome: ${chromeErr.message}. ` +
+          'Em produção (Easypanel), defina BROWSERLESS_TOKEN apontando para o serviço Browserless.'
+        );
+      }
+    }
     throw err;
   }
 }
@@ -246,8 +291,51 @@ app.use('/api', (req, res, next) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
+// DIAGNÓSTICO: testa conexão com Browserless (Easypanel)
+// GET /api/test-browserless — x-api-key obrigatório
+// ═════════════════════════════════════════════════════════════════════════════
+app.get('/api/test-browserless', async (req, res) => {
+  const host = process.env.BROWSERLESS_HOST || 'n8n-srcleads-browserless.dtna1d.easypanel.host';
+  const configured = Boolean(process.env.BROWSERLESS_TOKEN);
+  if (!configured) {
+    return res.json({
+      configured: false,
+      host,
+      ok: false,
+      error: 'BROWSERLESS_TOKEN não definido no container',
+    });
+  }
+
+  const start = Date.now();
+  try {
+    const browser = await chromium.connectOverCDP(browserlessWsEndpoint());
+    const page = await browser.newPage();
+    await page.setContent('<html><body><h1>Browserless OK</h1></body></html>', { waitUntil: 'domcontentloaded' });
+    const pdf = await page.pdf({ format: 'A4' });
+    await browser.close();
+    res.json({
+      configured: true,
+      host,
+      ws: `wss://${host}?token=***`,
+      ok: true,
+      pdfBytes: pdf.length,
+      ms: Date.now() - start,
+    });
+  } catch (err) {
+    res.json({
+      configured: true,
+      host,
+      ws: `wss://${host}?token=***`,
+      ok: false,
+      error: err.message,
+      ms: Date.now() - start,
+    });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
 // DIAGNÓSTICO: testa cada variante de flags do Chrome com --print-to-pdf
-// GET /api/test-chrome — não requer auth, retorna resultado de cada variante
+// GET /api/test-chrome — x-api-key obrigatório
 // ═════════════════════════════════════════════════════════════════════════════
 app.get('/api/test-chrome', async (req, res) => {
   const tmpHtml = path.join(os.tmpdir(), `chrome_test_${Date.now()}.html`);
