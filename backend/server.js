@@ -27,7 +27,8 @@ const os          = require('os');
 const multer      = require('multer');
 // ─── Supabase REST (sem SDK — usa axios direto) ───────────────────────────────
 const SUPA_URL  = process.env.SUPABASE_URL  || 'https://mblntoimrkfoocbztozb.supabase.co';
-const SUPA_KEY  = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ibG50b2ltcmtmb29jYnp0b3piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDE3MzYsImV4cCI6MjA5NDA3NzczNn0.SOhorLxV8GDBMaWEwhnGhaVfvENgdP_RleaAl5o92Tw';
+// service_role bypassa RLS e nunca deve ser exposta ao navegador — este backend só roda server-side.
+const SUPA_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ibG50b2ltcmtmb29jYnp0b3piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDE3MzYsImV4cCI6MjA5NDA3NzczNn0.SOhorLxV8GDBMaWEwhnGhaVfvENgdP_RleaAl5o92Tw';
 const supaHeaders = () => ({
   'apikey': SUPA_KEY,
   'Authorization': `Bearer ${SUPA_KEY}`,
