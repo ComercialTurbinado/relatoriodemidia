@@ -874,8 +874,9 @@ function parseSlideBody(body) {
       curtidas:          p.curtidas          ?? 0,
       comentarios:       p.comentarios       ?? 0,
       views:             p.views             ?? 0,
-      engajamento_total: p.engajamento_total ?? 0,
-      publicado_em:      p.publicado_em      || '',
+      engajamento_total:    p.engajamento_total    ?? 0,
+      publicado_em:         p.publicado_em         || '',
+      comentarios_ordenados: Array.isArray(p.comentarios_ordenados) ? p.comentarios_ordenados : [],
     };
   };
 
@@ -1796,6 +1797,18 @@ app.post('/api/save-analise', async (req, res) => {
       }, 'handle');
     }
 
+    // ── 2b. Upsert cliente_concorrentes (vínculo monitoramento) ─────────────
+    for (const c of concorrentes) {
+      const cHandle = (c.handle || '').replace('@', '').toLowerCase();
+      if (!cHandle) continue;
+      await supaUpsert('cliente_concorrentes', {
+        cliente_handle:     handle,
+        concorrente_handle: cHandle,
+      }, 'cliente_handle,concorrente_handle').catch(e =>
+        console.warn('[save-analise] cliente_concorrentes skip:', e.response?.data?.message || e.message)
+      );
+    }
+
     // ── 3. Insert analise ────────────────────────────────────────────────────
     const sc = raw.score_comparativo || {};
     const analisePayload = {
@@ -1857,6 +1870,54 @@ app.post('/api/save-analise', async (req, res) => {
         ganchos_top:        c.ganchos_top || null,
         top_posts:          (c.top_3_melhores_posts || c.top_posts || []).slice(0, 5),
       });
+    }
+
+    // ── 4b. Upsert posts (cliente + concorrentes) com comentários ────────────
+    const postSources = [];
+
+    // Posts do cliente
+    const cliPostsRaw = dm.cliente?.posts || dm.cliente?.top_3_melhores_posts || [];
+    for (const p of cliPostsRaw) {
+      const sc = p.shortCode || p.shortcode || (p.link_post || '').match(/\/p\/([^/]+)/)?.[1] || null;
+      if (sc) postSources.push({ postHandle: handle, p, sc });
+    }
+
+    // Posts dos concorrentes (raw.concorrentes tem comentarios_ordenados)
+    const enrichedConc = Array.isArray(raw.concorrentes) ? raw.concorrentes : [];
+    for (const c of enrichedConc) {
+      const cHandle = (c.handle || '').replace('@', '').toLowerCase();
+      for (const p of (c.posts || [])) {
+        const sc = p.shortCode || p.shortcode || (p.link_post || '').match(/\/p\/([^/]+)/)?.[1] || null;
+        if (sc) postSources.push({ postHandle: cHandle, p, sc });
+      }
+    }
+    // Complementa com top_posts do plano_diretor (se não vieram no raw.concorrentes)
+    const seenSc = new Set(postSources.map(x => x.sc));
+    for (const c of concorrentes) {
+      const cHandle = (c.handle || '').replace('@', '').toLowerCase();
+      for (const p of (c.top_3_melhores_posts || c.top_posts || [])) {
+        const sc = p.shortCode || p.shortcode || (p.link_post || '').match(/\/p\/([^/]+)/)?.[1] || null;
+        if (sc && !seenSc.has(sc)) { postSources.push({ postHandle: cHandle, p, sc }); seenSc.add(sc); }
+      }
+    }
+
+    for (const { postHandle, p, sc } of postSources) {
+      await supaUpsert('posts', {
+        shortcode:         sc,
+        handle:            postHandle,
+        link_post:         p.link_post || `https://www.instagram.com/p/${sc}/`,
+        tipo_conteudo:     p.tipo_conteudo  || '',
+        formato_midia:     p.formato_midia  || '',
+        legenda:           (p.legenda || '').slice(0, 5000),
+        curtidas:          p.curtidas          ?? 0,
+        comentarios:       p.comentarios       ?? 0,
+        views:             p.views             ?? 0,
+        engajamento_total: p.engajamento_total ?? 0,
+        publicado_em:      p.publicado_em || null,
+        comentarios_top:   p.comentarios_ordenados || p.comentarios_top || [],
+      }, 'shortcode').catch(e =>
+        console.warn('[save-analise] post skip:', sc, e.response?.data?.message || e.message)
+      );
     }
 
     // ── 5. Insert plano_diretor ──────────────────────────────────────────────
